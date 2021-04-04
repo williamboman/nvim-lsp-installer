@@ -90,7 +90,7 @@ The `tsserver` language server comes with the following extras:
   Usage:
 
 ```lua
-require'nvim-lsp-installer.extras'.tsserver.rename_file(old, new)
+require'nvim-lsp-installer.extras.tsserver'.rename_file(old, new)
 ```
 
 - `organize_imports(bufname)` Organizes the imports of a file. `bufname` is optional, will default to current buffer.
@@ -98,7 +98,7 @@ require'nvim-lsp-installer.extras'.tsserver.rename_file(old, new)
   Usage:
 
 ```lua
-require'nvim-lsp-installer.extras'.tsserver.organize_imports(bufname)
+require'nvim-lsp-installer.extras.tsserver'.organize_imports(bufname)
 ```
 
 ## TODO
