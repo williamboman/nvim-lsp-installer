@@ -32,8 +32,8 @@ return installer.create_lsp_config_installer {
                 )
             end
         end,
-        organize_imports = function(buf_name)
-            buf_name = buf_name or vim.api.nvim_buf_get_name(0)
+        organize_imports = function(bufname)
+            bufname = bufname or vim.api.nvim_buf_get_name(0)
 
             -- TODO: send only to tsserver
             for _, client in pairs(vim.lsp.get_active_clients()) do
@@ -41,7 +41,7 @@ return installer.create_lsp_config_installer {
                     'workspace/executeCommand',
                     {
                         command = '_typescript.organizeImports',
-                        arguments = {buf_name},
+                        arguments = {bufname},
                     }
                 )
             end

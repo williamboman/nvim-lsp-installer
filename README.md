@@ -65,11 +65,14 @@ end
 
 ### tsserver
 
+The `tsserver` language server comes with the following extras:
 
-
+- `rename_file(old, new)` Tells the language server that a file was renamed. Useful when refactoring.
+- `organize_imports(bufname)` Organizes the imports of a file. `bufname` is optional, will default to current buffer.
 
 ## TODO
 
 - installer... server... module.... pick one!!
 - use same lsp server names as lspconfig does
 - docs
+- nicer API for accessing extras
