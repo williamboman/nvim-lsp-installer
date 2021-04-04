@@ -61,7 +61,15 @@ for _, server in pairs(installed_servers) do
 end
 ```
 
+## Extras
+
+### tsserver
+
+
+
+
 ## TODO
 
 - installer... server... module.... pick one!!
 - use same lsp server names as lspconfig does
+- docs
