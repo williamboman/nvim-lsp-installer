@@ -64,3 +64,4 @@ end
 ## TODO
 
 - installer... server... module.... pick one!!
+- use same lsp server names as lspconfig does

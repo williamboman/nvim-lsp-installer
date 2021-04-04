@@ -118,6 +118,7 @@ end
 
 function M.create_lsp_config_installer(module)
     return {
+        name = module.name,
         install_cmd = module.install_cmd,
         root_dir = module.root_dir,
         pre_install = module.pre_install,
