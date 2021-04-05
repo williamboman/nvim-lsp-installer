@@ -1,3 +1,5 @@
+local Path = require'plenary.path'
+
 local M = {}
 
 -- :'<,'>!sort
@@ -17,10 +19,6 @@ local _SERVERS = {
     'vimls',
     'yamlls',
 }
-
-local function escape_quotes(str)
-    return string.format("%q", str)
-end
 
 local function get_server(server_name)
     return pcall(require, 'nvim-lsp-installer.servers.' .. server_name)
@@ -127,13 +125,12 @@ function M.Server:setup(opts)
 end
 
 function M.Server:is_installed()
-    return os.execute('test -d ' .. escape_quotes(self._root_dir)) == 0
+    local path = Path:new(self._root_dir)
+    return path:exists() and path:is_dir()
 end
 
 function M.Server:create_root_dir()
-    if os.execute('mkdir -p ' .. escape_quotes(self._root_dir)) ~= 0 then
-        error('Could not create LSP server directory ' .. self._root_dir)
-    end
+    Path:new(self._root_dir):mkdir({ parents = true })
 end
 
 function M.Server:install()
@@ -171,11 +168,7 @@ function M.Server:install()
 end
 
 function M.Server:uninstall()
-    -- giggity
-    if os.execute('rm -rf ' .. escape_quotes(self._root_dir)) ~= 0 then
-        error('Could not remove LSP server directory ' .. self._root_dir)
-    end
-
+    Path:new(self._root_dir):rm({ recursive = true })
 end
 
 return M
