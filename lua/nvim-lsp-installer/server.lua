@@ -38,7 +38,7 @@ local function get_servers(server_names)
     return result
 end
 
-function M.get_available_servers() return _SERVERS end
+function M.get_available_servers() return get_servers(_SERVERS) end
 
 function M.get_installed_servers()
     return vim.tbl_filter(
