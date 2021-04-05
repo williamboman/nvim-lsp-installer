@@ -172,7 +172,10 @@ function M.Server:install()
 end
 
 function M.Server:uninstall()
-    Path:new(self._root_dir):rm({ recursive = true })
+    local location = Path:new(self._root_dir)
+    if location:exists() then
+        location:rm({ recursive = true })
+    end
 end
 
 return M
