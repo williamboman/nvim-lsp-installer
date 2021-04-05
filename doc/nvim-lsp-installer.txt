@@ -80,18 +80,17 @@ Lua module: nvim-lsp-installer                                *lsp_installer*
                                       *lsp_installer.get_available_servers()*
 get_available_servers()
         Return: ~
-            (Server[]) A list containing all available language servers.
+            |lsp_installer.Server|] A list containing all available language servers.
 
                                       *lsp_installer.get_installed_servers()*
 get_installed_servers()
         Return: ~
-            (Server[]) A list of servers that are currently installed.
-            See |lsp_installer.Installer|.
+            |lsp_installer.Server|[] A list of servers that are currently installed.
 
                                     *lsp_installer.get_uninstalled_servers()*
 get_uninstalled_servers()
         Return: ~
-            (Server[]) A list of servers that are not installed.
+            |lsp_installer.Server|[] A list of servers that are not installed.
 
                                                     *lsp_installer.install()*
 install({server_name})
