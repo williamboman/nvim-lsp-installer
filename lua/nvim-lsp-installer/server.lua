@@ -112,8 +112,8 @@ M.Server.__index = M.Server
 function M.Server:new(opts)
     return setmetatable({
         name = opts.name,
+        _root_path = Path:new(opts.root_dir),
         _install_cmd = opts.install_cmd,
-        _root_dir = opts.root_dir,
         _default_options = opts.default_options,
         _pre_install_check = opts.pre_install_check,
     }, M.Server)
@@ -129,12 +129,11 @@ function M.Server:setup(opts)
 end
 
 function M.Server:is_installed()
-    local path = Path:new(self._root_dir)
-    return path:exists() and path:is_dir()
+    return self._root_path:exists() and self._root_path:is_dir()
 end
 
 function M.Server:create_root_dir()
-    Path:new(self._root_dir):mkdir({ parents = true, mode = Mode[0755] })
+    self._root_path:mkdir({ parents = true, mode = Mode[0755] })
 end
 
 function M.Server:install()
@@ -172,9 +171,8 @@ function M.Server:install()
 end
 
 function M.Server:uninstall()
-    local location = Path:new(self._root_dir)
-    if location:exists() then
-        location:rm({ recursive = true })
+    if self._root_path:exists() then
+        self._root_path:rm({ recursive = true })
     end
 end
 
