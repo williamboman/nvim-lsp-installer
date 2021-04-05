@@ -32,13 +32,15 @@ local function get_servers(server_names)
             vim.api.nvim_err_writeln("Unable to find LSP server " .. server_name)
             goto continue
         end
-        table[server_name] = server
+        result[server_name] = server
         ::continue::
     end
     return result
 end
 
-function M.get_available_servers() return get_servers(_SERVERS) end
+function M.get_available_servers()
+    return vim.tbl_values(get_servers(_SERVERS))
+end
 
 function M.get_installed_servers()
     return vim.tbl_filter(

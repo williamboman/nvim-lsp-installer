@@ -27,7 +27,7 @@ function! s:LspInstallAll() abort
 endfunction
 
 function! s:LspUninstall(server_name) abort
-    call luaeval("require'nvim-lsp-installer'.uninstall(_A)", server_name)
+    call luaeval("require'nvim-lsp-installer'.uninstall(_A)", a:server_name)
 endfunction
 
 function! s:LspUninstallAll() abort
