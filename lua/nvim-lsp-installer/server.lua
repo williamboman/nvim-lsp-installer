@@ -89,6 +89,10 @@ function M.get_server_root_path(server)
     return vim.fn.stdpath('data') .. "/lsp_servers/" .. server
 end
 
+local Mode = {
+    [0755] = 493,
+}
+
 M.Server = {}
 M.Server.__index = M.Server
 
@@ -130,7 +134,7 @@ function M.Server:is_installed()
 end
 
 function M.Server:create_root_dir()
-    Path:new(self._root_dir):mkdir({ parents = true })
+    Path:new(self._root_dir):mkdir({ parents = true, mode = Mode[0755] })
 end
 
 function M.Server:install()
