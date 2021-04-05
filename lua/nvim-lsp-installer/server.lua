@@ -154,7 +154,7 @@ function M.Server:install()
     vim.fn.termopen(
         'set -e;\n' .. self._install_cmd,
         {
-            cwd = self._root_dir,
+            cwd = tostring(self._root_path),
             on_exit = function (_, exit_code)
                 if exit_code ~= 0 then
                     vim.api.nvim_err_writeln("Server installation failed for " .. self.name .. ". Exit code: " .. exit_code)
