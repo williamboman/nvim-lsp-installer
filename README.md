@@ -17,6 +17,7 @@ Inspired by [nvim-lspinstall](https://github.com/kabouzeid/nvim-lspinstall).
 
 ```vim
 Plug 'neovim/nvim-lspconfig'
+Plug 'nvim-lua/plenary.nvim'
 Plug 'williamboman/nvim-lsp-installer'
 ```
 
@@ -25,7 +26,7 @@ Plug 'williamboman/nvim-lsp-installer'
 ```lua
 use {
     'neovim/nvim-lsp-config',
-    'williamboman/nvim-lsp-installer',
+    { 'williamboman/nvim-lsp-installer', requires = { 'nvim-lua/plenary.nvim' } }
 }
 ```
 
