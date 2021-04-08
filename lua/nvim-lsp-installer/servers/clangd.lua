@@ -3,8 +3,6 @@ local server = require('nvim-lsp-installer.server')
 local root_dir = server.get_server_root_path('c-family')
 
 local install_cmd = [=[
-rm -r clangd;
-
 if [[ $(uname) == Linux ]]; then
   wget -O clangd.zip https://github.com/clangd/clangd/releases/download/11.0.0/clangd-linux-11.0.0.zip;
 elif [[ $(uname) == Darwin ]]; then 
