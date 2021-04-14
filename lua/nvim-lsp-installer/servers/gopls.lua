@@ -3,9 +3,9 @@ local server = require('nvim-lsp-installer.server')
 local root_dir = server.get_server_root_path('go')
 
 local install_cmd = [=[
-GO111MODULE=on go get golang.org/x/tools/gopls@latest;
+GO111MODULE=on GOBIN="$PWD" GOPATH="$PWD"  go get golang.org/x/tools/gopls@latest;
 
-if ! command -v gopls &> /dev/null; 
+if ! command -v ./gopls &> /dev/null; 
 then 
   echo "something went wrong!"
 else 
@@ -24,6 +24,6 @@ return server.Server:new {
   end,
   install_cmd = install_cmd,
   default_options = {
-    cmd = {"gopls"},
+    cmd = {root_dir .. "/gopls"},
   }
 }
