@@ -5,7 +5,7 @@ local root_dir = server.get_server_root_path('go')
 local install_cmd = [=[
 
 GO111MODULE=on GOBIN="$PWD" GOPATH="$PWD"  go get golang.org/x/tools/gopls@latest;
-! command -v ./gopls &> /dev/null; 
+command -v ./gopls &> /dev/null; 
 
 ]=]
 
