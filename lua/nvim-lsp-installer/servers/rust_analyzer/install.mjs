@@ -2,7 +2,7 @@ const VERSION = "2021-06-07";
 
 const exitNotSupported = () => {
     console.error(
-        chalk.red(`${os.platform()} ${os.arch()} is not currently supported.`)
+        chalk.red(`${os.platform()} ${os.arch()} is currently not supported.`)
     );
     process.exit(1);
 };
