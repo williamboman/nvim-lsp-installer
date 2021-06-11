@@ -15,8 +15,10 @@ const target = (() => {
                     return "rust-analyzer-aarch64-apple-darwin.gz";
                 case "x64":
                     return "rust-analyzer-x86_64-apple-darwin.gz";
-                default:
+                default: {
                     exitNotSupported();
+                    break;
+                }
             }
         case "win32": {
             exitNotSupported();
