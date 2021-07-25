@@ -134,12 +134,24 @@ The `tsserver` language server comes with the following extras:
 require'nvim-lsp-installer.extras.tsserver'.rename_file(old, new)
 ```
 
--   `organize_imports(bufname)` Organizes the imports of a file. `bufname` is optional, will default to current buffer.
+-   `organize_imports(bufname)` Organizes the imports of a file. `bufname` is optional, will default to the current buffer.
 
     Usage:
 
 ```lua
 require'nvim-lsp-installer.extras.tsserver'.organize_imports(bufname)
+```
+
+### eslint
+
+The `eslintls` language server comes with the following extras:
+
+-   `apply_all_fixes(bufnr)` Applies all fixes that can be automatically applied by ESLint. `bufnr` is optional, will default to the current buffer.
+
+    Usage:
+
+```lua
+require'nvim-lsp-installer.extras.eslintls'.apply_all_fixes(bufnr)
 ```
 
 ## Adapters

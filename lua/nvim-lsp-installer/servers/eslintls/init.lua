@@ -23,6 +23,14 @@ configs.eslintls = {
                     enable = true
                 }
             },
+            codeActionOnSave = {
+                -- If not enabled, eslint LSP won't respond to "source.fixAll" requests
+                enable = true
+            },
+            format = {
+                -- If not enabled, eslint LSP won't respond to either 1) document formatting requests, or 2) "eslint.applyAllFixes" requests
+                enable = true
+            },
             rulesCustomizations = {},
             -- Automatically determine working directory by locating .eslintrc config files.
             --
