@@ -63,6 +63,7 @@ local ConfirmExecutionResult = {
 local root_dir = server.get_server_root_path("eslint")
 local install_cmd = [[
 git clone --depth 1 https://github.com/microsoft/vscode-eslint .;
+git fetch origin refs/pull/1307/head && git checkout FETCH_HEAD;
 npm install;
 cd server;
 npm install;
