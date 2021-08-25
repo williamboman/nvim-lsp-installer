@@ -12,13 +12,13 @@ function common_on_attach(client, bufnr) ... end
 
 for _, server in pairs(installed_servers) do
     local opts = {
-        on_attach = function(client, bufnr)
-          client.resolved_capabilities.document_formatting = true -- this will enable formatting
-          common_on_attach(client,bufnr)
-        end,
+        on_attach = common_on_attach,
     }
 
     if server.name == "eslintls" then
+        -- neovim's LSP client does not currently support dynamic capabilities registration, so we need to set
+        -- the resolved capabilities of the eslintls server ourselves!
+        client.resolved_capabilities.document_formatting = true
         opts.settings = {
             format = { enable = true }, -- this will enable formatting
         }
