@@ -12,7 +12,10 @@ function common_on_attach(client, bufnr) ... end
 
 for _, server in pairs(installed_servers) do
     local opts = {
-        on_attach = common_on_attach,
+        on_attach = function(client, bufnr)
+          client.resolved_capabilities.document_formatting = true -- this will enable formatting
+          common_on_attach(client,bufnr)
+        end,
     }
 
     if server.name == "eslintls" then
