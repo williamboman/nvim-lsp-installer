@@ -12,7 +12,7 @@ return server.Server:new {
             error "Missing a Javac installation."
         end
     end,
-    installer = shell.raw [[
+    installer = shell.bash [[
     git clone --depth 1 https://github.com/GroovyLanguageServer/groovy-language-server .;
     ./gradlew build;
     ]],

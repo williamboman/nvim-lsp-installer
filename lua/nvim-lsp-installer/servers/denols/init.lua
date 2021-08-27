@@ -7,7 +7,7 @@ local root_dir = server.get_server_root_path "denols"
 return server.Server:new {
     name = "denols",
     root_dir = root_dir,
-    installer = shell.remote("https://deno.land/x/install/install.sh", {
+    installer = shell.remote_bash("https://deno.land/x/install/install.sh", {
         env = {
             DENO_INSTALL = root_dir,
         },

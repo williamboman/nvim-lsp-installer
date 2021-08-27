@@ -10,7 +10,7 @@ local bin_path = path.concat { root_dir, "tflint" }
 return server.Server:new {
     name = "tflint",
     root_dir = root_dir,
-    installer = shell.remote("https://raw.githubusercontent.com/terraform-linters/tflint/master/install_linux.sh", {
+    installer = shell.remote_bash("https://raw.githubusercontent.com/terraform-linters/tflint/master/install_linux.sh", {
         env = {
             TFLINT_INSTALL_PATH = root_dir,
             TFLINT_INSTALL_NO_ROOT = 1,

@@ -7,7 +7,7 @@ local root_dir = server.get_server_root_path "elixir"
 return server.Server:new {
     name = "elixirls",
     root_dir = root_dir,
-    installer = shell.raw [[
+    installer = shell.bash [[
     wget -O elixir-ls.zip https://github.com/elixir-lsp/elixir-ls/releases/download/v0.7.0/elixir-ls.zip;
     unzip elixir-ls.zip -d elixir-ls;
     rm elixir-ls.zip;

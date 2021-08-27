@@ -22,7 +22,7 @@ npm install;
 return server.Server:new {
     name = "eslintls",
     root_dir = root_dir,
-    installer = shell.raw(install_cmd),
+    installer = shell.bash(install_cmd),
     pre_setup = function()
         local lspconfig = require "lspconfig"
         local configs = require "lspconfig/configs"

@@ -59,7 +59,7 @@ end
 function M.file(relpath)
     local script_path = path.realpath(relpath, 3)
     return installers.compose {
-        shell.raw(("%q %q"):format(ZX_EXECUTABLE, script_path)),
+        shell.polyshell(("%q %q"):format(ZX_EXECUTABLE, script_path)),
         zx_installer(false),
     }
 end

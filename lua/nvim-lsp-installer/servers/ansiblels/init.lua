@@ -7,7 +7,7 @@ local root_dir = server.get_server_root_path "ansiblels"
 return server.Server:new {
     name = "ansiblels",
     root_dir = root_dir,
-    installer = shell.raw [[
+    installer = shell.bash [[
     git clone --depth 1 https://github.com/ansible/ansible-language-server .;
     npm install;
     npm run build;
