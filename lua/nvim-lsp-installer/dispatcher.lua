@@ -4,8 +4,7 @@ local registered_callbacks = {}
 
 function M.dispatch_server_ready(server)
     for _, callback in pairs(registered_callbacks) do
-        local scheduled_callback = vim.schedule_wrap(callback)
-        scheduled_callback(server)
+        callback(server)
     end
 end
 

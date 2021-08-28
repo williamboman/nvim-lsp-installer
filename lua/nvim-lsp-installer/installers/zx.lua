@@ -61,6 +61,7 @@ function M.file(relpath)
     return installers.compose {
         shell.polyshell(("%q %q"):format(ZX_EXECUTABLE, ("file:///%s"):format(script_path))),
         zx_installer(false),
+        installers.block_win,
     }
 end
 
