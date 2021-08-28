@@ -37,7 +37,7 @@ local function zx_installer(force)
 
         fs.mkdirp(INSTALL_DIR)
 
-        uv.spawn(
+        local handle, pid = uv.spawn(
             "npm",
             {
                 args = { npm_command, "zx@1" },
@@ -53,6 +53,10 @@ local function zx_installer(force)
                 callback(true, nil)
             end)
         )
+
+        if handle == nil then
+            callback(false, ("Failed to install/update zx."):format(pid))
+        end
     end
 end
 
