@@ -32,7 +32,8 @@ end
 -- @return The realpath (absolute path). Note that this will currently produce results such as /Users/zuck/./script.js which may not be compatible with some tools.
 function M.realpath(relpath, depth)
     local callsite_abs_path = debug.getinfo(depth or 2, "S").source:sub(2)
-    return M.concat { vim.fn.fnamemodify(callsite_abs_path, ":h"), relpath }
+    local normalized_relpath = relpath:gsub("./", "")
+    return M.concat { vim.fn.fnamemodify(callsite_abs_path, ":h"), normalized_relpath }
 end
 
 function M.is_subdirectory(root_path, path)
