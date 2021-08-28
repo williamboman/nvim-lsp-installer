@@ -1,18 +1,7 @@
 const VERSION = "v1.37.11";
 
-const exitNotSupported = () => {
-    console.error(
-        chalk.red(`${os.platform()} ${os.arch()} is currently not supported.`)
-    );
-    process.exit(1);
-};
-
 const target = (() => {
     switch (os.platform()) {
-        case "win32": {
-            exitNotSupported();
-            break;
-        }
         case "darwin":
             return "omnisharp-osx.zip";
         default:

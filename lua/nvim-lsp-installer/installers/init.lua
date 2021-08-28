@@ -27,14 +27,6 @@ function M.compose(installers)
     end
 end
 
-function M.inverse(installer, create_result)
-    return function(server, callback)
-        installer(server, function(success, _)
-            callback(not success, create_result(not success, server))
-        end)
-    end
-end
-
 M.block_win = function(server, callback)
     if platform.is_win() then
         callback(false, ("Windows is not yet supported for server %q."):format(server.name))
@@ -43,8 +35,32 @@ M.block_win = function(server, callback)
     end
 end
 
-M.block_unix = M.inverse(M.block_win, function(success, server)
-    return success and nil or ("UNIX is not yet supported for server %q."):format(server.name)
-end)
+M.block_unix = function(server, callback)
+    if platform.is_unix() then
+        callback(false, ("Uniw is not yet supported for server %q."):format(server.name))
+    else
+        callback(true, nil)
+    end
+end
+
+function M.when(platform_table)
+    return function(server, callback)
+        if platform.is_unix() then
+            if platform_table.unix then
+                platform_table.unix(server, callback)
+            else
+                callback(false, ("Unix is not yet supported for server %q."):format(server.name))
+            end
+        elseif platform.is_win() then
+            if platform_table.win then
+                platform_table.win(server, callback)
+            else
+                callback(false, ("Windows is not yet supported for server %q."):format(server.name))
+            end
+        else
+            callback(false, "installers.when: Could not find installer for current platform.")
+        end
+    end
+end
 
 return M

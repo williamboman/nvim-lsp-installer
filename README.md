@@ -20,8 +20,6 @@ On top of just providing commands for installing & uninstalling LSP servers, it:
 -   Windows support for a majority of server installations
 -   provides adapters that offer out-of-the-box integrations with other plugins
 
-Inspired by [nvim-lspinstall](https://github.com/kabouzeid/nvim-lspinstall).
-
 ## Installation
 
 Requires:
