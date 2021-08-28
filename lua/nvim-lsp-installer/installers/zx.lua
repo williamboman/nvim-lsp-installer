@@ -55,7 +55,7 @@ local function zx_installer(force)
         )
 
         if handle == nil then
-            callback(false, ("Failed to install/update zx."):format(pid))
+            callback(false, ("Failed to install/update zx. %s"):format(pid))
         end
     end
 end
