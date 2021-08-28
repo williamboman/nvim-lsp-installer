@@ -47,14 +47,14 @@ function M.remote_bash(url, opts)
     return M.bash(("wget -nv -O - %q | bash"):format(url), opts)
 end
 
-function M.powershell(raw_script, opts)
+function M.cmd(raw_script, opts)
     local default_opts = {
         env = {},
     }
     opts = vim.tbl_deep_extend("force", default_opts, opts or {})
 
     return termopen {
-        shell = "powershell.exe",
+        shell = "cmd.exe",
         cmd = raw_script,
         env = opts.env,
     }
@@ -68,7 +68,7 @@ function M.polyshell(raw_script, opts)
 
     return installers.when {
         unix = M.bash(raw_script, { env = opts.env }),
-        win = M.powershell(raw_script, { env = opts.env }),
+        win = M.cmd(raw_script, { env = opts.env }),
     }
 end
 
