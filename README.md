@@ -17,6 +17,7 @@ On top of just providing commands for installing & uninstalling LSP servers, it:
 -   provides Lua APIs for non-standard LSP functionalities, for example `_typescript.applyRenameFile`
 -   has support for a variety of different install methods (e.g., [google/zx](https://github.com/google/zx))
 -   common install tasks are abstracted behind Lua APIs
+-   Windows support for a majority of server installations
 -   provides adapters that offer out-of-the-box integrations with other plugins
 
 Inspired by [nvim-lspinstall](https://github.com/kabouzeid/nvim-lspinstall).
