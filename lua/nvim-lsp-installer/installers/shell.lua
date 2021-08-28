@@ -1,5 +1,4 @@
 local installers = require "nvim-lsp-installer.installers"
-local platform = require "nvim-lsp-installer.platform"
 
 local M = {}
 
@@ -37,13 +36,10 @@ function M.bash(raw_script, opts)
     }
     opts = vim.tbl_deep_extend("force", default_opts, opts or {})
 
-    return installers.compose {
-        termopen {
-            shell = "/bin/bash",
-            cmd = (opts.prefix or "") .. raw_script,
-            env = opts.env,
-        },
-        installers.block_win,
+    return termopen {
+        shell = "/bin/bash",
+        cmd = (opts.prefix or "") .. raw_script,
+        env = opts.env,
     }
 end
 
@@ -57,13 +53,10 @@ function M.powershell(raw_script, opts)
     }
     opts = vim.tbl_deep_extend("force", default_opts, opts or {})
 
-    return installers.compose {
-        termopen {
-            shell = "powershell.exe",
-            cmd = raw_script,
-            env = opts.env,
-        },
-        installers.block_unix,
+    return termopen {
+        shell = "powershell.exe",
+        cmd = raw_script,
+        env = opts.env,
     }
 end
 

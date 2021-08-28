@@ -27,22 +27,6 @@ function M.compose(installers)
     end
 end
 
-M.block_win = function(server, callback)
-    if platform.is_win() then
-        callback(false, ("Windows is not yet supported for server %q."):format(server.name))
-    else
-        callback(true, nil)
-    end
-end
-
-M.block_unix = function(server, callback)
-    if platform.is_unix() then
-        callback(false, ("Uniw is not yet supported for server %q."):format(server.name))
-    else
-        callback(true, nil)
-    end
-end
-
 function M.when(platform_table)
     return function(server, callback)
         if platform.is_unix() then

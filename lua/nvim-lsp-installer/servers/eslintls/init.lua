@@ -1,6 +1,7 @@
 local notify = require "nvim-lsp-installer.notify"
 local server = require "nvim-lsp-installer.server"
 local path = require "nvim-lsp-installer.path"
+local installers = require "nvim-lsp-installer.installers"
 local shell = require "nvim-lsp-installer.installers.shell"
 
 local ConfirmExecutionResult = {
@@ -22,7 +23,9 @@ npm install;
 return server.Server:new {
     name = "eslintls",
     root_dir = root_dir,
-    installer = shell.bash(install_cmd),
+    installer = installers.when {
+        unix = shell.bash(install_cmd),
+    },
     pre_setup = function()
         local lspconfig = require "lspconfig"
         local configs = require "lspconfig/configs"
