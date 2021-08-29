@@ -2,6 +2,7 @@ local fs = require "nvim-lsp-installer.fs"
 local path = require "nvim-lsp-installer.path"
 local notify = require "nvim-lsp-installer.notify"
 local installers = require "nvim-lsp-installer.installers"
+local platform = require "nvim-lsp-installer.platform"
 local shell = require "nvim-lsp-installer.installers.shell"
 local npm = require "nvim-lsp-installer.installers.npm"
 
@@ -38,7 +39,7 @@ local function zx_installer(force)
         fs.mkdirp(INSTALL_DIR)
 
         local handle, pid = uv.spawn(
-            "npm",
+            platform.is_win() and "npm.cmd" or "npm",
             {
                 args = { npm_command, "zx@1" },
                 cwd = INSTALL_DIR,
