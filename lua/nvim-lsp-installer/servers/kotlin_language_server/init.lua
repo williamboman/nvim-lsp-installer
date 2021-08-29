@@ -14,7 +14,7 @@ return server.Server:new {
         unzip server.zip;
         rm server.zip;
         ]],
-        win = shell.cmd [[ curl -fsLo server.zip https://github.com/fwcd/kotlin-language-server/releases/latest/download/server.zip && tar -xf server.zip && del /f server.zip ]],
+        win = shell.cmd [[ curl -fLo server.zip https://github.com/fwcd/kotlin-language-server/releases/latest/download/server.zip && tar -xvf server.zip && del /f server.zip ]],
     },
     default_options = {
         cmd = { path.concat { root_dir, "server", "bin", "kotlin-language-server" } },
