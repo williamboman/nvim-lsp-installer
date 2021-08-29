@@ -1,7 +1,6 @@
 local notify = require "nvim-lsp-installer.notify"
 local server = require "nvim-lsp-installer.server"
 local path = require "nvim-lsp-installer.path"
-local installers = require "nvim-lsp-installer.installers"
 local shell = require "nvim-lsp-installer.installers.shell"
 
 local ConfirmExecutionResult = {
@@ -12,20 +11,11 @@ local ConfirmExecutionResult = {
 }
 
 local root_dir = server.get_server_root_path "eslint"
-local install_cmd = [[
-git clone --depth 1 https://github.com/microsoft/vscode-eslint .;
-npm install;
-cd server;
-npm install;
-../node_modules/.bin/tsc;
-]]
 
 return server.Server:new {
     name = "eslintls",
     root_dir = root_dir,
-    installer = installers.when {
-        unix = shell.bash(install_cmd),
-    },
+    installer = shell.polyshell [[ git clone --depth 1 https://github.com/microsoft/vscode-eslint . && npm install && npm run compile:server ]],
     pre_setup = function()
         local lspconfig = require "lspconfig"
         local configs = require "lspconfig/configs"
