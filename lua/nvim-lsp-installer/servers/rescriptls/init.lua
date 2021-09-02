@@ -7,13 +7,15 @@ local root_dir = server.get_server_root_path('rescriptls')
 return server.Server:new {
     name = "rescriptls",
     root_dir = root_dir,
-    installer = shell.polyshell [[
-        curl -s https://api.github.com/repos/rescript-lang/rescript-vscode/releases/latest \
-              | grep "browser_download_url.*vsix" \
-              | cut -d : -f 2,3 \
-              | tr -d '"' \
-              | wget -i - -O vscode-rescript.vsix;
-        unzip -q -o vscode-rescript.vsix;
+    installer = installers.when {
+        unix = shell.bash [[
+           curl -s https://api.github.com/repos/rescript-lang/rescript-vscode/releases/latest \
+                  | grep "browser_download_url.*vsix" \
+                  | cut -d : -f 2,3 \
+                  | tr -d '"' \
+                  | wget -i - -O vscode-rescript.vsix;
+            unzip -q -o vscode-rescript.vsix;
+        }
     ]],
     default_options = {
         cmd = {"node", path.concat { root_dir, "extension", "server", "out", "server.js" }, "--stdio"}
