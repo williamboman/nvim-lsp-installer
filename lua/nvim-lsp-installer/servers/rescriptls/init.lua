@@ -9,7 +9,7 @@ return server.Server:new {
     root_dir = root_dir,
     installer = installers.when {
         unix = shell.bash [[
-           curl -s https://api.github.com/repos/rescript-lang/rescript-vscode/releases/latest \
+           curl -fs https://api.github.com/repos/rescript-lang/rescript-vscode/releases/latest \
                   | grep "browser_download_url.*vsix" \
                   | cut -d : -f 2,3 \
                   | tr -d '"' \
