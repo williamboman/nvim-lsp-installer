@@ -1,8 +1,8 @@
-local server = require("nvim-lsp-installer.server")
-local path = require("nvim-lsp-installer.path")
-local shell = require("nvim-lsp-installer.installers.shell")
+local server = require "nvim-lsp-installer.server"
+local path = require "nvim-lsp-installer.path"
+local shell = require "nvim-lsp-installer.installers.shell"
 
-local root_dir = server.get_server_root_path('rescriptls')
+local root_dir = server.get_server_root_path "rescriptls"
 
 return server.Server:new {
     name = "rescriptls",
@@ -15,9 +15,9 @@ return server.Server:new {
                   | tr -d '"' \
                   | wget -i - -O vscode-rescript.vsix;
             unzip -q -o vscode-rescript.vsix;
-        }
-    ]],
+        ]],
+    },
     default_options = {
-        cmd = {"node", path.concat { root_dir, "extension", "server", "out", "server.js" }, "--stdio"}
-    }
+        cmd = { "node", path.concat { root_dir, "extension", "server", "out", "server.js" }, "--stdio" },
+    },
 }
