@@ -78,10 +78,9 @@ function M.get_server(server_name)
         return true, server
     end
     return false,
-        ("Unable to import server %s. This is an unexpected error, please file an issue at %s"):format(
-            server_name,
-            "https://github.com/williamboman/nvim-lsp-installer"
-        )
+        (
+            "Unable to import server %s.\n\nThis is an unexpected error, please file an issue at %s with the following information:\n%s"
+        ):format(server_name, "https://github.com/williamboman/nvim-lsp-installer", server)
 end
 
 function M.get_available_servers()
