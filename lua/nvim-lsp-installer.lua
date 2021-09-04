@@ -139,18 +139,26 @@ end
 
 function M.on_server_ready(cb)
     dispatcher.register_server_ready_callback(cb)
-    for _, server in pairs(M.get_installed_servers()) do
-        dispatcher.dispatch_server_ready(server)
-    end
+    vim.schedule(function()
+        for _, server in pairs(M.get_installed_servers()) do
+            dispatcher.dispatch_server_ready(server)
+        end
+    end)
 end
 
 -- "Proxy" function for triggering attachment of LSP servers to all buffers (useful when just installed a new server
 -- that wasn't installed at launch)
+local queued = false
 function M.lsp_attach_proxy()
-    -- As of writing, if the lspconfig server provides a filetypes setting, it uses FileType as trigger, otherwise it uses BufReadPost
-    local cur_bufnr = vim.fn.bufnr "%"
-    vim.cmd [[ bufdo do FileType | do BufReadPost ]]
-    vim.cmd(("buffer %s"):format(cur_bufnr)) -- restore buffer
+    if queued then
+        return
+    end
+    queued = true
+    vim.schedule(function()
+        -- As of writing, if the lspconfig server provides a filetypes setting, it uses FileType as trigger, otherwise it uses BufReadPost
+        vim.cmd [[ doautoall FileType | doautoall BufReadPost ]]
+        queued = false
+    end)
 end
 
 return M
