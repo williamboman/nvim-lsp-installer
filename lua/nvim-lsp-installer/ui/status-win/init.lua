@@ -97,7 +97,9 @@ end
 
 local function ServerGroup(props)
     local total_server_count = 0
-    for _, servers in ipairs(props.servers) do
+    local chunks = props.servers
+    for i = 1, #chunks do
+        local servers = chunks[i]
         total_server_count = total_server_count + #servers
     end
 
@@ -130,25 +132,25 @@ local function Servers(servers)
     -- giggity
     for _, server in pairs(servers) do
         if server.installer.is_running then
-            table.insert(grouped_servers.installing, server)
+            grouped_servers.installing[#grouped_servers.installing + 1] = server
         elseif server.installer.is_queued then
-            table.insert(grouped_servers.queued, server)
+            grouped_servers.queued[#grouped_servers.queued + 1] = server
         elseif server.uninstaller.has_run then
             if server.uninstaller.error then
-                table.insert(grouped_servers.uninstall_failed, server)
+                grouped_servers.uninstall_failed[#grouped_servers.uninstall_failed + 1] = server
             else
-                table.insert(grouped_servers.session_uninstalled, server)
+                grouped_servers.session_uninstalled[#grouped_servers.session_uninstalled + 1] = server
             end
         elseif server.is_installed then
             if server.installer.has_run then
-                table.insert(grouped_servers.session_installed, server)
+                grouped_servers.session_installed[#grouped_servers.session_installed + 1] = server
             else
-                table.insert(grouped_servers.installed, server)
+                grouped_servers.installed[#grouped_servers.installed + 1] = server
             end
         elseif server.installer.has_run then
-            table.insert(grouped_servers.install_failed, server)
+            grouped_servers.install_failed[#grouped_servers.install_failed + 1] = server
         else
-            table.insert(grouped_servers.uninstalled, server)
+            grouped_servers.uninstalled[#grouped_servers.uninstalled + 1] = server
         end
     end
 
@@ -202,7 +204,8 @@ local function init(all_servers)
     end)
 
     local servers = {}
-    for _, server in ipairs(all_servers) do
+    for i = 1, #all_servers do
+        local server = all_servers[i]
         servers[server.name] = create_server_state(server)
     end
 
@@ -279,7 +282,7 @@ local function init(all_servers)
         end)
 
         return function(server)
-            table.insert(q, server)
+            q[#q + 1] = server
             check_queue()
         end
     end)()

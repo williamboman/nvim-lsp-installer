@@ -2,7 +2,8 @@ local Data = {}
 
 function Data.enum(values)
     local result = {}
-    for _, v in ipairs(values) do
+    for i = 1, #values do
+        local v = values[i]
         result[v] = v
     end
     return result
@@ -10,8 +11,8 @@ end
 
 function Data.set_of(list)
     local set = {}
-    for _, l in ipairs(list) do
-        set[l] = true
+    for i = 1, #list do
+        set[list[i]] = true
     end
     return set
 end
@@ -19,7 +20,7 @@ end
 function Data.list_reverse(list)
     local result = {}
     for i = #list, 1, -1 do
-        table.insert(result, list[i])
+        result[#result + 1] = list[i]
     end
     return result
 end

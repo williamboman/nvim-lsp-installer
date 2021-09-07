@@ -9,8 +9,9 @@ local function connect_sink(pipe, sink)
             log.error { "Unexpected error when reading pipe.", err }
         end
         if data ~= nil then
-            for _, line in ipairs(vim.split(data, "\n")) do
-                sink(line)
+            local lines = vim.split(data, "\n")
+            for i = 1, #lines do
+                sink(lines[i])
             end
         else
             pipe:read_stop()
@@ -22,10 +23,10 @@ end
 function M.graft_env(env)
     local root_env = {}
     for key, val in pairs(vim.fn.environ()) do
-        table.insert(root_env, key .. "=" .. val)
+        root_env[#root_env + 1] = key .. "=" .. val
     end
     for key, val in pairs(env) do
-        table.insert(root_env, key .. "=" .. val)
+        root_env[#root_env + 1] = key .. "=" .. val
     end
     return root_env
 end
@@ -59,7 +60,8 @@ function M.spawn(cmd, opts, callback)
         -- ensure all pipes are closed, for I am a qualified plumber
         local check = uv.new_check()
         check:start(function()
-            for _, pipe in ipairs(stdio) do
+            for i = 1, #stdio do
+                local pipe = stdio[i]
                 if not pipe:is_closing() then
                     return
                 end
@@ -88,7 +90,7 @@ function M.chain(opts)
     local stack = {}
     return {
         run = function(cmd, args)
-            table.insert(stack, { cmd = cmd, args = args })
+            stack[#stack + 1] = { cmd = cmd, args = args }
         end,
         spawn = function(callback)
             local function execute(idx)

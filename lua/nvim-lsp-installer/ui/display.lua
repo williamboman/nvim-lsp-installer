@@ -32,8 +32,10 @@ end
 local function get_styles(line, render_context)
     local indentation = 0
 
-    for _, styles in ipairs(render_context.applied_block_styles) do
-        for _, style in ipairs(styles) do
+    for i = 1, #render_context.applied_block_styles do
+        local styles = render_context.applied_block_styles[i]
+        for j = 1, #styles do
+            local style = styles[j]
             if style == Ui.CascadingStyle.INDENT then
                 indentation = indentation + 2
             elseif style == Ui.CascadingStyle.CENTERED then
@@ -60,47 +62,50 @@ local function render_node(context, node, _render_context, _output)
     }
 
     if node.type == Ui.NodeType.VIRTUAL_TEXT then
-        table.insert(output.virt_texts, {
+        output.virt_texts[#output.virt_texts + 1] = {
             line = #output.lines - 1,
             content = node.virt_text,
-        })
+        }
     elseif node.type == Ui.NodeType.HL_TEXT then
-        for _, line in ipairs(node.lines) do
+        for i = 1, #node.lines do
+            local line = node.lines[i]
             local line_highlights = {}
             local full_line = ""
-            for _, span in ipairs(line) do
+            for j = 1, #line do
+                local span = line[j]
                 local content, hl_group = span[1], span[2]
                 local col_start = #full_line
                 full_line = full_line .. content
-                table.insert(line_highlights, {
+                line_highlights[#line_highlights + 1] = {
                     hl_group = hl_group,
                     line = #output.lines,
                     col_start = col_start,
                     col_end = col_start + #content,
-                })
+                }
             end
 
             local active_styles = get_styles(full_line, render_context)
 
             -- apply indentation
             full_line = (" "):rep(active_styles.indentation) .. full_line
-            for _, highlight in ipairs(line_highlights) do
+            for i = 1, #line_highlights do
+                local highlight = line_highlights[i]
                 highlight.col_start = highlight.col_start + active_styles.indentation
                 highlight.col_end = highlight.col_end + active_styles.indentation
-                table.insert(output.highlights, highlight)
+                output.highlights[#output.highlights + 1] = highlight
             end
 
-            table.insert(output.lines, full_line)
+            output.lines[#output.lines + 1] = full_line
         end
     elseif node.type == Ui.NodeType.NODE or node.type == Ui.NodeType.STYLE_BLOCK then
         if node.type == Ui.NodeType.STYLE_BLOCK then
-            table.insert(render_context.applied_block_styles, node.styles)
+            render_context.applied_block_styles[#render_context.applied_block_styles + 1] = node.styles
         end
-        for _, child in ipairs(node.children) do
-            render_node(context, child, render_context, output)
+        for i = 1, #node.children do
+            render_node(context, node.children[i], render_context, output)
         end
         if node.type == Ui.NodeType.STYLE_BLOCK then
-            table.remove(render_context.applied_block_styles, #render_context.applied_block_styles)
+            render_context.applied_block_styles[#render_context.applied_block_styles] = nil
         end
     end
 
@@ -114,8 +119,10 @@ function M.new_view_only_win(name)
 
     local function open(opts)
         opts = opts or {}
-        if opts.win_width then
-            vim.cmd(("%dvnew"):format(opts.win_width))
+        local win_width, highlight_groups = opts.win_width, opts.highlight_groups
+
+        if win_width then
+            vim.cmd(("%dvnew"):format(win_width))
         else
             vim.cmd [[vnew]]
         end
@@ -145,9 +152,9 @@ function M.new_view_only_win(name)
             vim.cmd(("autocmd %s <buffer> call v:lua.lsp_install_redraw(%d)"):format(redraw_event, win))
         end
 
-        if opts.highlight_groups then
-            for _, hl_group in ipairs(opts.highlight_groups) do
-                vim.cmd(hl_group)
+        if highlight_groups then
+            for i = 1, #highlight_groups do
+                vim.cmd(highlight_groups[i])
             end
         end
     end
@@ -164,17 +171,20 @@ function M.new_view_only_win(name)
             win_width = win_width,
         }
         local output = render_node(context, view)
+        local lines, virt_texts, highlights = output.lines, output.virt_texts, output.highlights
 
         vim.api.nvim_buf_clear_namespace(0, namespace, 0, -1)
         vim.api.nvim_buf_set_option(buf, "modifiable", true)
-        vim.api.nvim_buf_set_lines(buf, 0, -1, true, output.lines)
+        vim.api.nvim_buf_set_lines(buf, 0, -1, true, lines)
         vim.api.nvim_buf_set_option(buf, "modifiable", false)
-        for _, virt_text in ipairs(output.virt_texts) do
+        for i = 1, #virt_texts do
+            local virt_text = virt_texts[i]
             vim.api.nvim_buf_set_extmark(buf, namespace, virt_text.line, 0, {
                 virt_text = virt_text.content,
             })
         end
-        for _, highlight in ipairs(output.highlights) do
+        for i = 1, #highlights do
+            local highlight = highlights[i]
             vim.api.nvim_buf_add_highlight(
                 buf,
                 namespace,
