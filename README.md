@@ -126,6 +126,7 @@ end
 | PureScript                          | `purescriptls`           |
 | Python                              | `pylsp`                  |
 | Python                              | `pyright`                |
+| R                                   | `r_language_server`      |
 | ReScript                            | `rescriptls`             |
 | Rome                                | `rome`                   |
 | Ruby                                | `solargraph`             |
