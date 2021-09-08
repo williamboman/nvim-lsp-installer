@@ -33,24 +33,36 @@ function M.compose(installers)
     return M.join(Data.list_reverse(installers))
 end
 
+local function get_by_platform(platform_table)
+    if platform.is_unix then
+        return platform_table.unix
+    elseif platform.is_win then
+        return platform_table.win
+    else
+        return nil
+    end
+end
+
+-- non-exhaustive
+function M.on(platform_table)
+    return function(server, callback, context)
+        local installer = get_by_platform(platform_table)
+        if installer then
+            installer(server, callback, context)
+        else
+            callback(true)
+        end
+    end
+end
+
+-- exhaustive
 function M.when(platform_table)
     return function(server, callback, context)
-        if platform.is_unix then
-            if platform_table.unix then
-                platform_table.unix(server, callback, context)
-            else
-                context.stdio_sink.stderr(("Unix is not yet supported for server %q."):format(server.name))
-                callback(false)
-            end
-        elseif platform.is_win then
-            if platform_table.win then
-                platform_table.win(server, callback, context)
-            else
-                context.stdio_sink.stderr(("Windows is not yet supported for server %q."):format(server.name))
-                callback(false)
-            end
+        local installer = get_by_platform(platform_table)
+        if installer then
+            installer(server, callback, context)
         else
-            context.sdtio_sink.stderr "installers.when: Could not find installer for current platform."
+            context.stdio_sink.stderr(("Currenty platform is not yet supported for server %q."):format(server.name))
             callback(false)
         end
     end

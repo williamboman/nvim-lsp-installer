@@ -1,32 +1,36 @@
 local server = require "nvim-lsp-installer.server"
 local installers = require "nvim-lsp-installer.installers"
 local path = require "nvim-lsp-installer.path"
-local zx = require "nvim-lsp-installer.installers.zx"
+local platform = require "nvim-lsp-installer.platform"
+local Data = require "nvim-lsp-installer.data"
+local std = require "nvim-lsp-installer.installers.std"
+local shell = require "nvim-lsp-installer.installers.shell"
 
 local root_dir = server.get_server_root_path "lua"
 
-local uname_alias = {
-    Darwin = "macOS",
-}
-local uname = vim.fn.system("uname"):gsub("%s+", "")
-local bin_dir = uname_alias[uname] or uname
+local bin_dir = Data.coalesce(
+    Data.when(platform.is_mac, "macOS"),
+    Data.when(platform.is_unix, "Linux"),
+    Data.when(platform.is_win, "Windows")
+)
 
 return server.Server:new {
     name = "sumneko_lua",
     root_dir = root_dir,
-    installer = installers.when {
-        unix = zx.file "./install.mjs",
+    installer = installers.join {
+        std.download_file("https://github.com/sumneko/vscode-lua/releases/download/v2.3.6/lua-2.3.6.vsix", "lua.vsix"),
+        std.unzip("lua.vsix", "."),
+        std.delete_file "lua.vsix",
+        installers.on {
+            -- see https://github.com/sumneko/vscode-lua/pull/43
+            unix = shell.bash [[ chmod +x extension/server/bin/macOS/lua-language-server extension/server/bin/Linux/lua-language-server ]],
+        },
     },
-    pre_install_check = function()
-        if vim.fn.executable "ninja" ~= 1 then
-            error "ninja not installed (see https://github.com/ninja-build/ninja/wiki/Pre-built-Ninja-packages)"
-        end
-    end,
     default_options = {
         cmd = {
-            path.concat { root_dir, "bin", bin_dir, "lua-language-server" },
+            path.concat { root_dir, "extension", "server", "bin", bin_dir, "lua-language-server" },
             "-E",
-            path.concat { root_dir, "main.lua" },
+            path.concat { root_dir, "extension", "server", "main.lua" },
         },
         settings = {
             Lua = {

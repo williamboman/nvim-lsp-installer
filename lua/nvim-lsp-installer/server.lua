@@ -77,13 +77,14 @@ function M.Server:install()
 end
 
 function M.Server:install_attached(opts, callback)
-    local ok, err = pcall(self.pre_install, self)
-    if not ok then
-        opts.stdio_sink.stderr(tostring(err))
+    local pre_install_ok, pre_install_err = pcall(self.pre_install, self)
+    if not pre_install_ok then
+        opts.stdio_sink.stderr(tostring(pre_install_err))
         callback(false)
         return
     end
-    self._installer(self, function(success)
+
+    local install_ok, install_err = pcall(self._installer, self, function(success)
         if not success then
             pcall(self.uninstall, self)
         else
@@ -93,6 +94,10 @@ function M.Server:install_attached(opts, callback)
         end
         callback(success)
     end, opts)
+    if not install_ok then
+        opts.stdio_sink.stderr(tostring(install_err))
+        callback(false)
+    end
 end
 
 function M.Server:pre_install()
