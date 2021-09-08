@@ -33,6 +33,7 @@ local CORE_SERVERS = Data.set_of {
     "purescriptls",
     "pylsp",
     "pyright",
+    "r_language_server",
     "rescriptls",
     "rome",
     "rust_analyzer",
