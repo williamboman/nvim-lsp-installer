@@ -17,9 +17,8 @@ On top of just providing commands for installing & uninstalling LSP servers, it:
 
 -   provides a graphical UI
 -   provides configurations for servers that aren't supported by nvim-lspconfig (`eslint`)
--   has support for a variety of different install methods (e.g., [google/zx](https://github.com/google/zx))
 -   common install tasks are abstracted behind Lua APIs (has direct integration with libuv via vim.loop)
--   <img src="https://user-images.githubusercontent.com/6705160/131256603-cacf7f66-dfa9-4515-8ae4-0e42d08cfc6a.png" height="20"> supports Windows for a majority of server installations
+-   <img src="https://user-images.githubusercontent.com/6705160/131256603-cacf7f66-dfa9-4515-8ae4-0e42d08cfc6a.png" height="20"> full support for Windows
 
 ## Installation
 
