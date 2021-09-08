@@ -3,9 +3,9 @@ local Data = require "nvim-lsp-installer.data"
 
 local M = {}
 
-function M.join(installers)
+function M.pipe(installers)
     if #installers == 0 then
-        error "No installers to join."
+        error "No installers to pipe."
     end
 
     return function(server, callback, context)
@@ -30,7 +30,7 @@ end
 
 -- much fp, very wow
 function M.compose(installers)
-    return M.join(Data.list_reverse(installers))
+    return M.pipe(Data.list_reverse(installers))
 end
 
 local function get_by_platform(platform_table)

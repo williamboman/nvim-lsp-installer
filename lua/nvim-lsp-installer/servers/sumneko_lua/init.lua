@@ -17,7 +17,7 @@ local bin_dir = Data.coalesce(
 return server.Server:new {
     name = "sumneko_lua",
     root_dir = root_dir,
-    installer = installers.join {
+    installer = installers.pipe {
         std.download_file("https://github.com/sumneko/vscode-lua/releases/download/v2.3.6/lua-2.3.6.vsix", "lua.vsix"),
         std.unzip("lua.vsix", "."),
         std.delete_file "lua.vsix",

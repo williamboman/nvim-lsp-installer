@@ -183,7 +183,7 @@ Example:
 local installers = require "nvim-lsp-installer.installers"
 local shell = require "nvim-lsp-installer.installers.shell"
 
-installers.join {
+installers.pipe {
     npm.packages { "some-package" },
     pip3.packages { "another-package" },
     shell.raw [[ exit 1 ]],
