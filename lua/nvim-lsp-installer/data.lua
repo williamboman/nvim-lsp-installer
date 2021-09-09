@@ -43,7 +43,7 @@ end
 
 function Data.coalesce(...)
     local args = Data.tbl_pack(...)
-    for i = 1, #args do
+    for i = 1, args.n do
         local variable = args[i]
         if variable ~= nil then
             return variable
