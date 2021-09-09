@@ -52,7 +52,7 @@ function M.untar(file)
     }
 end
 
-function M.untargz_remote(url, dest)
+function M.untargz_remote(url)
     return installers.pipe {
         M.download_file(url, "archive.tar.gz"),
         M.gunzip "archive.tar.gz",
