@@ -22,17 +22,16 @@ On top of just providing commands for installing & uninstalling LSP servers, it:
 
 ## Installation
 
-Requires:
+Requires neovim `>= 0.5.0`. These are the full requirements to install all servers:
 
--   neovim `(>= 0.5.0)`
 -   neovim/nvim-lspconfig (https://github.com/neovim/nvim-lspconfig)
--   Unix systems: bash(1), git(1), wget(1), unzip(1), tar(1), gzip(1)
--   Windows systems: powershell.exe, tar, git
--   (optional) Node.js (LTS) & npm. Some LSP servers will need a Node runtime.
--   (optional) Python3 & pip3. Some LSP servers will need a Python3 runtime.
--   (optional) go. Some LSP servers will need a Go runtime.
--   (optional) javac. Some LSP servers will need a Javac (1.8+) compiler.
--   (optional) Ruby & gem. Some LSP servers will need a Ruby runtime.
+-   For Unix systems: bash(1), git(1), wget(1), unzip(1), tar(1), gzip(1)
+-   For Windows systems: powershell.exe, tar, git
+-   Node.js (LTS) & npm
+-   Python3 & pip3
+-   go
+-   javac
+-   Ruby & gem
 
 ### [Packer](https://github.com/wbthomason/packer.nvim)
 
