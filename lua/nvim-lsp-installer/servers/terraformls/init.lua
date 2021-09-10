@@ -31,9 +31,10 @@ return server.Server:new {
     name = "terraformls",
     root_dir = root_dir,
     installer = std.unzip_remote(
-        ("https://github.com/hashicorp/terraform-ls/releases/download/v%s/%s"):format(VERSION, target)
+        ("https://github.com/hashicorp/terraform-ls/releases/download/v%s/%s"):format(VERSION, target),
+        "terraform-ls"
     ),
     default_options = {
-        cmd = { path.concat { root_dir, "terraform-ls" }, "serve" },
+        cmd = { path.concat { root_dir, "terraform-ls", "terraform-ls" }, "serve" },
     },
 }
