@@ -1,7 +1,7 @@
 local server = require "nvim-lsp-installer.server"
 local gem = require "nvim-lsp-installer.installers.gem"
 
-local root_dir = server.get_server_root_path "ruby"
+local root_dir = server.get_server_root_path "solargraph"
 
 return server.Server:new {
     name = "solargraph",

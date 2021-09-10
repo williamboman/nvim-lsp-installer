@@ -4,7 +4,7 @@ local platform = require "nvim-lsp-installer.platform"
 local Data = require "nvim-lsp-installer.data"
 local std = require "nvim-lsp-installer.installers.std"
 
-local root_dir = server.get_server_root_path "lua"
+local root_dir = server.get_server_root_path "sumneko_lua"
 
 local bin_dir = Data.coalesce(
     Data.when(platform.is_mac, "macOS"),
