@@ -4,7 +4,7 @@ local platform = require "nvim-lsp-installer.platform"
 local Data = require "nvim-lsp-installer.data"
 local std = require "nvim-lsp-installer.installers.std"
 
-local root_dir = server.get_server_root_path "c-family"
+local root_dir = server.get_server_root_path "clangd"
 
 local VERSION = "12.0.1"
 
