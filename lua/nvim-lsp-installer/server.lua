@@ -63,11 +63,11 @@ function M.Server:get_default_options()
 end
 
 function M.Server:is_installed()
-    return fs.dir_exists(self._root_dir)
+    return fs.dir_exists(self.root_dir)
 end
 
 function M.Server:create_root_dir()
-    fs.mkdirp(self._root_dir)
+    fs.mkdirp(self.root_dir)
 end
 
 function M.Server:install()
@@ -96,8 +96,8 @@ function M.Server:install_attached(opts, callback)
 end
 
 function M.Server:uninstall()
-    if fs.dir_exists(self._root_dir) then
-        fs.rmrf(self._root_dir)
+    if fs.dir_exists(self.root_dir) then
+        fs.rmrf(self.root_dir)
     end
 end
 
