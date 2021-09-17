@@ -5,9 +5,9 @@ return function(name, root_dir)
     return server.Server:new {
         name = name,
         root_dir = root_dir,
-        installer = npm.packages { "rome@10.0.7-nightly.2021.7.2" }, -- https://github.com/rome/tools/pull/1409
+        installer = npm.packages { "dot-language-server" },
         default_options = {
-            cmd = { npm.executable(root_dir, "rome"), "lsp" },
+            cmd = { npm.executable(root_dir, "dot-language-server"), "--stdio" },
         },
     }
 end

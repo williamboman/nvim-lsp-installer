@@ -1,21 +1,13 @@
 local server = require "nvim-lsp-installer.server"
-local installers = require "nvim-lsp-installer.installers"
-local path = require "nvim-lsp-installer.path"
-local zx = require "nvim-lsp-installer.installers.zx"
+local npm = require "nvim-lsp-installer.installers.npm"
 
-local root_dir = server.get_server_root_path "tailwindcss"
-
-return server.Server:new {
-    name = "tailwindcss",
-    root_dir = root_dir,
-    installer = installers.when {
-        unix = zx.file "./install.mjs",
-    },
-    default_options = {
-        cmd = {
-            "node",
-            path.concat { root_dir, "tailwindcss", "extension", "dist", "server", "tailwindServer.js" },
-            "--stdio",
+return function(name, root_dir)
+    return server.Server:new {
+        name = name,
+        root_dir = root_dir,
+        installer = npm.packages { "@tailwindcss/language-server" },
+        default_options = {
+            cmd = { npm.executable(root_dir, "tailwindcss-language-server"), "--stdio" },
         },
-    },
-}
+    }
+end

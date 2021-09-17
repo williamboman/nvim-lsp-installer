@@ -52,6 +52,25 @@ function M.cmd(raw_script, opts)
     }
 end
 
+function M.powershell(raw_script, opts)
+    local default_opts = {
+        env = {},
+        -- YIKES https://stackoverflow.com/a/63301751
+        prefix = "$ProgressPreference = 'SilentlyContinue';",
+    }
+    opts = vim.tbl_deep_extend("force", default_opts, opts or {})
+
+    return shell {
+        shell = "powershell.exe",
+        cmd = (opts.prefix or "") .. raw_script,
+        env = opts.env,
+    }
+end
+
+function M.remote_powershell(url, opts)
+    return M.powershell(("iwr %q -useb | iex"):format(url), opts)
+end
+
 function M.polyshell(raw_script, opts)
     local default_opts = {
         env = {},

@@ -1,48 +1,50 @@
 local server = require "nvim-lsp-installer.server"
-local installers = require "nvim-lsp-installer.installers"
 local path = require "nvim-lsp-installer.path"
-local zx = require "nvim-lsp-installer.installers.zx"
+local platform = require "nvim-lsp-installer.platform"
+local Data = require "nvim-lsp-installer.data"
+local std = require "nvim-lsp-installer.installers.std"
 
-local root_dir = server.get_server_root_path "lua"
+local bin_dir = Data.coalesce(
+    Data.when(platform.is_mac, "macOS"),
+    Data.when(platform.is_linux, "Linux"),
+    Data.when(platform.is_win, "Windows")
+)
 
-local uname_alias = {
-    Darwin = "macOS",
-}
-local uname = vim.fn.system("uname"):gsub("%s+", "")
-local bin_dir = uname_alias[uname] or uname
-
-return server.Server:new {
-    name = "sumneko_lua",
-    root_dir = root_dir,
-    installer = installers.when {
-        unix = zx.file "./install.mjs",
-    },
-    pre_install_check = function()
-        if vim.fn.executable "ninja" ~= 1 then
-            error "ninja not installed (see https://github.com/ninja-build/ninja/wiki/Pre-built-Ninja-packages)"
-        end
-    end,
-    default_options = {
-        cmd = {
-            path.concat { root_dir, "bin", bin_dir, "lua-language-server" },
-            "-E",
-            path.concat { root_dir, "main.lua" },
+return function(name, root_dir)
+    return server.Server:new {
+        name = name,
+        root_dir = root_dir,
+        installer = {
+            std.unzip_remote "https://github.com/sumneko/vscode-lua/releases/download/v2.3.6/lua-2.3.6.vsix",
+            -- see https://github.com/sumneko/vscode-lua/pull/43
+            std.chmod(
+                "+x",
+                { "extension/server/bin/macOS/lua-language-server", "extension/server/bin/Linux/lua-language-server" }
+            ),
         },
-        settings = {
-            Lua = {
-                diagnostics = {
-                    -- Get the language server to recognize the `vim` global
-                    globals = { "vim" },
-                },
-                workspace = {
-                    -- Make the server aware of Neovim runtime files
-                    library = {
-                        [vim.fn.expand "$VIMRUNTIME/lua"] = true,
-                        [vim.fn.expand "$VIMRUNTIME/lua/vim/lsp"] = true,
+        default_options = {
+            cmd = {
+                -- We need to provide a _full path_ to the executable (sumneko_lua uses it to determine... things)
+                path.concat { root_dir, "extension", "server", "bin", bin_dir, "lua-language-server" },
+                "-E",
+                path.concat { root_dir, "extension", "server", "main.lua" },
+            },
+            settings = {
+                Lua = {
+                    diagnostics = {
+                        -- Get the language server to recognize the `vim` global
+                        globals = { "vim" },
                     },
-                    maxPreload = 10000,
+                    workspace = {
+                        -- Make the server aware of Neovim runtime files
+                        library = {
+                            [vim.fn.expand "$VIMRUNTIME/lua"] = true,
+                            [vim.fn.expand "$VIMRUNTIME/lua/vim/lsp"] = true,
+                        },
+                        maxPreload = 10000,
+                    },
                 },
             },
         },
-    },
-}
+    }
+end
