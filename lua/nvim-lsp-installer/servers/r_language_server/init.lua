@@ -9,7 +9,7 @@ return function(name, root_dir)
             process.spawn("R", {
                 args = {
                     "-e",
-                    ('install.packages("languageserver", repos="http://cran.us.r-project.org", lib = %q)'):format(
+                    ('install.packages("languageserver", repos="https://cloud.r-project.org", lib=%q)'):format(
                         root_dir
                     ),
                 },
