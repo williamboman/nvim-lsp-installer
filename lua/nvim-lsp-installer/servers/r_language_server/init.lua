@@ -9,7 +9,8 @@ return function(name, root_dir)
             process.spawn("R", {
                 args = {
                     "-e",
-                    ('install.packages("languageserver", repos="https://cloud.r-project.org", lib=%q)'):format(
+                    ('if (!require("remotes")) { install.packages("remotes", repos="https://cloud.r-project.org") };') ..
+                    ('remotes::install_github("REditorSupport/languageserver", upgrade="default", force=TRUE, lib=%q)'):format(
                         root_dir
                     ),
                 },
