@@ -28,15 +28,13 @@ function M.packages(packages)
             cwd = server.root_dir,
             stdio_sink = context.stdio_sink,
         }
-        if
-            not (
-                fs.dir_exists(path.concat { server.root_dir, "node_modules" })
-                or fs.file_exists(path.concat { server.root_dir, "package.json" })
-            )
+        -- stylua: ignore start
+        if not (fs.dir_exists(path.concat { server.root_dir, "node_modules" }) or
+               fs.file_exists(path.concat { server.root_dir, "package.json" }))
         then
             c.run(npm, { "init", "--yes" })
         end
-
+        -- stylua: ignore end
         c.run(npm, vim.list_extend({ "install" }, packages))
         c.spawn(callback)
     end)
