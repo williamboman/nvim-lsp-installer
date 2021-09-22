@@ -8,6 +8,12 @@ return function(msg, level)
             title = TITLE,
         })
     else
-        vim.notify(("[%s] %s"):format(TITLE, msg), level)
+        local vim_log_levels = vim.tbl_keys(vim.log.levels)
+        local log_levels = vim.tbl_map(function(lv)
+            return lv:lower()
+        end, vim_log_levels)
+
+        local Log = require "nvim-lsp-installer.log"
+        Log[log_levels[level]](msg)
     end
 end
