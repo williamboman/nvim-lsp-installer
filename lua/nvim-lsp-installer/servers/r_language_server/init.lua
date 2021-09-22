@@ -9,21 +9,24 @@ return function(name, root_dir)
             process.spawn("R", {
                 args = {
                     "-e",
-                    ('if (!require("remotes")) { install.packages("remotes", repos="https://cloud.r-project.org") };') ..
-                    ('remotes::install_github("REditorSupport/languageserver", upgrade="default", force=TRUE, lib=%q)'):format(
+                    ('install.packages("languageserver", repos="https://cloud.r-project.org", lib=%q)'):format(
                         root_dir
                     ),
+                },
+                env = process.graft_env {
+                    R_LIBS = root_dir,
+                    R_LIBS_USER = root_dir,
+                    R_LIBS_SITE = root_dir
                 },
                 stdio_sink = context.stdio_sink,
             }, callback)
         end,
         default_options = {
-            cmd = {
-                "R",
-                "--slave",
-                "-e",
-                ("library(languageserver, lib.loc = %q); languageserver::run()"):format(root_dir),
-            },
-        },
+            cmd_env = {
+                R_LIBS = root_dir,
+                R_LIBS_USER = root_dir,
+                R_LIBS_SITE = root_dir,
+            }
+        }
     }
 end
