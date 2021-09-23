@@ -8,7 +8,7 @@ local default_config = {
 
     -- Should print the output to neovim while running
     -- values: 'sync','async',false
-    use_console = "async",
+    use_console = "false",
 
     -- Should highlighting be used in console (using echohl)
     highlights = true,
