@@ -1,8 +1,4 @@
---
--- The following is extracted and modified from plenary.log by TJ Devries.
-
--- User configuration section
-local default_config = {
+local config = {
     -- Name of the plugin. Prepended to log messages
     name = "lsp-installer",
 
@@ -15,9 +11,6 @@ local default_config = {
 
     -- Should write to a file
     use_file = true,
-
-    -- Any messages above this level will be logged.
-    level = "warn",
 
     -- Level configuration
     modes = {
@@ -33,27 +26,17 @@ local default_config = {
     float_precision = 0.01,
 }
 
--- {{{ NO NEED TO CHANGE
 local log = {}
+
+log.levels = vim.deepcopy(vim.log.levels)
+
+-- Default log level is warn.
+local current_log_level = log.levels.WARN
 
 local unpack = unpack or table.unpack
 
-log.new = function(config, standalone)
-    config = vim.tbl_deep_extend("force", default_config, config)
-
+do
     local outfile = string.format("%s/%s.log", vim.api.nvim_call_function("stdpath", { "cache" }), config.name)
-
-    local obj
-    if standalone then
-        obj = log
-    else
-        obj = config
-    end
-
-    local levels = {}
-    for i, v in ipairs(config.modes) do
-        levels[v.name] = i
-    end
 
     local round = function(x, increment)
         increment = increment or 1
@@ -80,8 +63,8 @@ log.new = function(config, standalone)
     end
 
     local log_at_level = function(level, level_config, message_maker, ...)
-        -- Return early if we're below the config.level
-        if level < levels[config.level] then
+        -- Return early if we're below the current_log_level
+        if level < current_log_level then
             return
         end
         local nameupper = level_config.name:upper()
@@ -131,12 +114,12 @@ log.new = function(config, standalone)
 
     for i, x in ipairs(config.modes) do
         -- log.info("these", "are", "separated")
-        obj[x.name] = function(...)
+        log[x.name] = function(...)
             return log_at_level(i, x, make_string, ...)
         end
 
         -- log.fmt_info("These are %s strings", "formatted")
-        obj[("fmt_%s"):format(x.name)] = function(...)
+        log[("fmt_%s"):format(x.name)] = function(...)
             return log_at_level(i, x, function(...)
                 local passed = { ... }
                 local fmt = table.remove(passed, 1)
@@ -149,14 +132,14 @@ log.new = function(config, standalone)
         end
 
         -- log.lazy_info(expensive_to_calculate)
-        obj[("lazy_%s"):format(x.name)] = function()
+        log[("lazy_%s"):format(x.name)] = function()
             return log_at_level(i, x, function(f)
                 return f()
             end)
         end
 
         -- log.file_info("do not print")
-        obj[("file_%s"):format(x.name)] = function(vals, override)
+        log[("file_%s"):format(x.name)] = function(vals, override)
             local original_console = config.use_console
             config.use_console = false
             config.info_level = override.info_level
@@ -165,11 +148,23 @@ log.new = function(config, standalone)
             config.info_level = nil
         end
     end
-
-    return obj
 end
 
-log.new(default_config, true)
--- }}}
+--- Sets the current log level.
+---@param level string|number One of `vim.lsp.log.levels`
+function log.set_level(level)
+    if type(level) == "string" then
+        current_log_level = assert(log.levels[level:upper()], string.format("Invalid log level: %q", level))
+    else
+        assert(type(level) == "number", "level must be a number or string")
+        assert(log.levels[level], string.format("Invalid log level: %d", level))
+        current_log_level = level
+    end
+end
+
+--- Gets the current log level.
+function log.get_level()
+    return current_log_level
+end
 
 return log
