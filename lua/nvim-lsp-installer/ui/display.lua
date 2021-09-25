@@ -97,14 +97,7 @@ local function render_node(context, node, _render_context, _output)
     return output
 end
 
-function M.new_view_only_win(name)
-    local namespace = vim.api.nvim_create_namespace(("lsp_installer_%s"):format(name))
-    local bufnr, renderer, mutate_state, get_state, unsubscribe, win_id
-    local has_initiated = false
-
-    local function open(opts)
-        opts = opts or {}
-        local highlight_groups = opts.highlight_groups
+local function create_popup_window_opts()
         local win_height = vim.o.lines - vim.o.cmdheight - 2 -- Add margin for status and buffer line
         local win_width = vim.o.columns
         local popup_layout = {
@@ -116,8 +109,20 @@ function M.new_view_only_win(name)
         }
         popup_layout.row = math.floor((win_height - popup_layout.height) / 2)
         popup_layout.col = math.floor((win_width - popup_layout.width) / 2)
+
+        return popup_layout
+end
+
+function M.new_view_only_win(name)
+    local namespace = vim.api.nvim_create_namespace(("lsp_installer_%s"):format(name))
+    local bufnr, renderer, mutate_state, get_state, unsubscribe, win_id
+    local has_initiated = false
+
+    local function open(opts)
+        opts = opts or {}
+        local highlight_groups = opts.highlight_groups
         bufnr = vim.api.nvim_create_buf(false, true)
-        win_id = vim.api.nvim_open_win(bufnr, true, popup_layout)
+        win_id = vim.api.nvim_open_win(bufnr, true, create_popup_window_opts())
         vim.lsp.util.close_preview_autocmd({ "BufHidden", "BufLeave" }, win_id)
 
         local buf_opts = {
@@ -153,7 +158,7 @@ function M.new_view_only_win(name)
 
         vim.cmd [[ syntax clear ]]
 
-        for _, redraw_event in ipairs { "WinEnter", "WinLeave", "VimResized" } do
+        for _, redraw_event in ipairs { "VimResized" } do
             vim.cmd(("autocmd %s <buffer> call v:lua.lsp_install_redraw(%d)"):format(redraw_event, win_id))
         end
 
@@ -181,6 +186,7 @@ function M.new_view_only_win(name)
             if buf_valid then
                 vim.api.nvim_buf_delete(bufnr, { force = true })
             end
+            redraw_by_winnr[win_id] = nil
             -- return log.debug { "Buffer or window is no longer valid", name, win_id, buf }
             return
         end
@@ -241,6 +247,7 @@ function M.new_view_only_win(name)
             draw(renderer(get_state()))
             redraw_by_winnr[opened_win] = function()
                 draw(renderer(get_state()))
+                vim.api.nvim_win_set_config(opened_win, create_popup_window_opts())
             end
         end),
         -- This is probably not needed.
