@@ -15,7 +15,7 @@ function _G.lsp_install_redraw(winnr)
 end
 
 local function get_styles(line, render_context)
-    local indentation = 0
+    local indentation = 2
 
     for i = 1, #render_context.applied_block_styles do
         local styles = render_context.applied_block_styles[i]
@@ -138,6 +138,7 @@ function M.new_view_only_win(name)
             foldenable = false,
             signcolumn = "no",
             colorcolumn = "",
+            cursorline = true,
         }
 
         -- window options
@@ -156,7 +157,7 @@ function M.new_view_only_win(name)
             vim.cmd(("autocmd %s <buffer> call v:lua.lsp_install_redraw(%d)"):format(redraw_event, win_id))
         end
 
-        vim.api.nvim_buf_set_keymap(buf, "n", "<esc>", "<cmd>bd<CR>", { noremap = true })
+        vim.api.nvim_buf_set_keymap(bufnr, "n", "<esc>", "<cmd>bd<CR>", { noremap = true })
         vim.lsp.util.close_preview_autocmd({ "BufHidden", "BufLeave" }, win_id)
 
         if highlight_groups then
@@ -225,7 +226,6 @@ function M.new_view_only_win(name)
         open = vim.schedule_wrap(function(opts)
             -- log.debug { "opening window" }
             assert(has_initiated, "Display has not been initiated, cannot open.")
-            local win_id = vim.fn.win_findbuf(bufnr)[1]
             if win_id and vim.api.nvim_win_is_valid(win_id) then
                 return
             end
