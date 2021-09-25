@@ -4,7 +4,7 @@ local config = {
 
     -- Should print the output to neovim while running
     -- values: 'sync','async',false
-    use_console = "false",
+    use_console = false,
 
     -- Should highlighting be used in console (using echohl)
     highlights = true,
@@ -28,10 +28,8 @@ local config = {
 
 local log = {}
 
-log.levels = vim.deepcopy(vim.log.levels)
-
 -- Default log level is warn.
-local current_log_level = log.levels.WARN
+vim.g.lsp_installer_log_level = vim.g.lsp_installer_log_level or vim.log.levels.WARN
 
 local unpack = unpack or table.unpack
 
@@ -64,7 +62,7 @@ do
 
     local log_at_level = function(level, level_config, message_maker, ...)
         -- Return early if we're below the current_log_level
-        if level < current_log_level then
+        if level < vim.g.lsp_installer_log_level then
             return
         end
         local nameupper = level_config.name:upper()
@@ -148,23 +146,6 @@ do
             config.info_level = nil
         end
     end
-end
-
---- Sets the current log level.
----@param level string|number One of `vim.lsp.log.levels`
-function log.set_level(level)
-    if type(level) == "string" then
-        current_log_level = assert(log.levels[level:upper()], string.format("Invalid log level: %q", level))
-    else
-        assert(type(level) == "number", "level must be a number or string")
-        assert(log.levels[level], string.format("Invalid log level: %d", level))
-        current_log_level = level
-    end
-end
-
---- Gets the current log level.
-function log.get_level()
-    return current_log_level
 end
 
 return log
