@@ -16,4 +16,4 @@ jobs:
               with:
                 token: ${{ secrets.GITHUB_TOKEN }}
                 # CLI arguments
-                args: --check ./lua/
+                args: . --check
