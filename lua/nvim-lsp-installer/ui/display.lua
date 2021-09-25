@@ -99,38 +99,26 @@ end
 
 function M.new_view_only_win(name)
     local namespace = vim.api.nvim_create_namespace(("lsp_installer_%s"):format(name))
-    local buf_handle, renderer, mutate_state, get_state, unsubscribe, win_id
+    local bufnr, renderer, mutate_state, get_state, unsubscribe, win_id
     local has_initiated = false
 
     local function open(opts)
         opts = opts or {}
-        local win_width, highlight_groups = opts.win_width, opts.highlight_groups
-        opts.layout = opts.layout or "popup"
-
-        if opts.layout == "popup" then
-            local win_height = vim.o.lines - vim.o.cmdheight - 2 -- Add margin for status and buffer line
-            win_width = vim.o.columns
-            local popup_layout = {
-                relative = "editor",
-                height = math.floor(win_height * 0.9),
-                width = math.floor(win_width * 0.8),
-                style = "minimal",
-                border = "rounded",
-            }
-            popup_layout.row = math.floor((win_height - popup_layout.height) / 2)
-            popup_layout.col = math.floor((win_width - popup_layout.width) / 2)
-            buf_handle = vim.api.nvim_create_buf(false, true)
-            win_id = vim.api.nvim_open_win(buf_handle, true, popup_layout)
-            vim.lsp.util.close_preview_autocmd({ "BufHidden", "BufLeave" }, win_id)
-        else
-            if win_width then
-                vim.cmd(("%dvnew"):format(win_width))
-            else
-                vim.cmd [[vnew]]
-            end
-            win_id = vim.api.nvim_get_current_win()
-            buf_handle = vim.api.nvim_get_current_buf()
-        end
+        local highlight_groups = opts.highlight_groups
+        local win_height = vim.o.lines - vim.o.cmdheight - 2 -- Add margin for status and buffer line
+        local win_width = vim.o.columns
+        local popup_layout = {
+            relative = "editor",
+            height = math.floor(win_height * 0.9),
+            width = math.floor(win_width * 0.8),
+            style = "minimal",
+            border = "rounded",
+        }
+        popup_layout.row = math.floor((win_height - popup_layout.height) / 2)
+        popup_layout.col = math.floor((win_width - popup_layout.width) / 2)
+        bufnr = vim.api.nvim_create_buf(false, true)
+        win_id = vim.api.nvim_open_win(bufnr, true, popup_layout)
+        vim.lsp.util.close_preview_autocmd({ "BufHidden", "BufLeave" }, win_id)
 
         local buf_opts = {
             modifiable = false,
@@ -144,6 +132,7 @@ function M.new_view_only_win(name)
 
         local win_opts = {
             number = false,
+            relativenumber = false,
             wrap = false,
             spell = false,
             foldenable = false,
@@ -158,7 +147,7 @@ function M.new_view_only_win(name)
 
         -- buffer options
         for key, value in pairs(buf_opts) do
-            vim.api.nvim_buf_set_option(buf_handle, key, value)
+            vim.api.nvim_buf_set_option(bufnr, key, value)
         end
 
         vim.cmd [[ syntax clear ]]
@@ -168,7 +157,7 @@ function M.new_view_only_win(name)
         end
 
         vim.api.nvim_buf_set_keymap(buf, "n", "<esc>", "<cmd>bd<CR>", { noremap = true })
-        vim.lsp.util.close_preview_autocmd({ "BufHidden", "BufLeave" }, win)
+        vim.lsp.util.close_preview_autocmd({ "BufHidden", "BufLeave" }, win_id)
 
         if highlight_groups then
             for i = 1, #highlight_groups do
@@ -180,11 +169,11 @@ function M.new_view_only_win(name)
     end
 
     local draw = process.debounced(function(view)
-        -- local win = vim.fn.win_findbuf(buf_handle)[1]
-        if not win_id or not vim.api.nvim_buf_is_valid(buf_handle) then
+        -- local win_id = vim.fn.win_findbuf(bufnr)[1]
+        if not win_id or not vim.api.nvim_buf_is_valid(bufnr) then
             -- the window has been closed or the buffer is somehow no longer valid
             unsubscribe(true)
-            -- return log.debug { "Buffer or window is no longer valid", name, win, buf }
+            -- return log.debug { "Buffer or window is no longer valid", name, win_id, buf }
             return
         end
 
@@ -196,21 +185,20 @@ function M.new_view_only_win(name)
         local lines, virt_texts, highlights = output.lines, output.virt_texts, output.highlights
 
         vim.api.nvim_buf_clear_namespace(0, namespace, 0, -1)
-        vim.api.nvim_buf_set_option(buf_handle, "modifiable", true)
-        -- vim.api.nvim_buf_set_lines(buf_handle, 0, -1, true, lines)
-        vim.api.nvim_buf_set_lines(buf_handle, 0, -1, false, lines)
-        vim.api.nvim_buf_set_option(buf_handle, "modifiable", false)
+        vim.api.nvim_buf_set_option(bufnr, "modifiable", true)
+        vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
+        vim.api.nvim_buf_set_option(bufnr, "modifiable", false)
 
         for i = 1, #virt_texts do
             local virt_text = virt_texts[i]
-            vim.api.nvim_buf_set_extmark(buf_handle, namespace, virt_text.line, 0, {
+            vim.api.nvim_buf_set_extmark(bufnr, namespace, virt_text.line, 0, {
                 virt_text = virt_text.content,
             })
         end
         for i = 1, #highlights do
             local highlight = highlights[i]
             vim.api.nvim_buf_add_highlight(
-                buf_handle,
+                bufnr,
                 namespace,
                 highlight.hl_group,
                 highlight.line,
@@ -237,8 +225,8 @@ function M.new_view_only_win(name)
         open = vim.schedule_wrap(function(opts)
             -- log.debug { "opening window" }
             assert(has_initiated, "Display has not been initiated, cannot open.")
-            local win = vim.fn.win_findbuf(buf_handle)[1]
-            if win and vim.api.nvim_win_is_valid(win) then
+            local win_id = vim.fn.win_findbuf(bufnr)[1]
+            if win_id and vim.api.nvim_win_is_valid(win_id) then
                 return
             end
             unsubscribe(false)
@@ -253,9 +241,9 @@ function M.new_view_only_win(name)
         --     assert(has_initiated, "Display has not been initiated, cannot destroy.")
         --     TODO: what happens with the state container, etc?
         --     unsubscribe(true)
-        --     redraw_by_winnr[win] = nil
-        --     if win then
-        --         vim.api.nvim_win_close(win, true)
+        --     redraw_by_winnr[win_id] = nil
+        --     if win_id then
+        --         vim.api.nvim_win_close(win_id, true)
         --     end
         -- end),
     }
