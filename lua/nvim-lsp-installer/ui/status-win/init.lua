@@ -233,7 +233,7 @@ local function init(all_servers)
     local window = display.new_view_only_win "LSP servers"
 
     window.view(function(state)
-        return Ui.Node {
+        return Indent {
             Header(),
             Servers(state.servers),
         }

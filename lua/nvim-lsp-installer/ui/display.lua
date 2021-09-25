@@ -15,7 +15,7 @@ function _G.lsp_install_redraw(winnr)
 end
 
 local function get_styles(line, render_context)
-    local indentation = 2
+    local indentation = 0
 
     for i = 1, #render_context.applied_block_styles do
         local styles = render_context.applied_block_styles[i]
