@@ -158,7 +158,7 @@ function M.new_view_only_win(name)
         end
 
         vim.api.nvim_buf_set_keymap(bufnr, "n", "<esc>", "<cmd>bd<CR>", { noremap = true })
-        vim.lsp.util.close_preview_autocmd({ "BufHidden", "BufLeave" }, win_id)
+        vim.lsp.util.close_preview_autocmd({ "WinLeave", "BufHidden", "BufLeave" }, win_id)
 
         if highlight_groups then
             for i = 1, #highlight_groups do
@@ -170,10 +170,17 @@ function M.new_view_only_win(name)
     end
 
     local draw = process.debounced(function(view)
-        -- local win_id = vim.fn.win_findbuf(bufnr)[1]
-        if not win_id or not vim.api.nvim_buf_is_valid(bufnr) then
+        local win_valid = vim.api.nvim_win_is_valid(win_id)
+        local buf_valid = vim.api.nvim_buf_is_valid(bufnr)
+        if not win_valid or not buf_valid then
             -- the window has been closed or the buffer is somehow no longer valid
             unsubscribe(true)
+            if win_valid then
+                vim.api.nvim_win_close(win_id, true)
+            end
+            if buf_valid then
+                vim.api.nvim_buf_delete(bufnr, { force = true })
+            end
             -- return log.debug { "Buffer or window is no longer valid", name, win_id, buf }
             return
         end
