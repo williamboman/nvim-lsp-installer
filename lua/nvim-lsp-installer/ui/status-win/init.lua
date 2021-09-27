@@ -96,7 +96,7 @@ local function PendingServers(servers)
                     { " " .. note, "Comment" },
                     {
                         has_failed and "" or (" " .. get_last_non_empty_line(server.installer.tailed_output)),
-                        "Comment"
+                        "Comment",
                     },
                 },
             },
