@@ -2,9 +2,11 @@ name: Format Checker
 
 on:
     push:
-        branches: [main]
+        branches:
+            - '*'
     pull_request:
-        branches: [main]
+        branches:
+            - '*'
 
 jobs:
     fmt:
@@ -16,4 +18,4 @@ jobs:
               with:
                 token: ${{ secrets.GITHUB_TOKEN }}
                 # CLI arguments
-                args: . --check
+                args: ./lua/ --check
