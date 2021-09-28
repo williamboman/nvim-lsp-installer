@@ -116,7 +116,9 @@ end
 function M.delete_win_buf(win_id, bufnr)
     pcall(vim.api.nvim_win_close, win_id, true)
     pcall(vim.api.nvim_buf_delete, bufnr, { force = true })
-    redraw_by_win_id[win_id] = nil
+    if redraw_by_win_id[win_id] then
+        redraw_by_win_id[win_id] = nil
+    end
 end
 
 function M.new_view_only_win(name)
