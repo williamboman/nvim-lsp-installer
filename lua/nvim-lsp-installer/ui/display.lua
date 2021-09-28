@@ -113,8 +113,9 @@ function M.redraw_win(win_id)
     end
 end
 
-function M.delete_win_buf(win_id)
+function M.delete_win_buf(win_id, bufnr)
     pcall(vim.api.nvim_win_close, win_id, true)
+    pcall(vim.api.nvim_buf_delete, bufnr, { force = true })
     if redraw_by_win_id[win_id] then
         redraw_by_win_id[win_id] = nil
     end
@@ -194,7 +195,6 @@ function M.new_view_only_win(name)
         if not win_valid or not buf_valid then
             -- the window has been closed or the buffer is somehow no longer valid
             unsubscribe(true)
-            M.delete_win_buf(win_id)
             Log:debug { "Buffer or window is no longer valid", win_id, bufnr }
             return
         end
@@ -258,8 +258,10 @@ function M.new_view_only_win(name)
             local opened_win_id = open(opts)
             draw(renderer(get_state()))
             redraw_by_win_id[opened_win_id] = function()
-                draw(renderer(get_state()))
-                vim.api.nvim_win_set_config(opened_win_id, create_popup_window_opts())
+                if vim.api.nvim_win_is_valid(opened_win_id) then
+                    draw(renderer(get_state()))
+                    vim.api.nvim_win_set_config(opened_win_id, create_popup_window_opts())
+                end
             end
         end),
         -- This is probably not needed.
