@@ -1,5 +1,5 @@
 local Ui = require "nvim-lsp-installer.ui"
-local log = require "nvim-lsp-installer.log"
+local Log = require "nvim-lsp-installer.log"
 local process = require "nvim-lsp-installer.process"
 local state = require "nvim-lsp-installer.ui.state"
 
@@ -113,9 +113,8 @@ function M.redraw_win(win_id)
     end
 end
 
-function M.delete_win_buf(win_id, bufnr)
+function M.delete_win_buf(win_id)
     pcall(vim.api.nvim_win_close, win_id, true)
-    pcall(vim.api.nvim_buf_delete, bufnr, { force = true })
     if redraw_by_win_id[win_id] then
         redraw_by_win_id[win_id] = nil
     end
@@ -189,11 +188,14 @@ function M.new_view_only_win(name)
     local draw = process.debounced(function(view)
         local win_valid = win_id ~= nil and vim.api.nvim_win_is_valid(win_id)
         local buf_valid = bufnr ~= nil and vim.api.nvim_buf_is_valid(bufnr)
+        Log:debug("got bufnr: " .. bufnr)
+        Log:debug("got win_id: " .. win_id)
+
         if not win_valid or not buf_valid then
             -- the window has been closed or the buffer is somehow no longer valid
             unsubscribe(true)
-            M.delete_win_buf(win_id, bufnr)
-            -- return log.debug { "Buffer or window is no longer valid", name, win_id, buf }
+            M.delete_win_buf(win_id)
+            Log:debug { "Buffer or window is no longer valid", win_id, bufnr }
             return
         end
 
@@ -246,7 +248,7 @@ function M.new_view_only_win(name)
             return mutate_state, get_state
         end,
         open = vim.schedule_wrap(function(opts)
-            -- log.debug { "opening window" }
+            Log:debug "opening window"
             assert(has_initiated, "Display has not been initiated, cannot open.")
             if win_id and vim.api.nvim_win_is_valid(win_id) then
                 -- window is already open
