@@ -19,7 +19,7 @@ return function(name, root_dir)
             context.github_release_file("sumneko/vscode-lua", function(version)
                 return ("lua-%s.vsix"):format(version:gsub("^v", ""))
             end),
-            context.wrap(function(ctx)
+            context.capture(function(ctx)
                 return std.unzip_remote(ctx.github_release_file)
             end),
             -- see https://github.com/sumneko/vscode-lua/pull/43

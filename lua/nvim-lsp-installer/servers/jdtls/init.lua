@@ -42,7 +42,7 @@ return function(name, root_dir)
         name = name,
         root_dir = root_dir,
         installer = {
-            context.wrap(function(ctx)
+            context.capture(function(ctx)
                 local version = ctx.requested_server_version or "latest"
                 return std.untargz_remote(
                     ("https://download.eclipse.org/jdtls/snapshots/jdt-language-server-%s.tar.gz"):format(version)

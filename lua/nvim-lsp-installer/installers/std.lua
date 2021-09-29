@@ -105,7 +105,6 @@ function M.git_clone(repo_url)
         c.run("git", { "clone", "--depth", "1", repo_url, "." })
 
         if context.requested_server_version then
-            -- The "head" package is the recipient for the requested version. It's.. by design... don't ask.
             c.run("git", { "fetch", "--depth", "1", "origin", context.requested_server_version })
             c.run("git", { "checkout", "FETCH_HEAD" })
         end

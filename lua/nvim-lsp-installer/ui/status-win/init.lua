@@ -300,7 +300,7 @@ local function init(all_servers)
             },
         }, function(success)
             mutate_state(function(state)
-                -- TODO log each line separately
+                -- can we log each line separately?
                 Log.debug("Installer output", server.name, state.servers[server.name].installer.tailed_output)
                 if success then
                     -- release stdout/err output table.. hopefully ¯\_(ツ)_/¯

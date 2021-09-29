@@ -19,7 +19,7 @@ return function(name, root_dir)
                     Data.when(platform.is_win, "haskell-language-server-Windows-%s.tar.gz")
                 ):format(version)
             end),
-            context.wrap(function(ctx)
+            context.capture(function(ctx)
                 return std.untargz_remote(ctx.github_release_file)
             end),
             installers.on {

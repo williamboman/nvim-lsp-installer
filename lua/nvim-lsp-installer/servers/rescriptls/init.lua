@@ -11,7 +11,7 @@ return function(name, root_dir)
             context.github_release_file("rescript-lang/rescript-vscode", function(version)
                 return ("rescript-vscode-%s.vsix"):format(version)
             end),
-            context.wrap(function(ctx)
+            context.capture(function(ctx)
                 return std.unzip_remote(ctx.github_release_file)
             end),
         },

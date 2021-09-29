@@ -24,7 +24,7 @@ return function(name, root_dir)
                     )
                 )
             ),
-            context.wrap(function(ctx)
+            context.capture(function(ctx)
                 return std.unzip_remote(ctx.github_release_file, "omnisharp")
             end),
             std.chmod("+x", { "omnisharp/run" }),

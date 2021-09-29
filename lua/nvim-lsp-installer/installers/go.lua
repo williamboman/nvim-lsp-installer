@@ -21,7 +21,7 @@ function M.packages(packages)
                 stdio_sink = context.stdio_sink,
             }
 
-            if context.requested_server_version and #pkgs > 0 then
+            if context.requested_server_version then
                 -- The "head" package is the recipient for the requested version. It's.. by design... don't ask.
                 pkgs[1] = ("%s@%s"):format(pkgs[1], context.requested_server_version)
             end

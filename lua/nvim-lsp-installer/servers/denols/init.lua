@@ -24,7 +24,7 @@ return function(name, root_dir)
                     Data.when(platform.is_win, "deno-x86_64-pc-windows-msvc.zip")
                 )
             ),
-            context.wrap(function(ctx)
+            context.capture(function(ctx)
                 return std.unzip_remote(ctx.github_release_file)
             end),
         },

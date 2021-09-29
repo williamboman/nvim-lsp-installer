@@ -9,7 +9,7 @@ return function(name, root_dir)
         root_dir = root_dir,
         installer = {
             context.github_release_file("elixir-lsp/elixir-ls", "elixir-ls.zip"),
-            context.wrap(function(ctx)
+            context.capture(function(ctx)
                 return std.unzip_remote(ctx.github_release_file, "elixir-ls")
             end),
             std.chmod("+x", { "elixir-ls/language_server.sh" }),

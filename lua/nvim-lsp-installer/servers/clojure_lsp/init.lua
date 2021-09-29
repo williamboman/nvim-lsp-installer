@@ -18,7 +18,7 @@ return function(name, root_dir)
                     Data.when(platform.is_win, "clojure-lsp-native-windows-amd64.zip")
                 )
             ),
-            context.wrap(function(ctx)
+            context.capture(function(ctx)
                 return std.unzip_remote(ctx.github_release_file)
             end),
             std.chmod("+x", { "clojure-lsp" }),

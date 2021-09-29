@@ -17,7 +17,7 @@ return function(name, root_dir)
                     Data.when(platform.is_win, "clangd-windows-%s.zip")
                 ):format(version)
             end),
-            context.wrap(function(ctx)
+            context.capture(function(ctx)
                 return std.unzip_remote(ctx.github_release_file)
             end),
             function(server, callback, context)

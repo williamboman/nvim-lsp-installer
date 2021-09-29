@@ -33,7 +33,7 @@ return function(name, root_dir)
                     )
                 ):format(version:gsub("^v", ""))
             end),
-            context.wrap(function(ctx)
+            context.capture(function(ctx)
                 return std.unzip_remote(ctx.github_release_file, "terraform-ls")
             end),
         },

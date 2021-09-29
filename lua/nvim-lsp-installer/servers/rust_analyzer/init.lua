@@ -35,7 +35,7 @@ return function(name, root_dir)
         root_dir = root_dir,
         installer = {
             context.github_release_file("rust-analyzer/rust-analyzer", target),
-            context.wrap(function(ctx)
+            context.capture(function(ctx)
                 return std.gunzip_remote(
                     ctx.github_release_file,
                     platform.is_win and "rust-analyzer.exe" or "rust-analyzer"

@@ -23,11 +23,10 @@ local function fetch(url, callback)
             "$ProgressPreference = 'SilentlyContinue'",
             ("Write-Output (iwr -Uri %q).Content"):format(url),
         }
-        local _, process_stdio = process.spawn("powershell.exe", {
+        process.spawn("powershell.exe", {
             args = { "-Command", table.concat(script, ";") },
             stdio_sink = stdio.sink,
         }, function(success)
-            print(success, vim.inspect(stdio.buffers))
             if success then
                 callback(nil, table.concat(stdio.buffers.stdout, ""))
             else
@@ -73,7 +72,7 @@ function M.github_release_file(repo, file)
     end
 end
 
-function M.wrap(fn)
+function M.capture(fn)
     return function(server, callback, context, ...)
         local installer = fn(context)
         installer(server, callback, context, ...)

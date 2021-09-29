@@ -21,7 +21,7 @@ return function(name, root_dir)
                     Data.when(platform.is_win, "texlab-x86_64-windows.tar.gz")
                 )
             ),
-            context.wrap(function(ctx)
+            context.capture(function(ctx)
                 return std.untargz_remote(ctx.github_release_file)
             end),
         },

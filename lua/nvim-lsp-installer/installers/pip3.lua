@@ -16,7 +16,7 @@ function M.packages(packages)
             { "pip3", "pip3 was not found in path." },
         },
         function(server, callback, context)
-            local pkgs = Data.list_copy(packages)
+            local pkgs = Data.list_copy(packages or {})
             local c = process.chain {
                 cwd = server.root_dir,
                 stdio_sink = context.stdio_sink,
