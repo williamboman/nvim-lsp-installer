@@ -35,6 +35,20 @@ function M.bash(raw_script, opts)
     }
 end
 
+function M.sh(raw_script, opts)
+    local default_opts = {
+        prefix = "set -euo pipefail;",
+        env = {},
+    }
+    opts = vim.tbl_deep_extend("force", default_opts, opts or {})
+
+    return shell {
+        shell = "sh",
+        cmd = (opts.prefix or "") .. raw_script,
+        env = opts.env,
+    }
+end
+
 function M.remote_bash(url, opts)
     return M.bash(("wget -nv -O - %q | bash"):format(url), opts)
 end
