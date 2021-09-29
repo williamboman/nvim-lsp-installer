@@ -189,13 +189,13 @@ function M.new_view_only_win(name)
     local draw = process.debounced(function(view)
         local win_valid = win_id ~= nil and vim.api.nvim_win_is_valid(win_id)
         local buf_valid = bufnr ~= nil and vim.api.nvim_buf_is_valid(bufnr)
-        Log:debug("got bufnr: " .. bufnr)
-        Log:debug("got win_id: " .. win_id)
+        Log.fmt_debug("got bufnr=%s", bufnr)
+        Log.fmt_debug("got win_id=%s", win_id)
 
         if not win_valid or not buf_valid then
             -- the window has been closed or the buffer is somehow no longer valid
             unsubscribe(true)
-            Log:debug { "Buffer or window is no longer valid", win_id, bufnr }
+            Log.debug("Buffer or window is no longer valid", win_id, bufnr)
             return
         end
 
@@ -248,7 +248,7 @@ function M.new_view_only_win(name)
             return mutate_state, get_state
         end,
         open = vim.schedule_wrap(function(opts)
-            Log:debug "opening window"
+            Log.debug "Opening window"
             assert(has_initiated, "Display has not been initiated, cannot open.")
             if win_id and vim.api.nvim_win_is_valid(win_id) then
                 -- window is already open
