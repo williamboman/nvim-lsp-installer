@@ -21,7 +21,7 @@ local function fetch(url, callback)
     elseif platform.is_win then
         local script = {
             "$ProgressPreference = 'SilentlyContinue'",
-(             "Write-Output (iwr -Uri %q).Content" ):format(url)
+            ("Write-Output (iwr -Uri %q).Content"):format(url),
         }
         local _, process_stdio = process.spawn("powershell.exe", {
             args = { "-Command", table.concat(script, ";") },
