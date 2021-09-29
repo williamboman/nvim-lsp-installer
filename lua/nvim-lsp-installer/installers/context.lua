@@ -19,23 +19,21 @@ local function fetch(url, callback)
             end
         end)
     elseif platform.is_win then
+        local script = {
+            "$ProgressPreference = 'SilentlyContinue'",
+(             "Write-Output (iwr -Uri %q).Content" ):format(url)
+        }
         local _, process_stdio = process.spawn("powershell.exe", {
+            args = { "-Command", table.concat(script, ";") },
             stdio_sink = stdio.sink,
         }, function(success)
+            print(success, vim.inspect(stdio.buffers))
             if success then
                 callback(nil, table.concat(stdio.buffers.stdout, ""))
             else
                 callback(("Failed to fetch url=%s"):format(url), nil)
             end
         end)
-
-        if process_stdio then
-            local stdin = process_stdio[1]
-            stdin:write [[ $ProgressPreference = 'SilentlyContinue' ]]
-            stdin:write "\n"
-            stdin:write(("(iwr -Uri %q).Content"):format(url))
-            stdin:close()
-        end
     else
         error "Unexpected error: Unsupported OS."
     end
