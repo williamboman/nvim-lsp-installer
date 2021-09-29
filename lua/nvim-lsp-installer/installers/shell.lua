@@ -29,7 +29,7 @@ function M.bash(raw_script, opts)
     opts = vim.tbl_deep_extend("force", default_opts, opts or {})
 
     return shell {
-        shell = "/bin/bash",
+        shell = "bash",
         cmd = (opts.prefix or "") .. raw_script,
         env = opts.env,
     }
