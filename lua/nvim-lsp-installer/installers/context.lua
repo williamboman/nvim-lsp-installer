@@ -1,22 +1,44 @@
 local Data = require "nvim-lsp-installer.data"
 local Log = require "nvim-lsp-installer.log"
 local process = require "nvim-lsp-installer.process"
+local platform = require "nvim-lsp-installer.platform"
 
 local M = {}
 
 local function fetch(url, callback)
     local stdio = process.in_memory_sink()
-    -- TODO windows
-    process.spawn("wget", {
-        args = { "-nv", "-O", "-", url },
-        stdio_sink = stdio.sink,
-    }, function(success)
-        if success then
-            callback(nil, table.concat(stdio.buffers.stdout, ""))
-        else
-            callback(("Failed to fetch url=%s"):format(url), nil)
+    if platform.is_unix then
+        process.spawn("wget", {
+            args = { "-nv", "-O", "-", url },
+            stdio_sink = stdio.sink,
+        }, function(success)
+            if success then
+                callback(nil, table.concat(stdio.buffers.stdout, ""))
+            else
+                callback(("Failed to fetch url=%s"):format(url), nil)
+            end
+        end)
+    elseif platform.is_win then
+        local _, process_stdio = process.spawn("powershell.exe", {
+            stdio_sink = stdio.sink,
+        }, function(success)
+            if success then
+                callback(nil, table.concat(stdio.buffers.stdout, ""))
+            else
+                callback(("Failed to fetch url=%s"):format(url), nil)
+            end
+        end)
+
+        if process_stdio then
+            local stdin = process_stdio[1]
+            stdin:write [[ $ProgressPreference = 'SilentlyContinue' ]]
+            stdin:write "\n"
+            stdin:write(("(iwr -Uri %q).Content"):format(url))
+            stdin:close()
         end
-    end)
+    else
+        error "Unexpected error: Unsupported OS."
+    end
 end
 
 function M.github_release_file(repo, file)
