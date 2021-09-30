@@ -114,8 +114,12 @@ function M.redraw_win(win_id)
 end
 
 function M.delete_win_buf(win_id, bufnr)
-    pcall(vim.api.nvim_win_close, win_id, true)
-    pcall(vim.api.nvim_buf_delete, bufnr, { force = true })
+    if win_id ~= nil and vim.api.nvim_win_is_valid(win_id) then
+        pcall(vim.api.nvim_win_close, win_id, true)
+    end
+    if bufnr ~= nil and vim.api.nvim_buf_is_valid(bufnr) then
+        pcall(vim.api.nvim_buf_delete, bufnr, { force = true })
+    end
     if redraw_by_win_id[win_id] then
         redraw_by_win_id[win_id] = nil
     end
