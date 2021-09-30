@@ -115,7 +115,7 @@ require("nvim-lsp-installer").settings {
 #### Default configuration
 
 ```lua
-local DEFAULT_OPTS = {
+local DEFAULT_SETTINGS = {
     ui = {
         icons = {
             -- The list icon to use for installed servers.

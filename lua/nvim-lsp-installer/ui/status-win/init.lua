@@ -1,6 +1,6 @@
 local Ui = require "nvim-lsp-installer.ui"
 local fs = require "nvim-lsp-installer.fs"
-local opts = require "nvim-lsp-installer.opts"
+local settings = require "nvim-lsp-installer.settings"
 local Log = require "nvim-lsp-installer.log"
 local Data = require "nvim-lsp-installer.data"
 local display = require "nvim-lsp-installer.ui.display"
@@ -54,7 +54,7 @@ local function InstalledServers(servers)
         return Ui.Node {
             Ui.HlTextNode {
                 {
-                    { opts.current.ui.icons.server_installed, "LspInstallerGreen" },
+                    { settings.current.ui.icons.server_installed, "LspInstallerGreen" },
                     { " " .. server.name, "Normal" },
                     {
                         (" installed %s"):format(get_relative_install_time(server.creation_time)),
@@ -89,7 +89,10 @@ local function PendingServers(servers)
         return Ui.Node {
             Ui.HlTextNode {
                 {
-                    { opts.current.ui.icons.server_pending, has_failed and "LspInstallerError" or "LspInstallerOrange" },
+                    {
+                        settings.current.ui.icons.server_pending,
+                        has_failed and "LspInstallerError" or "LspInstallerOrange",
+                    },
                     { " " .. server.name, server.installer.is_running and "Normal" or "LspInstallerGray" },
                     { " " .. note, "Comment" },
                     {
@@ -116,7 +119,7 @@ local function UninstalledServers(servers)
         return Ui.Node {
             Ui.HlTextNode {
                 {
-                    { opts.current.ui.icons.server_uninstalled, "LspInstallerGray" },
+                    { settings.current.ui.icons.server_uninstalled, "LspInstallerGray" },
                     { " " .. server.name, "Comment" },
                     { server.uninstaller.has_run and " (just uninstalled)" or "", "Comment" },
                 },

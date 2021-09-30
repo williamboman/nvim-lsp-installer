@@ -1,4 +1,4 @@
-local DEFAULT_OPTS = {
+local DEFAULT_SETTINGS = {
     ui = {
         icons = {
             -- The list icon to use for installed servers.
@@ -28,9 +28,9 @@ local DEFAULT_OPTS = {
 local M = {}
 
 function M.set(opts)
-    M.current = vim.tbl_deep_extend("force", DEFAULT_OPTS, opts)
+    M.current = vim.tbl_deep_extend("force", DEFAULT_SETTINGS, opts)
 end
 
-M.current = DEFAULT_OPTS
+M.current = DEFAULT_SETTINGS
 
 return M

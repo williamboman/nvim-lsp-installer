@@ -129,7 +129,7 @@ Example: >
 The following settings are applied by default.
 
 >
-    local DEFAULT_OPTS = {
+    local DEFAULT_SETTINGS = {
         ui = {
             icons = {
                 -- The list icon to use for installed servers.
