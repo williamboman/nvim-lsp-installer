@@ -3,8 +3,11 @@ local dispatcher = require "nvim-lsp-installer.dispatcher"
 local process = require "nvim-lsp-installer.process"
 local status_win = require "nvim-lsp-installer.ui.status-win"
 local servers = require "nvim-lsp-installer.servers"
+local opts = require("nvim-lsp-installer.opts")
 
 local M = {}
+
+M.settings = opts.set
 
 function M.display()
     status_win().open()

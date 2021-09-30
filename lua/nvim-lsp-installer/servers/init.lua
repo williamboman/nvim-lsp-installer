@@ -6,7 +6,8 @@ local opts = require "nvim-lsp-installer.opts"
 local M = {}
 
 local function vscode_langservers_extracted(name)
-    return opts.allow_federated_servers() and "vscode-langservers-extracted" or "vscode-langservers-extracted_" .. name
+    return opts.current.allow_federated_servers and "vscode-langservers-extracted"
+        or "vscode-langservers-extracted_" .. name
 end
 
 -- By default the install dir will be the same as the server's name.
