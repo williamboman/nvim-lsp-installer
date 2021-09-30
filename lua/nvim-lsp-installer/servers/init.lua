@@ -1,17 +1,18 @@
 local Data = require "nvim-lsp-installer.data"
 local path = require "nvim-lsp-installer.path"
 local fs = require "nvim-lsp-installer.fs"
-local opts = require "nvim-lsp-installer.opts"
+local settings = require "nvim-lsp-installer.settings"
 
 local M = {}
 
 local function vscode_langservers_extracted(name)
-    return opts.allow_federated_servers() and "vscode-langservers-extracted" or "vscode-langservers-extracted_" .. name
+    return settings.current.allow_federated_servers and "vscode-langservers-extracted"
+        or "vscode-langservers-extracted_" .. name
 end
 
 -- By default the install dir will be the same as the server's name.
 -- There are two cases when servers should install to a different location:
---  1. federated server installations, (see :help vim.g.lsp_installer_allow_federated_servers)
+--  1. federated server installations, (see :help nvim-lsp-installer-settings)
 --  2. legacy reasons, where some servers were previously installed to a location different than their name
 local INSTALL_DIRS = {
     ["bashls"] = "bash",
@@ -129,6 +130,11 @@ function M.is_server_installed(server_name)
     local scanned_server_dirs = scan_server_roots()
     local dirname = get_server_install_dir(server_name)
     return scanned_server_dirs[dirname] or false
+end
+
+-- returns a tuple of [server_name, requested_version], where requested_version may be nil
+function M.parse_server_tuple(server_name)
+    return vim.split(server_name, "@")
 end
 
 function M.get_server(server_name)

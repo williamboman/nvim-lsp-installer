@@ -1,5 +1,8 @@
 # Custom servers
 
+*Note that there may be breaking changes introduced over time that may have an impact on the functionality of custom
+servers. These breaking changes should generally be easy to address.*
+
 You may create your own server installers by using the same APIs that nvim-lsp-installer itself uses.
 
 Each installable LSP server is represented as an instance of the `Server` class. This class is responsible for
@@ -80,7 +83,7 @@ available installers that are available out of the box.
 
     #### `shell.bash(raw_script: string, opts?: table)`
 
-    Returns an installer that runs the provided `raw_script` as a bash script (`/bin/bash`).
+    Returns an installer that runs the provided `raw_script` as a bash script.
 
     `opts` is an optional table, with the following defaults:
 
@@ -140,7 +143,7 @@ available installers that are available out of the box.
     #### `shell.polyshell(raw_script: string, opts?: table)`
 
     Returns an installer that runs the provided `raw_script` as a platform agnostic shell script. This installer expects
-    the provided `raw_script` is syntactically valid across all platform shells (`/bin/bash` and `cmd.exe`).
+    the provided `raw_script` is syntactically valid across all platform shells (`bash` and `cmd.exe`).
 
     `opts` is an optional table, with the following defaults:
 

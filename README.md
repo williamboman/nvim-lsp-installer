@@ -17,6 +17,7 @@ On top of just providing commands for installing & uninstalling LSP servers, it:
 
 -   provides a graphical UI
 -   optimized for blazing fast startup times
+-   supports installing custom versions of LSP servers (for example `:LspInstall rust_analyzer@nightly`)
 -   provides configurations for servers that aren't supported by nvim-lspconfig (`eslint`)
 -   common install tasks are abstracted behind Lua APIs (has direct integration with libuv via vim.loop)
 -   <img src="https://user-images.githubusercontent.com/6705160/131256603-cacf7f66-dfa9-4515-8ae4-0e42d08cfc6a.png" height="20"> full support for Windows
@@ -92,6 +93,56 @@ if ok then
 end
 ```
 
+### Configuration
+
+You can configure certain behavior of nvim-lsp-installer by calling the `.settings()` function.
+Refer to the [default configuration](#default-configuration) for all available settings.
+
+Example:
+
+```lua
+require("nvim-lsp-installer").settings {
+    ui = {
+        icons = {
+            server_installed = "✓",
+            server_pending = "➜",
+            server_uninstalled = "✗"
+        }
+    }
+}
+```
+
+#### Default configuration
+
+```lua
+local DEFAULT_SETTINGS = {
+    ui = {
+        icons = {
+            -- The list icon to use for installed servers.
+            server_installed = "◍",
+            -- The list icon to use for servers that are pending installation.
+            server_pending = "◍",
+            -- The list icon to use for servers that are not installed.
+            server_uninstalled = "◍",
+        },
+    },
+
+    -- Controls to which degree logs are written to the log file. For example, it's useful to set this to
+    -- vim.log.levels.TRACE when debugging issues with server installations.
+    log_level = vim.log.levels.WARN,
+
+    -- Whether to allow LSP servers to share the same installation directory.
+    -- For some servers, this effectively causes more than one server to be
+    -- installed (and uninstalled) when executing `:LspInstall` and
+    -- `:LspUninstall`.
+
+    -- For example, installing `cssls` will also install both `jsonls` and `html`
+    -- (and the other ways around), as these all share the same underlying
+    -- package.
+    allow_federated_servers = true,
+}
+```
+
 ## Available LSPs
 
 | Language                            | Server name              |
@@ -162,6 +213,6 @@ Illustrations in the logo are derived from [@Kaligule](https://schauderbasis.de/
 
 ## Roadmap
 
--   Managed versioning of installed servers
 -   Command (and corresponding Lua API) to update outdated servers (e.g., `:LspUpdate {server}`)
+-   More helpful metadata displayed in the UI window
 -   Cross-platform CI for all server installers
