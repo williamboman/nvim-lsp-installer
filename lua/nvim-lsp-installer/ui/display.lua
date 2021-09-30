@@ -174,8 +174,10 @@ function M.new_view_only_win(name)
             ("autocmd VimResized <buffer> lua require('nvim-lsp-installer.ui.display').redraw_win(%d)"):format(win_id)
         )
         vim.api.nvim_command(
+            -- We queue the win_buf to be deleted in a schedule call, otherwise when used with folke/which-key (and
+            -- set timeoutlen=0) we run into a weird segfault.
             (
-                "autocmd WinLeave,BufHidden,BufLeave <buffer> ++once lua require('nvim-lsp-installer.ui.display').delete_win_buf(%d, %d)"
+                "autocmd WinLeave,BufHidden,BufLeave <buffer> ++once lua vim.schedule(function() require('nvim-lsp-installer.ui.display').delete_win_buf(%d, %d) end)"
             ):format(win_id, bufnr)
         )
 
