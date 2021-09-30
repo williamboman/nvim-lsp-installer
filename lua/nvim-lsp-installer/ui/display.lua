@@ -1,5 +1,5 @@
 local Ui = require "nvim-lsp-installer.ui"
-local Log = require "nvim-lsp-installer.log"
+local log = require "nvim-lsp-installer.log"
 local process = require "nvim-lsp-installer.process"
 local state = require "nvim-lsp-installer.ui.state"
 
@@ -114,15 +114,22 @@ function M.redraw_win(win_id)
 end
 
 function M.delete_win_buf(win_id, bufnr)
-    if win_id ~= nil and vim.api.nvim_win_is_valid(win_id) then
-        pcall(vim.api.nvim_win_close, win_id, true)
-    end
-    if bufnr ~= nil and vim.api.nvim_buf_is_valid(bufnr) then
-        pcall(vim.api.nvim_buf_delete, bufnr, { force = true })
-    end
-    if redraw_by_win_id[win_id] then
-        redraw_by_win_id[win_id] = nil
-    end
+    -- We queue the win_buf to be deleted in a schedule call, otherwise when used with folke/which-key (and
+    -- set timeoutlen=0) we run into a weird segfault.
+    -- It should probably be unnecessary once https://github.com/neovim/neovim/issues/15548 is resolved
+    vim.schedule(function()
+        if win_id and vim.api.nvim_win_is_valid(win_id) then
+            log.debug "Deleting window"
+            vim.api.nvim_win_close(win_id, true)
+        end
+        if bufnr and vim.api.nvim_buf_is_valid(bufnr) then
+            log.debug "Deleting buffer"
+            vim.api.nvim_buf_delete(bufnr, { force = true })
+        end
+        if redraw_by_win_id[win_id] then
+            redraw_by_win_id[win_id] = nil
+        end
+    end)
 end
 
 function M.new_view_only_win(name)
@@ -135,7 +142,6 @@ function M.new_view_only_win(name)
         local highlight_groups = opts.highlight_groups
         bufnr = vim.api.nvim_create_buf(false, true)
         win_id = vim.api.nvim_open_win(bufnr, true, create_popup_window_opts())
-        vim.lsp.util.close_preview_autocmd({ "BufHidden", "BufLeave" }, win_id)
 
         local buf_opts = {
             modifiable = false,
@@ -170,12 +176,10 @@ function M.new_view_only_win(name)
 
         vim.cmd [[ syntax clear ]]
 
-        vim.api.nvim_command(
+        vim.cmd(
             ("autocmd VimResized <buffer> lua require('nvim-lsp-installer.ui.display').redraw_win(%d)"):format(win_id)
         )
-        vim.api.nvim_command(
-            -- We queue the win_buf to be deleted in a schedule call, otherwise when used with folke/which-key (and
-            -- set timeoutlen=0) we run into a weird segfault.
+        vim.cmd(
             (
                 "autocmd WinLeave,BufHidden,BufLeave <buffer> ++once lua vim.schedule(function() require('nvim-lsp-installer.ui.display').delete_win_buf(%d, %d) end)"
             ):format(win_id, bufnr)
@@ -195,13 +199,13 @@ function M.new_view_only_win(name)
     local draw = process.debounced(function(view)
         local win_valid = win_id ~= nil and vim.api.nvim_win_is_valid(win_id)
         local buf_valid = bufnr ~= nil and vim.api.nvim_buf_is_valid(bufnr)
-        Log.fmt_debug("got bufnr=%s", bufnr)
-        Log.fmt_debug("got win_id=%s", win_id)
+        log.fmt_debug("got bufnr=%s", bufnr)
+        log.fmt_debug("got win_id=%s", win_id)
 
         if not win_valid or not buf_valid then
             -- the window has been closed or the buffer is somehow no longer valid
             unsubscribe(true)
-            Log.debug("Buffer or window is no longer valid", win_id, bufnr)
+            log.debug("Buffer or window is no longer valid", win_id, bufnr)
             return
         end
 
@@ -254,7 +258,7 @@ function M.new_view_only_win(name)
             return mutate_state, get_state
         end,
         open = vim.schedule_wrap(function(opts)
-            Log.debug "Opening window"
+            log.debug "Opening window"
             assert(has_initiated, "Display has not been initiated, cannot open.")
             if win_id and vim.api.nvim_win_is_valid(win_id) then
                 -- window is already open
