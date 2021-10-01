@@ -32,13 +32,13 @@ return function(name, root_dir)
                         "clangd",
                     }
                     local new_path = path.concat { server.root_dir, "clangd" }
-                    context.stdio_sink.stdout(("Creating symlink from %s to %s"):format(path, new_path))
+                    context.stdio_sink.stdout(("Creating symlink from %s to %s\n"):format(path, new_path))
                     uv.fs_symlink(
                         path,
                         new_path,
                         function(err, success)
                             if not success then
-                                context.stdio_sink.stderr(tostring(err))
+                                context.stdio_sink.stderr(tostring(err) .. "\n")
                                 callback(false)
                             else
                                 callback(true)
@@ -48,7 +48,7 @@ return function(name, root_dir)
                     print(vim.inspect(test))
                 end,
                 win = function (server,callback,context)
-                    context.stdio_sink.stdout("Creating clangd.bat...")
+                    context.stdio_sink.stdout("Creating clangd.bat...\n")
                     uv.fs_open(path.concat { server.root_dir, "clangd.bat" }, "w", 438, function (err, fd)
                         local path = path.concat {
                             server.root_dir,
@@ -57,15 +57,15 @@ return function(name, root_dir)
                             "clangd.exe",
                         }
                         if err then
-                            context.stdio_sink.stderr(tostring(err))
+                            context.stdio_sink.stderr(tostring(err) .. "\n")
                             return callback(false)
                         end
                         uv.fs_write(fd, ("@call %q %%*"):format(path), -1, function (err)
                             if err then
-                                context.stdio_sink.stderr(tostring(err))
+                                context.stdio_sink.stderr(tostring(err) .. "\n")
                                 callback(false)
                             else
-                                context.stdio_sink.stdout("Created clangd.bat")
+                                context.stdio_sink.stdout("Created clangd.bat\n")
                                 callback(true)
                             end
                             assert(uv.fs_close(fd))
