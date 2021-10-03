@@ -23,11 +23,13 @@ return function(name, root_dir)
                             when(platform.arch == "x86", "i386-linux.tar.zx")
                         )
                     ),
-                    when(platform.is_win and platform.arch == "x64", "x86_64-window.tar.xz")
+                    when(platform.is_win and platform.arch == "x64", "x86_64-windows.tar.xz")
                 )
             ),
             context.capture(function(ctx)
-                return std.untargz_remote(ctx.github_release_file)
+                return std.untarxz_remote(ctx.github_release_file, {
+                    strip_components = 1
+                })
             end),
         },
         default_options = {
