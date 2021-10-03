@@ -7,14 +7,17 @@ local M = {}
 
 local function fetch(url, callback)
     local stdio = process.in_memory_sink()
+    log.fmt_debug("Fetching URL=%s", url)
     if platform.is_unix then
         process.spawn("wget", {
             args = { "-nv", "-O", "-", url },
             stdio_sink = stdio.sink,
         }, function(success)
             if success then
+                log.fmt_debug("Successfully fetched URL=%s", url)
                 callback(nil, table.concat(stdio.buffers.stdout, ""))
             else
+                log.fmt_warn("Failed to fetch URL=%s", url)
                 callback(("Failed to fetch url=%s"):format(url), nil)
             end
         end)
@@ -28,8 +31,10 @@ local function fetch(url, callback)
             stdio_sink = stdio.sink,
         }, function(success)
             if success then
+                log.fmt_debug("Successfully fetched URL=%s", url)
                 callback(nil, table.concat(stdio.buffers.stdout, ""))
             else
+                log.fmt_warn("Failed to fetch URL=%s", url)
                 callback(("Failed to fetch url=%s"):format(url), nil)
             end
         end)
@@ -43,6 +48,11 @@ function M.github_release_file(repo, file)
         local function get_download_url(version)
             local target_file = type(file) == "function" and file(version) or file
             if not target_file then
+                log.fmt_error(
+                    "Unable to find which release file to download. server_name=%s, repo=%s",
+                    server.name,
+                    repo
+                )
                 context.stdio_sink.stderr(
                     (
                         "Could not find which release file to download. Most likely, the current operating system or architecture (%s) is not supported.\n"
