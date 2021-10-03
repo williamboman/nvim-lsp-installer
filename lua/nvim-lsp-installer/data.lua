@@ -71,7 +71,7 @@ function Data.list_find_first(list, predicate)
 end
 
 function Data.json_decode(data)
-    if vim.json.decode then
+    if vim.json and vim.json.decode then
         return vim.json.decode(data)
     else
         return vim.fn.json_decode(data)
