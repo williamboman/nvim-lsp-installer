@@ -59,15 +59,15 @@ end
 function M.untarxz_remote(url, tar_opts)
     return installers.pipe {
         M.download_file(url, "archive.tar.xz"),
-        M.untar(  "archive.tar.xz" , tar_opts),
+        M.untar("archive.tar.xz", tar_opts),
     }
 end
 
-function M.untargz_remote(url,tar_opts)
+function M.untargz_remote(url, tar_opts)
     return installers.pipe {
         M.download_file(url, "archive.tar.gz"),
         M.gunzip "archive.tar.gz",
-        M.untar(  "archive.tar" , tar_opts),
+        M.untar("archive.tar", tar_opts),
     }
 end
 

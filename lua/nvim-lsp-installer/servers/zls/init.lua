@@ -28,7 +28,7 @@ return function(name, root_dir)
             ),
             context.capture(function(ctx)
                 return std.untarxz_remote(ctx.github_release_file, {
-                    strip_components = 1
+                    strip_components = 1,
                 })
             end),
         },
