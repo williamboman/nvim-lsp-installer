@@ -89,6 +89,7 @@ local CORE_SERVERS = Data.set_of {
     "vimls",
     "vuels",
     "yamlls",
+    "zls",
 }
 
 local INITIALIZED_SERVERS = {}

@@ -39,17 +39,26 @@ local function fetch(url, callback)
 end
 
 function M.github_release_file(repo, file)
-    local function get_download_url(version)
-        return ("https://github.com/%s/releases/download/%s/%s"):format(
-            repo,
-            version,
-            type(file) == "function" and file(version) or file
-        )
-    end
-
     return function(server, callback, context)
+        local function get_download_url(version)
+            local target_file = type(file) == "function" and file(version) or file
+            if not target_file then
+                context.stdio_sink.stderr(
+                    (
+                        "Could not find which release file to download. Most likely, the current operating system or architecture (%s) is not supported.\n"
+                    ):format(platform.arch)
+                )
+                return nil
+            end
+
+            return ("https://github.com/%s/releases/download/%s/%s"):format(repo, version, target_file)
+        end
         if context.requested_server_version then
-            context.github_release_file = get_download_url(context.requested_server_version)
+            local download_url = get_download_url(context.requested_server_version)
+            if not download_url then
+                return callback(false)
+            end
+            context.github_release_file = download_url
             callback(true)
         else
             context.stdio_sink.stdout "Fetching latest release version from GitHub API...\n"
@@ -59,13 +68,16 @@ function M.github_release_file(repo, file)
                     if err then
                         context.stdio_sink.stderr "Failed to fetch latest release version from GitHub API.\n"
                         return callback(false)
-                    else
-                        local version = Data.json_decode(response).tag_name
-                        log.debug("Resolved latest version", server.name, version)
-                        context.requested_server_version = version
-                        context.github_release_file = get_download_url(version)
-                        callback(true)
                     end
+                    local version = Data.json_decode(response).tag_name
+                    log.debug("Resolved latest version", server.name, version)
+                    context.requested_server_version = version
+                    local download_url = get_download_url(version)
+                    if not download_url then
+                        return callback(false)
+                    end
+                    context.github_release_file = download_url
+                    callback(true)
                 end)
             )
         end

@@ -194,6 +194,7 @@ local DEFAULT_SETTINGS = {
 | VimL                                | `vimls`                  |
 | Vue                                 | `vuels`                  |
 | YAML                                | `yamlls`                 |
+| Zig                                 | `zls`                    |
 
 [eslintls]: ./lua/nvim-lsp-installer/servers/eslintls/README.md
 [tflint]: ./lua/nvim-lsp-installer/servers/tflint/README.md

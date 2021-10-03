@@ -59,8 +59,23 @@ function Data.list_copy(list)
     return result
 end
 
+function Data.list_find_first(list, predicate)
+    local result
+    for i = 1, #list do
+        local entry = list[i]
+        if predicate(entry) then
+            return entry
+        end
+    end
+    return result
+end
+
 function Data.json_decode(data)
-    return vim.fn.json_decode(data)
+    if vim.json.decode then
+        return vim.json.decode(data)
+    else
+        return vim.fn.json_decode(data)
+    end
 end
 
 return Data
