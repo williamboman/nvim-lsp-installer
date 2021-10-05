@@ -71,7 +71,7 @@ function M.github_release_file(repo, file)
                 ("https://api.github.com/repos/%s/releases/latest"):format(repo),
                 vim.schedule_wrap(function(err, response)
                     if err then
-                        context.stdio_sink.stderr(tostring(err) .. "\n")
+                        context.stdio_sink.stderr(tostring(err))
                         return callback(false)
                     end
                     local version = Data.json_decode(response).tag_name
