@@ -15,7 +15,7 @@ return function(name, root_dir)
                     Data.when(platform.is_mac, "serve-d_%s-osx-x86_64.tar.xz"),
                     Data.when(platform.is_linux, "serve-d_%s-linux-x86_64.tar.xz"),
                     Data.when(platform.is_win, "serve-d_%s-windows-x86_64.zip")
-                ):format(version)
+                ):format(version:gsub("^v", ""))
             end),
             context.capture(function(ctx)
                 return std.untargz_remote(ctx.github_release_file)
