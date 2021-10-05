@@ -50,13 +50,13 @@ return function(name, root_dir)
                     end)
                 end,
                 win = function(server, callback, context)
-                    context.stdio_sink.stdout "Creating ltex.bat...\n"
-                    uv.fs_open(path.concat { server.root_dir, "ltex.bat" }, "w", 438, function(open_err, fd)
+                    context.stdio_sink.stdout "Creating ltex-ls.bat...\n"
+                    uv.fs_open(path.concat { server.root_dir, "ltex-ls.bat" }, "w", 438, function(open_err, fd)
                         local executable = path.concat {
                             server.root_dir,
                             ("ltex-ls-%s"):format(context.requested_server_version),
                             "bin",
-                            "ltex-ls.exe",
+                            "ltex-ls.bat",
                         }
                         if open_err then
                             context.stdio_sink.stderr(tostring(open_err) .. "\n")
@@ -67,7 +67,7 @@ return function(name, root_dir)
                                 context.stdio_sink.stderr(tostring(write_err) .. "\n")
                                 callback(false)
                             else
-                                context.stdio_sink.stdout "Created ltex.bat\n"
+                                context.stdio_sink.stdout "Created ltex-ls.bat\n"
                                 callback(true)
                             end
                             assert(uv.fs_close(fd))
