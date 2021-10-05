@@ -145,6 +145,7 @@ local DEFAULT_SETTINGS = {
 | Angular                             | `angularls`              |
 | Ansible                             | `ansiblels`              |
 | Bash                                | `bashls`                 |
+| Bicep                               | `bicep`                  |
 | C#                                  | `omnisharp`              |
 | C++                                 | `clangd`                 |
 | CMake                               | `cmake`                  |
@@ -152,6 +153,7 @@ local DEFAULT_SETTINGS = {
 | Clojure                             | `clojure_lsp`            |
 | Deno                                | `denols`                 |
 | Diagnostic (general purpose server) | `diagnosticls`           |
+| Dlang                               | `serve_d`                |
 | Docker                              | `dockerls`               |
 | Dot                                 | `dotls`                  |
 | EFM (general purpose server)        | `efm`                    |
@@ -193,7 +195,9 @@ local DEFAULT_SETTINGS = {
 | Terraform [(docs)][tflint]          | `tflint`                 |
 | TypeScript [(docs)][tsserver]       | `tsserver`               |
 | VimL                                | `vimls`                  |
+| Vue                                 | `volar`                  |
 | Vue                                 | `vuels`                  |
+| XML                                 | `lemminx`                |
 | YAML                                | `yamlls`                 |
 
 [eslintls]: ./lua/nvim-lsp-installer/servers/eslintls/README.md

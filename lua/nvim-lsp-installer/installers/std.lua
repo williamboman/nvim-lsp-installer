@@ -59,7 +59,6 @@ function M.untar(file, opts)
     return installers.pipe {
         function(server, callback, context)
             process.spawn("tar", {
-                -- TODO: check if -z flag is needed on windows if compressed tar
                 args = { "-xvf", file, "--strip-components", opts.strip_components },
                 cwd = server.root_dir,
                 stdio_sink = context.stdio_sink,
