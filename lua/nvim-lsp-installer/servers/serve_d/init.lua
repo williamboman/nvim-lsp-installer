@@ -18,7 +18,11 @@ return function(name, root_dir)
                 ):format(version:gsub("^v", ""))
             end),
             context.capture(function(ctx)
-                return std.untargz_remote(ctx.github_release_file)
+                if platform.is_win then
+                    return std.unzip_remote(ctx.github_release_file)
+                else
+                    return std.untarxz_remote(ctx.github_release_file)
+                end
             end),
         },
         default_options = {
