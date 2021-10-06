@@ -86,7 +86,7 @@ local function win_extract(file)
                 stdio_sink = context.stdio_sink,
             })
             process.attempt {
-                jobs = { peazip, sevenzip, winzip },
+                jobs = { sevenzip, peazip, winzip },
                 on_finish = callback,
             }
         end,
@@ -216,7 +216,7 @@ end
 
 function M.rename(old_path, new_path)
     return function(server, callback, context)
-        local ok=  pcall(
+        local ok = pcall(
             fs.rename,
             path.concat { server.root_dir, old_path },
             path.concat { server.root_dir, new_path }

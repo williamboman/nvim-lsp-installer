@@ -231,9 +231,9 @@ function M.attempt(opts)
         error "process.attempt(...) need at least one job."
     end
 
-    local spawn, iterate
+    local spawn, on_job_exit
 
-    iterate = function(cur_idx, success)
+    on_job_exit = function(cur_idx, success)
         if success then
             -- this job succeeded. exit early
             on_finish(true)
@@ -253,11 +253,11 @@ function M.attempt(opts)
 
     spawn = function(idx)
         local ok, err = pcall(jobs[idx], function(success)
-            iterate(idx, success)
+            on_job_exit(idx, success)
         end)
         if not ok then
             log.fmt_error("Job failed to execute. Error=%s", tostring(err))
-            iterate(idx, false)
+            on_job_exit(idx, false)
             on_finish(false)
         end
     end
