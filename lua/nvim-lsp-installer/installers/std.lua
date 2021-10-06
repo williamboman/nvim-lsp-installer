@@ -86,7 +86,7 @@ local function win_extract(file)
                 stdio_sink = context.stdio_sink,
             })
             process.attempt {
-                jobs = { peazip, sevenzip, winzip },
+                jobs = { sevenzip, peazip, winzip },
                 on_finish = callback,
             }
         end,
