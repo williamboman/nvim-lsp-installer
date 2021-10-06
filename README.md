@@ -26,7 +26,7 @@ Requires neovim `>= 0.5.0` and [nvim-lspconfig](https://github.com/neovim/nvim-l
 install all servers are:
 
 -   For Unix systems: bash(1), git(1), curl(1) or wget(1), unzip(1), tar(1), gzip(1)
--   For Windows systems: powershell, git, tar, 7zip
+-   For Windows systems: powershell, git, tar, 7zip or winzip or peazip or archiver
 -   Node.js (LTS) & npm
 -   Python3 & pip3
 -   go
