@@ -34,9 +34,9 @@ install all servers are:
 -   Ruby & gem
 
 [7zip]: https://www.7-zip.org/
-[winzip]: https://www.winzip.com/
+[archiver]: https://github.com/mholt/archiver
 [peazip]: https://peazip.github.io/
-[archiver]: https://community.chocolatey.org/packages/archiver
+[winzip]: https://www.winzip.com/
 
 ### [Packer](https://github.com/wbthomason/packer.nvim)
 
