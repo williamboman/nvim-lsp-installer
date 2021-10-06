@@ -20,7 +20,6 @@ function M.packages(packages)
                 stdio_sink = context.stdio_sink,
             }
 
-            -- stylua: ignore start
             if not (fs.file_exists(path.concat { server.root_dir, "composer.json" }))
             then
                 c.run("composer", { "init", "--no-interaction", "--name=lsp-installer/lsp-server", "--stability=dev" })
@@ -33,7 +32,6 @@ function M.packages(packages)
                 pkgs[1] = ("%s:%s"):format(pkgs[1], context.requested_server_version)
             end
 
-            -- stylua: ignore end
             c.run("composer", vim.list_extend({ "require" }, pkgs))
             c.spawn(callback)
         end,
