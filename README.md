@@ -3,9 +3,7 @@
 </p>
 
 <p align="center">
-  <a href="https://asciinema.org/a/434365" target="_blank" rel="noopener">
-    <img src="https://user-images.githubusercontent.com/6705160/132266914-e0f89b07-35e2-45ff-a55e-560f612f8a45.gif" width="650" />
-  </a>
+    <img src="https://user-images.githubusercontent.com/6705160/135912610-9d7ac377-b3bc-4db5-b72c-aa987ae23da4.gif" width="650" />
 </p>
 
 ## About
@@ -27,7 +25,7 @@ On top of just providing commands for installing & uninstalling LSP servers, it:
 Requires neovim `>= 0.5.0` and [nvim-lspconfig](https://github.com/neovim/nvim-lspconfig). The full requirements to
 install all servers are:
 
--   For Unix systems: bash(1), git(1), wget(1), unzip(1), tar(1), gzip(1)
+-   For Unix systems: bash(1), git(1), curl(1) or wget(1), unzip(1), tar(1), gzip(1)
 -   For Windows systems: powershell, git, gzip, tar
 -   Node.js (LTS) & npm
 -   Python3 & pip3
@@ -147,6 +145,7 @@ local DEFAULT_SETTINGS = {
 | Angular                             | `angularls`              |
 | Ansible                             | `ansiblels`              |
 | Bash                                | `bashls`                 |
+| Bicep                               | `bicep`                  |
 | C#                                  | `omnisharp`              |
 | C++                                 | `clangd`                 |
 | CMake                               | `cmake`                  |
@@ -154,6 +153,7 @@ local DEFAULT_SETTINGS = {
 | Clojure                             | `clojure_lsp`            |
 | Deno                                | `denols`                 |
 | Diagnostic (general purpose server) | `diagnosticls`           |
+| Dlang                               | `serve_d`                |
 | Docker                              | `dockerls`               |
 | Dot                                 | `dotls`                  |
 | EFM (general purpose server)        | `efm`                    |
@@ -161,6 +161,7 @@ local DEFAULT_SETTINGS = {
 | Elixir                              | `elixirls`               |
 | Elm                                 | `elmls`                  |
 | Ember                               | `ember`                  |
+| Emmet                               | `emmet_ls`               |
 | Fortran                             | `fortls`                 |
 | Go                                  | `gopls`                  |
 | GraphQL                             | `graphql`                |
@@ -171,11 +172,13 @@ local DEFAULT_SETTINGS = {
 | Java                                | `jdtls`                  |
 | Jedi                                | `jedi_language_server`   |
 | Kotlin                              | `kotlin_language_server` |
+| LaTeX (unstable preview)            | `ltex`                   |
 | LaTeX                               | `texlab`                 |
 | Lua                                 | `sumneko_lua`            |
 | OCaml                               | `ocamlls`                |
 | PHP                                 | `intelephense`           |
 | Prisma                              | `prismals`               |
+| Puppet                              | `puppet`                 |
 | PureScript                          | `purescriptls`           |
 | Python                              | `pylsp`                  |
 | Python                              | `pyright`                |
@@ -192,7 +195,9 @@ local DEFAULT_SETTINGS = {
 | Terraform [(docs)][tflint]          | `tflint`                 |
 | TypeScript [(docs)][tsserver]       | `tsserver`               |
 | VimL                                | `vimls`                  |
+| Vue                                 | `volar`                  |
 | Vue                                 | `vuels`                  |
+| XML                                 | `lemminx`                |
 | YAML                                | `yamlls`                 |
 | Zig                                 | `zls`                    |
 

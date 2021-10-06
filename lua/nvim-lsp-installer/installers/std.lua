@@ -9,13 +9,23 @@ local M = {}
 function M.download_file(url, out_file)
     return installers.when {
         unix = function(server, callback, context)
-            process.spawn("wget", {
-                args = { "-O", out_file, url },
-                cwd = server.root_dir,
-                stdio_sink = context.stdio_sink,
-            }, callback)
+            process.attempt {
+                jobs = {
+                    process.lazy_spawn("wget", {
+                        args = { "-nv", "-O", out_file, url },
+                        cwd = server.root_dir,
+                        stdio_sink = context.stdio_sink,
+                    }),
+                    process.lazy_spawn("curl", {
+                        args = { "-fsSL", "-o", out_file, url },
+                        cwd = server.root_dir,
+                        stdio_sink = context.stdio_sink,
+                    }),
+                },
+                on_finish = callback,
+            }
         end,
-        win = shell.powershell(("iwr -Uri %q -OutFile %q"):format(url, out_file)),
+        win = shell.powershell(("iwr -UseBasicParsing -Uri %q -OutFile %q"):format(url, out_file)),
     }
 end
 
@@ -43,11 +53,14 @@ function M.unzip_remote(url, dest)
 end
 
 function M.untar(file, opts)
-    local strip_components = opts.strip_components or 0
+    local default_opts = {
+        strip_components = 0,
+    }
+    opts = vim.tbl_deep_extend("force", default_opts, opts or {})
     return installers.pipe {
         function(server, callback, context)
             process.spawn("tar", {
-                args = { "-xvf", file, "--strip-components", strip_components },
+                args = { "-xvf", file, "--strip-components", opts.strip_components },
                 cwd = server.root_dir,
                 stdio_sink = context.stdio_sink,
             }, callback)
@@ -66,8 +79,7 @@ end
 function M.untargz_remote(url, tar_opts)
     return installers.pipe {
         M.download_file(url, "archive.tar.gz"),
-        M.gunzip "archive.tar.gz",
-        M.untar("archive.tar", tar_opts),
+        M.untar("archive.tar.gz", tar_opts),
     }
 end
 

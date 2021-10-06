@@ -1,6 +1,9 @@
 local log = require "nvim-lsp-installer.log"
+local Data = require "nvim-lsp-installer.data"
 local platform = require "nvim-lsp-installer.platform"
 local uv = vim.loop
+
+local list_any = Data.list_any
 
 local M = {}
 
@@ -41,14 +44,36 @@ function M.graft_env(env)
     return root_env
 end
 
+local function sanitize_env_list(env_list)
+    local sanitized_list = {}
+    for _, env in ipairs(env_list) do
+        local safe_envs = {
+            "GO111MODULE",
+            "GOBIN",
+            "GOPATH",
+            "PATH",
+            "GEM_HOME",
+            "GEM_PATH",
+        }
+        local is_safe_env = list_any(safe_envs, function(safe_env)
+            return env:find(safe_env .. "=") == 1
+        end)
+        if is_safe_env then
+            sanitized_list[#sanitized_list + 1] = env
+        else
+            local idx = env:find "="
+            sanitized_list[#sanitized_list + 1] = env:sub(1, idx) .. "=<redacted>"
+        end
+    end
+    return sanitized_list
+end
+
 function M.spawn(cmd, opts, callback)
     local stdin = uv.new_pipe(false)
     local stdout = uv.new_pipe(false)
     local stderr = uv.new_pipe(false)
 
     local stdio = { stdin, stdout, stderr }
-
-    log.debug("Spawning", cmd, opts)
 
     local spawn_opts = {
         env = opts.env,
@@ -59,8 +84,19 @@ function M.spawn(cmd, opts, callback)
         hide = true,
     }
 
-    local handle, pid
-    handle, pid = uv.spawn(cmd, spawn_opts, function(exit_code, signal)
+    log.lazy_debug(function()
+        local sanitized_env = sanitize_env_list(opts.env or {})
+        return "Spawning cmd=%s, spawn_opts=%s",
+            cmd,
+            {
+                args = opts.args,
+                cwd = opts.cwd,
+                env = sanitized_env,
+            }
+    end)
+
+    local handle, pid_or_err
+    handle, pid_or_err = uv.spawn(cmd, spawn_opts, function(exit_code, signal)
         local successful = exit_code == 0 and signal == 0
         handle:close()
         if not stdin:is_closing() then
@@ -82,13 +118,17 @@ function M.spawn(cmd, opts, callback)
     end)
 
     if handle == nil then
-        log.error("Failed to spawn process", cmd, pid)
-        opts.stdio_sink.stderr(("Failed to spawn process cmd=%s pid=%s\n"):format(cmd, pid))
+        log.fmt_error("Failed to spawn process. cmd=%s, err=%s", cmd, pid_or_err)
+        if type(pid_or_err) == "string" and pid_or_err:find "ENOENT" == 1 then
+            opts.stdio_sink.stderr(("Could not find executable %q in path.\n"):format(cmd))
+        else
+            opts.stdio_sink.stderr(("Failed to spawn process cmd=%s err=%s\n"):format(cmd, pid_or_err))
+        end
         callback(false)
         return nil, nil
     end
 
-    log.debug("Spawned with pid", pid)
+    log.debug("Spawned with pid", pid_or_err)
 
     stdout:read_start(connect_sink(stdout, opts.stdio_sink.stdout))
     stderr:read_start(connect_sink(stderr, opts.stdio_sink.stderr))
@@ -173,6 +213,40 @@ function M.debounced(debounced_fn)
             last_arg = nil
         end)
     end
+end
+
+function M.lazy_spawn(cmd, opts)
+    return function(callback)
+        return M.spawn(cmd, opts, callback)
+    end
+end
+
+function M.attempt(opts)
+    local jobs, on_finish, on_iterate = opts.jobs, opts.on_finish, opts.on_iterate
+    if #jobs == 0 then
+        error "process.attempt(...) need at least one job."
+    end
+    local function spawn(idx)
+        jobs[idx](function(success)
+            if success then
+                -- this job succeeded. exit early
+                on_finish(true)
+            elseif jobs[idx + 1] then
+                -- iterate
+                if on_iterate then
+                    on_iterate()
+                end
+                log.debug "Previous job failed, attempting next."
+                spawn(idx + 1)
+            else
+                -- we exhausted all jobs without success
+                log.debug "All jobs failed."
+                on_finish(false)
+            end
+        end)
+    end
+
+    spawn(1)
 end
 
 return M
