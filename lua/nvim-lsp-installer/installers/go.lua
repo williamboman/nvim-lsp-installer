@@ -26,7 +26,7 @@ function M.packages(packages)
                 pkgs[1] = ("%s@%s"):format(pkgs[1], context.requested_server_version)
             end
 
-            c.run("go", vim.list_extend({ "get", "-v" }, pkgs))
+            c.run("go", vim.list_extend({ "install"}, pkgs))
             c.run("go", { "clean", "-modcache" })
 
             c.spawn(callback)
