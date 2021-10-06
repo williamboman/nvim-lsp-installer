@@ -216,7 +216,7 @@ end
 
 function M.rename(old_path, new_path)
     return function(server, callback, context)
-        local ok, success = pcall(
+        local ok=  pcall(
             fs.rename,
             path.concat { server.root_dir, old_path },
             path.concat { server.root_dir, new_path }
@@ -224,7 +224,7 @@ function M.rename(old_path, new_path)
         if not ok then
             context.stdio_sink.stderr(("Failed to rename %q to %q.\n"):format(old_path, new_path))
         end
-        callback(ok and success)
+        callback(ok)
     end
 end
 
