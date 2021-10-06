@@ -12,22 +12,22 @@ function M.pipe(installers)
     return function(server, callback, context)
         local function execute(idx)
             local ok, err = pcall(installers[idx], server, function(success)
-                    if not success then
-                        -- oh no, error. exit early
-                        callback(success)
-                    elseif installers[idx + 1] then
-                        -- iterate
-                        execute(idx + 1)
-                    else
-                        -- we done
-                        callback(success)
-                    end
+                if not success then
+                    -- oh no, error. exit early
+                    callback(success)
+                elseif installers[idx + 1] then
+                    -- iterate
+                    execute(idx + 1)
+                else
+                    -- we done
+                    callback(success)
+                end
             end, context)
-        if not ok then
-            context.stdio_sink.stderr(tostring(err) .. "\n")
-            callback(false)
+            if not ok then
+                context.stdio_sink.stderr(tostring(err) .. "\n")
+                callback(false)
+            end
         end
-    end
 
         execute(1)
     end
@@ -50,15 +50,15 @@ function M.first_successful(installers)
                     callback(success)
                 end
             end, context)
-        if not ok then
-            context.stdio_sink.stderr(tostring(err) .. "\n")
-            if installers[idx + 1] then
-                execute(idx + 1)
-            else
-                callback(false)
+            if not ok then
+                context.stdio_sink.stderr(tostring(err) .. "\n")
+                if installers[idx + 1] then
+                    execute(idx + 1)
+                else
+                    callback(false)
+                end
             end
         end
-    end
 
         execute(1)
     end

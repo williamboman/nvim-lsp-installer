@@ -78,40 +78,40 @@ local function win_extract(file)
             local peazip = process.lazy_spawn("peazip", {
                 args = { "-ext2here", path.concat { server.root_dir, file } }, -- peazip require absolute paths, or else!
                 cwd = server.root_dir,
-                stdio_sink=context.stdio_sink
+                stdio_sink = context.stdio_sink,
             })
             local winzip = process.lazy_spawn("wzunzip", {
                 args = { file },
                 cwd = server.root_dir,
-                stdio_sink = context.stdio_sink
+                stdio_sink = context.stdio_sink,
             })
             process.attempt {
                 jobs = { peazip, sevenzip, winzip },
                 on_finish = callback,
             }
         end,
-        installers.always_succeed(M.delete_file(file))
-}
+        installers.always_succeed(M.delete_file(file)),
+    }
 end
 
 local function win_untarxz(file)
     return installers.pipe {
         win_extract(file),
-        M.untar(file:gsub(".xz$", ""))
+        M.untar(file:gsub(".xz$", "")),
     }
 end
 
 local function win_arc_unarchive(file)
     return installers.pipe {
-        function (server, callback, context)
+        function(server, callback, context)
             context.stdio_sink.stdout "Attempting to unarchive using arc."
             process.spawn("arc", {
-                    args = {"unarchive", file},
-                    cwd = server.root_dir,
-                    stdio_sink = context.stdio_sink
-                }, callback)
+                args = { "unarchive", file },
+                cwd = server.root_dir,
+                stdio_sink = context.stdio_sink,
+            }, callback)
         end,
-        installers.always_succeed(M.delete_file(file))
+        installers.always_succeed(M.delete_file(file)),
     }
 end
 
@@ -119,10 +119,10 @@ function M.untarxz_remote(url)
     return installers.pipe {
         M.download_file(url, "archive.tar.xz"),
         installers.when {
-            unix = M.untar("archive.tar.xz"),
-            win = installers.first_successful{
-                win_untarxz("archive.tar.xz"),
-                win_arc_unarchive("archive.tar.xz"),
+            unix = M.untar "archive.tar.xz",
+            win = installers.first_successful {
+                win_untarxz "archive.tar.xz",
+                win_arc_unarchive "archive.tar.xz",
             },
         },
     }
@@ -131,7 +131,7 @@ end
 function M.untargz_remote(url)
     return installers.pipe {
         M.download_file(url, "archive.tar.gz"),
-        M.untar("archive.tar.gz"),
+        M.untar "archive.tar.gz",
     }
 end
 
@@ -216,9 +216,13 @@ end
 
 function M.rename(old_path, new_path)
     return function(server, callback, context)
-        local ok, success = pcall(fs.rename, path.concat { server.root_dir, old_path}, path.concat{server.root_dir, new_path})
+        local ok, success = pcall(
+            fs.rename,
+            path.concat { server.root_dir, old_path },
+            path.concat { server.root_dir, new_path }
+        )
         if not ok then
-            context.stdio_sink.stderr(( "Failed to rename %q to %q.\n" ):format(old_path, new_path))
+            context.stdio_sink.stderr(("Failed to rename %q to %q.\n"):format(old_path, new_path))
         end
         callback(ok and success)
     end

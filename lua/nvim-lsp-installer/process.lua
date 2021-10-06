@@ -142,9 +142,12 @@ function M.chain(opts)
     local jobs = {}
     return {
         run = function(cmd, args)
-            jobs[#jobs + 1] = M.lazy_spawn(cmd, vim.tbl_deep_extend("force", opts, {
-                args = args,
-            }))
+            jobs[#jobs + 1] = M.lazy_spawn(
+                cmd,
+                vim.tbl_deep_extend("force", opts, {
+                    args = args,
+                })
+            )
         end,
         spawn = function(callback)
             local function execute(idx)
@@ -253,7 +256,7 @@ function M.attempt(opts)
             iterate(idx, success)
         end)
         if not ok then
-            log.fmt_error(  "Job failed to execute. Error=%s" , tostring(err))
+            log.fmt_error("Job failed to execute. Error=%s", tostring(err))
             iterate(idx, false)
             on_finish(false)
         end
