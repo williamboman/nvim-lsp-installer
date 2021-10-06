@@ -69,6 +69,7 @@ local CORE_SERVERS = Data.set_of {
     "jsonls",
     "kotlin_language_server",
     "lemminx",
+    "ltex",
     "ocamlls",
     "omnisharp",
     "prismals",
@@ -96,6 +97,7 @@ local CORE_SERVERS = Data.set_of {
     "volar",
     "vuels",
     "yamlls",
+    "zls",
 }
 
 local INITIALIZED_SERVERS = {}
