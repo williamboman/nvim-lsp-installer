@@ -69,10 +69,30 @@ function M.untar(file, opts)
     }
 end
 
+function M.extract_7zip(archive, dest)
+    return function(server, callback, context)
+        local sevenzip = process.lazy_spawn("7zip", {
+            args = { "x", archive, "-o", dest, "r" },
+            cwd = server.root_dir,
+            stdio_sink = context.stdio_sink,
+        })
+        process.attempt {
+            jobs = { sevenzip },
+            on_finish = callback,
+        }
+    end
+end
+
 function M.untarxz_remote(url, tar_opts)
     return installers.pipe {
         M.download_file(url, "archive.tar.xz"),
-        M.untar("archive.tar.xz", tar_opts),
+        installers.when {
+            win = {
+                M.extract_7zip("archive.tar.xz", "archive.tar"),
+                M.untar("archive.tar", tar_opts),
+            },
+            unix = M.untar("archive.tar.xz", tar_opts),
+        },
     }
 end
 
@@ -84,13 +104,16 @@ function M.untargz_remote(url, tar_opts)
 end
 
 function M.gunzip(file)
-    return function(server, callback, context)
-        process.spawn("gzip", {
-            args = { "-d", file },
-            cwd = server.root_dir,
-            stdio_sink = context.stdio_sink,
-        }, callback)
-    end
+    return installers.when {
+        unix = function(server, callback, context)
+            process.spawn("gzip", {
+                args = { "-d", file },
+                cwd = server.root_dir,
+                stdio_sink = context.stdio_sink,
+            }, callback)
+        end,
+        win = M.extract_7zip(file, file:gsub(".gz$", "")),
+    }
 end
 
 function M.gunzip_remote(url, out_file)

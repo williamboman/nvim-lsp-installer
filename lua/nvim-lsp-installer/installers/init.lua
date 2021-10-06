@@ -64,7 +64,11 @@ function M.on(platform_table)
     return function(server, callback, context)
         local installer = get_by_platform(platform_table)
         if installer then
-            installer(server, callback, context)
+            if type(installer) == "function" then
+                installer(server, callback, context)
+            else
+                M.pipe(installer)(server, callback, context)
+            end
         else
             callback(true)
         end
@@ -76,7 +80,11 @@ function M.when(platform_table)
     return function(server, callback, context)
         local installer = get_by_platform(platform_table)
         if installer then
-            installer(server, callback, context)
+            if type(installer) == "function" then
+                installer(server, callback, context)
+            else
+                M.pipe(installer)(server, callback, context)
+            end
         else
             context.stdio_sink.stderr(
                 ("Current operating system is not yet supported for server %q.\n"):format(server.name)
