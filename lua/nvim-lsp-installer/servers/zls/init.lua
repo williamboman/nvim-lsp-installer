@@ -27,13 +27,12 @@ return function(name, root_dir)
                 )
             ),
             context.capture(function(ctx)
-                return std.untarxz_remote(ctx.github_release_file, {
-                    strip_components = 1,
-                })
+                return std.untarxz_remote(ctx.github_release_file)
             end),
+            std.rename("x86_64-windows", "package")
         },
         default_options = {
-            cmd = { path.concat { root_dir, "zls" } },
+            cmd = { path.concat { root_dir, "package", "zls" } },
         },
     }
 end

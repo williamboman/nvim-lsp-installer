@@ -1,4 +1,5 @@
 local platform = require "nvim-lsp-installer.platform"
+local log = require "nvim-lsp-installer.log"
 local Data = require "nvim-lsp-installer.data"
 
 local M = {}
@@ -11,22 +12,53 @@ function M.pipe(installers)
     return function(server, callback, context)
         local function execute(idx)
             local ok, err = pcall(installers[idx], server, function(success)
-                if not success then
-                    -- oh no, error. exit early
-                    callback(success)
-                elseif installers[idx + 1] then
+                    if not success then
+                        -- oh no, error. exit early
+                        callback(success)
+                    elseif installers[idx + 1] then
+                        -- iterate
+                        execute(idx + 1)
+                    else
+                        -- we done
+                        callback(success)
+                    end
+            end, context)
+        if not ok then
+            context.stdio_sink.stderr(tostring(err) .. "\n")
+            callback(false)
+        end
+    end
+
+        execute(1)
+    end
+end
+
+function M.first_successful(installers)
+    if #installers == 0 then
+        error "No installers to pipe."
+    end
+
+    return function(server, callback, context)
+        local function execute(idx)
+            log.fmt_trace("Executing installer idx=%d", idx)
+            local ok, err = pcall(installers[idx], server, function(success)
+                log.fmt_trace("Installer idx=%d on exit with success=%s", idx, success)
+                if not success and installers[idx + 1] then
                     -- iterate
                     execute(idx + 1)
                 else
-                    -- we done
                     callback(success)
                 end
             end, context)
-            if not ok then
-                context.stdio_sink.stderr(tostring(err) .. "\n")
+        if not ok then
+            context.stdio_sink.stderr(tostring(err) .. "\n")
+            if installers[idx + 1] then
+                execute(idx + 1)
+            else
                 callback(false)
             end
         end
+    end
 
         execute(1)
     end
