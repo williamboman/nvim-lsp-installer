@@ -20,8 +20,7 @@ function M.packages(packages)
                 stdio_sink = context.stdio_sink,
             }
 
-            if not (fs.file_exists(path.concat { server.root_dir, "composer.json" }))
-            then
+            if not (fs.file_exists(path.concat { server.root_dir, "composer.json" })) then
                 c.run("composer", { "init", "--no-interaction", "--stability=dev" })
                 c.run("composer", { "config", "prefer-stable", "true" })
             end
