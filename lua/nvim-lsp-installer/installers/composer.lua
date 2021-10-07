@@ -22,7 +22,7 @@ function M.packages(packages)
 
             if not (fs.file_exists(path.concat { server.root_dir, "composer.json" }))
             then
-                c.run("composer", { "init", "--no-interaction", "--name=lsp-installer/lsp-server", "--stability=dev" })
+                c.run("composer", { "init", "--no-interaction", "--stability=dev" })
                 c.run("composer", { "config", "prefer-stable", "true" })
             end
 
