@@ -315,6 +315,9 @@ function M.new_view_only_win(name)
                     keybind.key,
                     ("<cmd>lua require('nvim-lsp-installer.ui.display').dispatch_effect(%d, %q)<cr>"):format(
                         bufnr,
+                        -- We transfer the keybinding as hex to avoid issues with (neo)vim interpreting the key as a
+                        -- literal input to the command. For example, "<CR>" would cause vim to issue an actual carriage
+                        -- return - even if it's quoted as a string.
                         to_hex(keybind.key)
                     ),
                     { nowait = true, silent = true, noremap = true }
