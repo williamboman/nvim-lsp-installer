@@ -4,6 +4,11 @@ local log = require "nvim-lsp-installer.log"
 local Data = require "nvim-lsp-installer.data"
 local display = require "nvim-lsp-installer.ui.display"
 local settings = require "nvim-lsp-installer.settings"
+local lsp_servers = require "nvim-lsp-installer.servers"
+
+local HELP_KEYMAP = "?"
+local CLOSE_WINDOW_KEYMAP_1 = "<Esc>"
+local CLOSE_WINDOW_KEYMAP_2 = "q"
 
 local function ServerGroupHeading(props)
     return Ui.HlTextNode {
@@ -15,11 +20,67 @@ local function Indent(children)
     return Ui.CascadingStyleNode({ Ui.CascadingStyle.INDENT }, children)
 end
 
+local function Help()
+    local keymap_tuples = {
+        { "Toggle help", HELP_KEYMAP },
+        { "Toggle server info", settings.current.ui.keymaps.toggle_server_expand },
+        { "Reinstall server", settings.current.ui.keymaps.reinstall_server },
+        { "Uninstall server", settings.current.ui.keymaps.uninstall_server },
+        { "Install server", settings.current.ui.keymaps.install_server },
+        { "Close window", CLOSE_WINDOW_KEYMAP_1 },
+        { "Close window", CLOSE_WINDOW_KEYMAP_2 },
+    }
+
+    -- stylua: ignore start
+    local cow = {
+        { { [[ _______________________________________________________________________ ]], "LspInstallerMuted" } },
+        { { [[ < Help sponsor Neovim development! ]], "LspInstallerMuted" }, { "https://github.com/sponsors/neovim", "LspInstallerHighlighted"}, {[[ > ]], "LspInstallerMuted" } },
+        { { [[ ----------------------------------------------------------------------- ]], "LspInstallerMuted" } },
+        { { [[        \    ,-^-.                                                       ]], "LspInstallerMuted" } },
+        { { [[         \   !oYo!                                                       ]], "LspInstallerMuted" } },
+        { { [[          \ /./=\.\______                                                ]], "LspInstallerMuted" } },
+        { { [[               ##        )\/\                                            ]], "LspInstallerMuted" } },
+        { { [[                ||-----w||                                               ]], "LspInstallerMuted" } },
+        { { [[                ||      ||                                               ]], "LspInstallerMuted" } },
+        { { [[                                                                         ]], "LspInstallerMuted" } },
+        { { [[         Cowth Vader (alleged Neovim user)                               ]], "LspInstallerMuted" } },
+        { { [[                                                                         ]], "LspInstallerMuted" } },
+    }
+    -- stylua: ignore end
+
+    return Ui.Node {
+        Ui.EmptyLine(),
+        Ui.Table(vim.list_extend(
+            {
+                {
+                    { "Keyboard shortcuts", "LspInstallerLabel" },
+                },
+            },
+            Data.list_map(function(keymap_tuple)
+                return { { keymap_tuple[1], "LspInstallerMuted" }, { keymap_tuple[2], "LspInstallerHighlighted" } }
+            end, keymap_tuples)
+        )),
+        Ui.EmptyLine(),
+        Ui.HlTextNode {
+            { { "Problems installing/uninstalling servers", "LspInstallerLabel" } },
+            { { "Refer to ", "" }, { ":help nvim-lsp-installer-debugging", "LspInstallerHighlighted" } },
+            { { "", "" } },
+            { { "Problems with server functionality", "LspInstallerLabel" } },
+            { { "Please refer to each language server's own homepage for further assistance.", "LspInstallerMuted" } },
+        },
+        Ui.EmptyLine(),
+        Ui.EmptyLine(),
+        Ui.EmptyLine(),
+        Ui.HlTextNode(cow),
+    }
+end
+
 local function Header()
     return Ui.CascadingStyleNode({ Ui.CascadingStyle.CENTERED }, {
         Ui.HlTextNode {
             { { "nvim-lsp-installer", "LspInstallerHeader" } },
-            { { "https://github.com/williamboman/nvim-lsp-installer", "LspInstallerLink" } },
+            { { ":help nvim-lsp-installer", "Comment" } },
+            { { "https://github.com/williamboman/nvim-lsp-installer", "Comment" } },
         },
     })
 end
@@ -49,6 +110,25 @@ local function get_relative_install_time(time)
     end
 end
 
+local function ServerMetadata(server)
+    return Ui.Table(Data.list_not_nil(
+        Data.lazy(server.metadata.install_timestamp_seconds, function()
+            return {
+                { "Installation date", "LspInstallerMuted" },
+                { get_relative_install_time(server.metadata.install_timestamp_seconds), "" },
+            }
+        end),
+        Data.when(server.is_installed, {
+            { "Install directory", "LspInstallerMuted" },
+            { server.metadata.install_dir, "" },
+        }),
+        Data.when(server.metadata.homepage, {
+            { "Server homepage", "LspInstallerMuted" },
+            { server.metadata.homepage, "" },
+        })
+    ))
+end
+
 local function InstalledServers(servers)
     return Ui.Node(Data.list_map(function(server)
         return Ui.Node {
@@ -56,19 +136,23 @@ local function InstalledServers(servers)
                 {
                     { settings.current.ui.icons.server_installed, "LspInstallerGreen" },
                     { " " .. server.name, "" },
-                    {
-                        (" installed %s"):format(get_relative_install_time(server.creation_time)),
-                        "Comment",
-                    },
                 },
             },
+            Ui.Keybind(settings.current.ui.keymaps.toggle_server_expand, "EXPAND_SERVER", { server.name }),
+            Ui.Keybind(settings.current.ui.keymaps.reinstall_server, "INSTALL_SERVER", { server.name }),
+            Ui.Keybind(settings.current.ui.keymaps.uninstall_server, "UNINSTALL_SERVER", { server.name }),
+            Ui.When(server.is_expanded, function()
+                return Indent {
+                    ServerMetadata(server),
+                }
+            end),
         }
     end, servers))
 end
 
 local function TailedOutput(server)
     return Ui.HlTextNode(Data.list_map(function(line)
-        return { { line, "LspInstallerGray" } }
+        return { { line, "LspInstallerMuted" } }
     end, server.installer.tailed_output))
 end
 
@@ -93,7 +177,7 @@ local function PendingServers(servers)
                         settings.current.ui.icons.server_pending,
                         has_failed and "LspInstallerError" or "LspInstallerOrange",
                     },
-                    { " " .. server.name, server.installer.is_running and "" or "LspInstallerGray" },
+                    { " " .. server.name, server.installer.is_running and "" or "LspInstallerMuted" },
                     { " " .. note, "Comment" },
                     {
                         has_failed and "" or (" " .. get_last_non_empty_line(server.installer.tailed_output)),
@@ -119,11 +203,18 @@ local function UninstalledServers(servers)
         return Ui.Node {
             Ui.HlTextNode {
                 {
-                    { settings.current.ui.icons.server_uninstalled, "LspInstallerGray" },
+                    { settings.current.ui.icons.server_uninstalled, "LspInstallerMuted" },
                     { " " .. server.name, "Comment" },
                     { server.uninstaller.has_run and " (just uninstalled)" or "", "Comment" },
                 },
             },
+            Ui.Keybind(settings.current.ui.keymaps.toggle_server_expand, "EXPAND_SERVER", { server.name }),
+            Ui.Keybind(settings.current.ui.keymaps.install_server, "INSTALL_SERVER", { server.name }),
+            Ui.When(server.is_expanded, function()
+                return Indent {
+                    ServerMetadata(server),
+                }
+            end),
         }
     end, servers))
 end
@@ -212,17 +303,16 @@ local function Servers(servers)
     }
 end
 
-local function create_server_state(server)
-    local ok, fstat = pcall(fs.fstat, server.root_dir)
-    local creation_time
-    if ok then
-        creation_time = fstat.mtime.sec
-    end
-
+local function create_initial_server_state(server)
     return {
         name = server.name,
         is_installed = server:is_installed(),
-        creation_time = creation_time,
+        is_expanded = false,
+        metadata = {
+            homepage = server.homepage,
+            install_timestamp_seconds = nil, -- lazy
+            install_dir = server.root_dir,
+        },
         installer = {
             is_queued = false,
             is_running = false,
@@ -246,34 +336,50 @@ local function init(all_servers)
 
     window.view(function(state)
         return Indent {
+            Ui.Keybind(HELP_KEYMAP, "TOGGLE_HELP", nil, true),
+            Ui.Keybind(CLOSE_WINDOW_KEYMAP_1, "CLOSE_WINDOW", nil, true),
+            Ui.Keybind(CLOSE_WINDOW_KEYMAP_2, "CLOSE_WINDOW", nil, true),
             Header(),
-            Servers(state.servers),
+            Ui.When(state.is_showing_help, function()
+                return Help()
+            end),
+            Ui.When(not state.is_showing_help, function()
+                return Servers(state.servers)
+            end),
         }
     end)
 
     local servers = {}
     for i = 1, #all_servers do
         local server = all_servers[i]
-        servers[server.name] = create_server_state(server)
+        servers[server.name] = create_initial_server_state(server)
     end
 
     local mutate_state, get_state = window.init {
         servers = servers,
+        is_showing_help = false,
     }
 
-    local function open()
-        window.open {
-            win_width = 95,
-            highlight_groups = {
-                "hi def LspInstallerHeader gui=bold guifg=#ebcb8b",
-                "hi def link LspInstallerLink Comment",
-                "hi def LspInstallerHeading gui=bold",
-                "hi def LspInstallerGreen guifg=#a3be8c",
-                "hi def LspInstallerOrange ctermfg=222 guifg=#ebcb8b",
-                "hi def LspInstallerGray guifg=#888888 ctermfg=144",
-                "hi def LspInstallerError ctermfg=203 guifg=#f44747",
-            },
-        }
+    -- TODO: memoize or throttle.. or cache. Do something. Also, as opposed to what the naming currently suggests, this
+    -- is not really doing anything async stuff, but will very likely do so in the future :tm:.
+    local function async_populate_server_metadata(server_name)
+        local ok, server = lsp_servers.get_server(server_name)
+        if not ok then
+            return log.warn("Unable to get server when populating metadata.", server_name)
+        end
+        local fstat_ok, fstat = pcall(fs.fstat, server.root_dir)
+        mutate_state(function(state)
+            if fstat_ok then
+                state.servers[server.name].metadata.install_timestamp_seconds = fstat.mtime.sec
+            end
+        end)
+    end
+
+    local function expand_server(server_name)
+        mutate_state(function(state)
+            state.servers[server_name].is_expanded = not state.servers[server_name].is_expanded
+        end)
+        async_populate_server_metadata(server_name)
     end
 
     local function start_install(server_tuple, on_complete)
@@ -309,10 +415,11 @@ local function init(all_servers)
                     state.servers[server.name].installer.tailed_output = {}
                 end
                 state.servers[server.name].is_installed = success
-                state.servers[server.name].creation_time = os.time()
+                state.servers[server.name].is_expanded = true
                 state.servers[server.name].installer.is_running = false
                 state.servers[server.name].installer.has_run = true
             end)
+            expand_server(server.name)
             on_complete()
         end)
     end
@@ -320,7 +427,7 @@ local function init(all_servers)
     -- We have a queue because installers have a tendency to hog resources.
     local queue
     do
-        local max_running = 2
+        local max_running = settings.current.max_concurrent_installers
         local q = {}
         local r = 0
 
@@ -342,39 +449,89 @@ local function init(all_servers)
         end
     end
 
+    local function install_server(server, version)
+        log.debug("Installing server", server, version)
+        local server_state = get_state().servers[server.name]
+        if server_state and (server_state.installer.is_running or server_state.installer.is_queued) then
+            log.debug("Installer is already queued/running", server.name)
+            return
+        end
+        mutate_state(function(state)
+            -- reset state
+            state.servers[server.name] = create_initial_server_state(server)
+            state.servers[server.name].installer.is_queued = true
+        end)
+        queue(server, version)
+    end
+
+    local function uninstall_server(server)
+        local server_state = get_state().servers[server.name]
+        if server_state and (server_state.installer.is_running or server_state.installer.is_queued) then
+            log.debug("Installer is already queued/running", server.name)
+            return
+        end
+
+        local is_uninstalled, err = pcall(server.uninstall, server)
+        mutate_state(function(state)
+            -- reset state
+            state.servers[server.name] = create_initial_server_state(server)
+            if is_uninstalled then
+                state.servers[server.name].is_installed = false
+            end
+            state.servers[server.name].uninstaller.has_run = true
+            state.servers[server.name].uninstaller.error = err
+        end)
+    end
+
+    local function open()
+        window.open {
+            win_width = 95,
+            highlight_groups = {
+                "hi def LspInstallerHeader gui=bold guifg=#ebcb8b",
+                "hi def LspInstallerServerExpanded gui=italic",
+                "hi def LspInstallerHeading gui=bold",
+                "hi def LspInstallerGreen guifg=#a3be8c",
+                "hi def LspInstallerOrange ctermfg=222 guifg=#ebcb8b",
+                "hi def LspInstallerMuted guifg=#888888 ctermfg=144",
+                "hi def LspInstallerLabel gui=bold",
+                "hi def LspInstallerError ctermfg=203 guifg=#f44747",
+                "hi def LspInstallerHighlighted guifg=#56B6C2",
+            },
+            effects = {
+                ["TOGGLE_HELP"] = function()
+                    mutate_state(function(state)
+                        state.is_showing_help = not state.is_showing_help
+                    end)
+                end,
+                ["CLOSE_WINDOW"] = function()
+                    window.close()
+                end,
+                ["EXPAND_SERVER"] = function(e)
+                    local server_name = e.payload[1]
+                    expand_server(server_name)
+                end,
+                ["INSTALL_SERVER"] = function(e)
+                    local server_name = e.payload[1]
+                    local ok, server = lsp_servers.get_server(server_name)
+                    if ok then
+                        install_server(server, nil)
+                    end
+                end,
+                ["UNINSTALL_SERVER"] = function(e)
+                    local server_name = e.payload[1]
+                    local ok, server = lsp_servers.get_server(server_name)
+                    if ok then
+                        uninstall_server(server)
+                    end
+                end,
+            },
+        }
+    end
+
     return {
         open = open,
-        install_server = function(server, version)
-            log.debug("Installing server", server, version)
-            local server_state = get_state().servers[server.name]
-            if server_state and (server_state.installer.is_running or server_state.installer.is_queued) then
-                log.debug("Installer is already queued/running", server.name)
-                return
-            end
-            mutate_state(function(state)
-                -- reset state
-                state.servers[server.name] = create_server_state(server)
-                state.servers[server.name].installer.is_queued = true
-            end)
-            queue(server, version)
-        end,
-        uninstall_server = function(server)
-            local server_state = get_state().servers[server.name]
-            if server_state and (server_state.installer.is_running or server_state.installer.is_queued) then
-                log.debug("Installer is already queued/running", server.name)
-                return
-            end
-
-            local is_uninstalled, err = pcall(server.uninstall, server)
-            mutate_state(function(state)
-                state.servers[server.name] = create_server_state(server)
-                if is_uninstalled then
-                    state.servers[server.name].is_installed = false
-                end
-                state.servers[server.name].uninstaller.has_run = true
-                state.servers[server.name].uninstaller.error = err
-            end)
-        end,
+        install_server = install_server,
+        uninstall_server = uninstall_server,
     }
 end
 
@@ -383,7 +540,6 @@ return function()
     if win then
         return win
     end
-    local servers = require "nvim-lsp-installer.servers"
-    win = init(servers.get_available_servers())
+    win = init(lsp_servers.get_available_servers())
     return win
 end
