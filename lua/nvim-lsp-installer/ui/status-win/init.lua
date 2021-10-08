@@ -63,7 +63,13 @@ local function Help(is_current_settings_expanded)
         Ui.EmptyLine(),
         Ui.HlTextNode {
             { { "Problems installing/uninstalling servers", "LspInstallerLabel" } },
-            { { "Refer to ", "" }, { ":help nvim-lsp-installer-debugging", "LspInstallerHighlighted" } },
+            {
+                {
+                    "Make sure you meet the minimum requirements to install servers. For debugging, refer to ",
+                    "LspInstallerMuted",
+                },
+                { ":help nvim-lsp-installer-debugging", "LspInstallerHighlighted" },
+            },
         },
         Ui.EmptyLine(),
         Ui.HlTextNode {
@@ -74,10 +80,10 @@ local function Help(is_current_settings_expanded)
         Ui.HlTextNode {
             {
                 {
-                    ("%s current settings"):format(is_current_settings_expanded and "Hide" or "Show"),
+                    ("%s Current settings"):format(is_current_settings_expanded and "v" or ">"),
                     "LspInstallerLabel",
                 },
-                { " :help nvim-lsp-installer-settings", "LspInstallerMuted" },
+                { " :help nvim-lsp-installer-settings", "LspInstallerHighlighted" },
             },
         },
         Ui.Keybind("<CR>", "TOGGLE_EXPAND_CURRENT_SETTINGS", nil),
