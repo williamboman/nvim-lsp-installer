@@ -20,7 +20,24 @@ local function Indent(children)
     return Ui.CascadingStyleNode({ Ui.CascadingStyle.INDENT }, children)
 end
 
-local function Help()
+-- stylua: ignore start
+local very_reasonable_cow = {
+    { { [[ _______________________________________________________________________ ]], "LspInstallerMuted" } },
+    { { [[ < Help sponsor Neovim development! ]], "LspInstallerMuted" }, { "https://github.com/sponsors/neovim", "LspInstallerHighlighted"}, {[[ > ]], "LspInstallerMuted" } },
+    { { [[ ----------------------------------------------------------------------- ]], "LspInstallerMuted" } },
+    { { [[        \    ,-^-.                                                       ]], "LspInstallerMuted" } },
+    { { [[         \   !oYo!                                                       ]], "LspInstallerMuted" } },
+    { { [[          \ /./=\.\______                                                ]], "LspInstallerMuted" } },
+    { { [[               ##        )\/\                                            ]], "LspInstallerMuted" } },
+    { { [[                ||-----w||                                               ]], "LspInstallerMuted" } },
+    { { [[                ||      ||                                               ]], "LspInstallerMuted" } },
+    { { [[                                                                         ]], "LspInstallerMuted" } },
+    { { [[         Cowth Vader (alleged Neovim user)                               ]], "LspInstallerMuted" } },
+    { { [[                                                                         ]], "LspInstallerMuted" } },
+}
+-- stylua: ignore end
+
+local function Help(is_current_settings_expanded)
     local keymap_tuples = {
         { "Toggle help", HELP_KEYMAP },
         { "Toggle server info", settings.current.ui.keymaps.toggle_server_expand },
@@ -30,23 +47,6 @@ local function Help()
         { "Close window", CLOSE_WINDOW_KEYMAP_1 },
         { "Close window", CLOSE_WINDOW_KEYMAP_2 },
     }
-
-    -- stylua: ignore start
-    local cow = {
-        { { [[ _______________________________________________________________________ ]], "LspInstallerMuted" } },
-        { { [[ < Help sponsor Neovim development! ]], "LspInstallerMuted" }, { "https://github.com/sponsors/neovim", "LspInstallerHighlighted"}, {[[ > ]], "LspInstallerMuted" } },
-        { { [[ ----------------------------------------------------------------------- ]], "LspInstallerMuted" } },
-        { { [[        \    ,-^-.                                                       ]], "LspInstallerMuted" } },
-        { { [[         \   !oYo!                                                       ]], "LspInstallerMuted" } },
-        { { [[          \ /./=\.\______                                                ]], "LspInstallerMuted" } },
-        { { [[               ##        )\/\                                            ]], "LspInstallerMuted" } },
-        { { [[                ||-----w||                                               ]], "LspInstallerMuted" } },
-        { { [[                ||      ||                                               ]], "LspInstallerMuted" } },
-        { { [[                                                                         ]], "LspInstallerMuted" } },
-        { { [[         Cowth Vader (alleged Neovim user)                               ]], "LspInstallerMuted" } },
-        { { [[                                                                         ]], "LspInstallerMuted" } },
-    }
-    -- stylua: ignore end
 
     return Ui.Node {
         Ui.EmptyLine(),
@@ -64,14 +64,32 @@ local function Help()
         Ui.HlTextNode {
             { { "Problems installing/uninstalling servers", "LspInstallerLabel" } },
             { { "Refer to ", "" }, { ":help nvim-lsp-installer-debugging", "LspInstallerHighlighted" } },
-            { { "", "" } },
+        },
+        Ui.EmptyLine(),
+        Ui.HlTextNode {
             { { "Problems with server functionality", "LspInstallerLabel" } },
             { { "Please refer to each language server's own homepage for further assistance.", "LspInstallerMuted" } },
         },
         Ui.EmptyLine(),
+        Ui.HlTextNode {
+            {
+                {
+                    ("%s current settings"):format(is_current_settings_expanded and "Hide" or "Show"),
+                    "LspInstallerLabel",
+                },
+                { " :help nvim-lsp-installer-settings", "LspInstallerMuted" },
+            },
+        },
+        Ui.Keybind("<CR>", "TOGGLE_EXPAND_CURRENT_SETTINGS", nil),
+        Ui.When(is_current_settings_expanded, function()
+            local settings_split_by_newline = vim.split(vim.inspect(settings.current), "\n")
+            local current_settings = Data.list_map(function(line)
+                return { { line, "LspInstallerMuted" } }
+            end, settings_split_by_newline)
+            return Ui.HlTextNode(current_settings)
+        end),
         Ui.EmptyLine(),
-        Ui.EmptyLine(),
-        Ui.HlTextNode(cow),
+        Ui.HlTextNode(very_reasonable_cow),
     }
 end
 
@@ -341,7 +359,7 @@ local function init(all_servers)
             Ui.Keybind(CLOSE_WINDOW_KEYMAP_2, "CLOSE_WINDOW", nil, true),
             Header(),
             Ui.When(state.is_showing_help, function()
-                return Help()
+                return Help(state.is_current_settings_expanded)
             end),
             Ui.When(not state.is_showing_help, function()
                 return Servers(state.servers)
@@ -505,6 +523,11 @@ local function init(all_servers)
                 end,
                 ["CLOSE_WINDOW"] = function()
                     window.close()
+                end,
+                ["TOGGLE_EXPAND_CURRENT_SETTINGS"] = function()
+                    mutate_state(function(state)
+                        state.is_current_settings_expanded = not state.is_current_settings_expanded
+                    end)
                 end,
                 ["EXPAND_SERVER"] = function(e)
                     local server_name = e.payload[1]
