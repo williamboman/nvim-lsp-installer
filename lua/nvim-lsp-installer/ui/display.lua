@@ -369,6 +369,14 @@ function M.new_view_only_win(name)
             unsubscribe(true)
             M.delete_win_buf(win_id, bufnr)
         end),
+        set_cursor = function(pos)
+            assert(win_id ~= nil, "Window has not been opened, cannot set cursor.")
+            return vim.api.nvim_win_set_cursor(win_id, pos)
+        end,
+        get_cursor = function()
+            assert(win_id ~= nil, "Window has not been opened, cannot get cursor.")
+            return vim.api.nvim_win_get_cursor(win_id)
+        end,
     }
 end
 

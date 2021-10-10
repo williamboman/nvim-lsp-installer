@@ -541,6 +541,9 @@ local function init(all_servers)
             },
             effects = {
                 ["TOGGLE_HELP"] = function()
+                    if not get_state().is_showing_help then
+                        window.set_cursor { 1, 1 }
+                    end
                     mutate_state(function(state)
                         state.is_showing_help = not state.is_showing_help
                     end)
