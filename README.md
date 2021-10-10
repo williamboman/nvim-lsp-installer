@@ -167,6 +167,7 @@ local DEFAULT_SETTINGS = {
 | Elm                                 | `elmls`                  |
 | Ember                               | `ember`                  |
 | Emmet                               | `emmet_ls`               |
+| Erlang                              | `erlangls`              |
 | Fortran                             | `fortls`                 |
 | Go                                  | `gopls`                  |
 | GraphQL                             | `graphql`                |
