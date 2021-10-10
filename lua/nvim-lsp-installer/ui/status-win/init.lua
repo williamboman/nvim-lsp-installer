@@ -41,7 +41,7 @@ local function Help(is_current_settings_expanded)
     local keymap_tuples = {
         { "Toggle help", HELP_KEYMAP },
         { "Toggle server info", settings.current.ui.keymaps.toggle_server_expand },
-        { "Reinstall server", settings.current.ui.keymaps.reinstall_server },
+        { "Update server", settings.current.ui.keymaps.update_server },
         { "Uninstall server", settings.current.ui.keymaps.uninstall_server },
         { "Install server", settings.current.ui.keymaps.install_server },
         { "Close window", CLOSE_WINDOW_KEYMAP_1 },
@@ -102,8 +102,7 @@ end
 local function Header()
     return Ui.CascadingStyleNode({ Ui.CascadingStyle.CENTERED }, {
         Ui.HlTextNode {
-            { { "nvim-lsp-installer", "LspInstallerHeader" } },
-            { { ":help nvim-lsp-installer", "Comment" } },
+            { { ":help ", "LspInstallerMuted" }, { "nvim-lsp-installer", "LspInstallerHeader" } },
             { { "https://github.com/williamboman/nvim-lsp-installer", "Comment" } },
         },
     })
@@ -138,34 +137,39 @@ local function ServerMetadata(server)
     return Ui.Table(Data.list_not_nil(
         Data.lazy(server.metadata.install_timestamp_seconds, function()
             return {
-                { "Installation date", "LspInstallerMuted" },
+                { "last updated", "LspInstallerMuted" },
                 { get_relative_install_time(server.metadata.install_timestamp_seconds), "" },
             }
         end),
         Data.when(server.is_installed, {
-            { "Install directory", "LspInstallerMuted" },
+            { "path", "LspInstallerMuted" },
             { server.metadata.install_dir, "" },
         }),
-        Data.when(server.metadata.homepage, {
-            { "Server homepage", "LspInstallerMuted" },
-            { server.metadata.homepage, "" },
-        })
+        Data.when(server.is_installed, {
+            { "startup command", "LspInstallerMuted" },
+            { server.metadata.cmd, "" },
+        }),
+        {
+            { "homepage", "LspInstallerMuted" },
+            { server.metadata.homepage or "-", "" },
+        }
     ))
 end
 
-local function InstalledServers(servers)
+local function InstalledServers(servers, expanded_server)
     return Ui.Node(Data.list_map(function(server)
+        local is_expanded = expanded_server == server.name
         return Ui.Node {
             Ui.HlTextNode {
-                {
+                Data.list_not_nil(
                     { settings.current.ui.icons.server_installed, "LspInstallerGreen" },
-                    { " " .. server.name, "" },
-                },
+                    { " " .. server.name, "" }
+                ),
             },
             Ui.Keybind(settings.current.ui.keymaps.toggle_server_expand, "EXPAND_SERVER", { server.name }),
-            Ui.Keybind(settings.current.ui.keymaps.reinstall_server, "INSTALL_SERVER", { server.name }),
+            Ui.Keybind(settings.current.ui.keymaps.update_server, "INSTALL_SERVER", { server.name }),
             Ui.Keybind(settings.current.ui.keymaps.uninstall_server, "UNINSTALL_SERVER", { server.name }),
-            Ui.When(server.is_expanded, function()
+            Ui.When(is_expanded, function()
                 return Indent {
                     ServerMetadata(server),
                 }
@@ -193,22 +197,23 @@ end
 local function PendingServers(servers)
     return Ui.Node(Data.list_map(function(server)
         local has_failed = server.installer.has_run or server.uninstaller.has_run
-        local note = has_failed and "(failed)" or (server.installer.is_queued and "(queued)" or "(running)")
+        local note = has_failed and "(failed)" or (server.installer.is_queued and "(queued)" or "(installing)")
         return Ui.Node {
             Ui.HlTextNode {
-                {
+                Data.list_not_nil(
                     {
                         settings.current.ui.icons.server_pending,
                         has_failed and "LspInstallerError" or "LspInstallerOrange",
                     },
                     { " " .. server.name, server.installer.is_running and "" or "LspInstallerMuted" },
                     { " " .. note, "Comment" },
-                    {
-                        has_failed and "" or (" " .. get_last_non_empty_line(server.installer.tailed_output)),
+                    Data.when(not has_failed, {
+                        (" " .. get_last_non_empty_line(server.installer.tailed_output)),
                         "Comment",
-                    },
-                },
+                    })
+                ),
             },
+            Ui.Keybind(settings.current.ui.keymaps.install_server, "INSTALL_SERVER", { server.name }),
             Ui.When(has_failed, function()
                 return Indent { Indent { TailedOutput(server) } }
             end),
@@ -222,19 +227,20 @@ local function PendingServers(servers)
     end, servers))
 end
 
-local function UninstalledServers(servers)
+local function UninstalledServers(servers, expanded_server)
     return Ui.Node(Data.list_map(function(server)
+        local is_expanded = expanded_server == server.name
         return Ui.Node {
             Ui.HlTextNode {
-                {
+                Data.list_not_nil(
                     { settings.current.ui.icons.server_uninstalled, "LspInstallerMuted" },
-                    { " " .. server.name, "Comment" },
-                    { server.uninstaller.has_run and " (just uninstalled)" or "", "Comment" },
-                },
+                    { " " .. server.name, "LspInstallerMuted" },
+                    Data.when(server.uninstaller.has_run, { " (just uninstalled)", "Comment" })
+                ),
             },
             Ui.Keybind(settings.current.ui.keymaps.toggle_server_expand, "EXPAND_SERVER", { server.name }),
             Ui.Keybind(settings.current.ui.keymaps.install_server, "INSTALL_SERVER", { server.name }),
-            Ui.When(server.is_expanded, function()
+            Ui.When(is_expanded, function()
                 return Indent {
                     ServerMetadata(server),
                 }
@@ -259,13 +265,13 @@ local function ServerGroup(props)
                 count = total_server_count,
             },
             Indent(Data.list_map(function(servers)
-                return props.renderer(servers)
+                return props.renderer(servers, props.expanded_server)
             end, props.servers)),
         }
     end)
 end
 
-local function Servers(servers)
+local function Servers(servers, expanded_server)
     local grouped_servers = {
         installed = {},
         queued = {},
@@ -307,6 +313,7 @@ local function Servers(servers)
             title = "Installed servers",
             renderer = InstalledServers,
             servers = { grouped_servers.session_installed, grouped_servers.installed },
+            expanded_server = expanded_server,
         },
         ServerGroup {
             title = "Pending servers",
@@ -318,11 +325,13 @@ local function Servers(servers)
                 grouped_servers.install_failed,
                 grouped_servers.uninstall_failed,
             },
+            expanded_server = expanded_server,
         },
         ServerGroup {
             title = "Available servers",
             renderer = UninstalledServers,
             servers = { grouped_servers.session_uninstalled, grouped_servers.uninstalled },
+            expanded_server = expanded_server,
         },
     }
 end
@@ -331,8 +340,8 @@ local function create_initial_server_state(server)
     return {
         name = server.name,
         is_installed = server:is_installed(),
-        is_expanded = false,
         metadata = {
+            cmd = table.concat(server._default_options.cmd, " "),
             homepage = server.homepage,
             install_timestamp_seconds = nil, -- lazy
             install_dir = server.root_dir,
@@ -368,7 +377,7 @@ local function init(all_servers)
                 return Help(state.is_current_settings_expanded)
             end),
             Ui.When(not state.is_showing_help, function()
-                return Servers(state.servers)
+                return Servers(state.servers, state.expanded_server)
             end),
         }
     end)
@@ -382,6 +391,7 @@ local function init(all_servers)
     local mutate_state, get_state = window.init {
         servers = servers,
         is_showing_help = false,
+        expanded_server = nil,
     }
 
     -- TODO: memoize or throttle.. or cache. Do something. Also, as opposed to what the naming currently suggests, this
@@ -401,9 +411,14 @@ local function init(all_servers)
 
     local function expand_server(server_name)
         mutate_state(function(state)
-            state.servers[server_name].is_expanded = not state.servers[server_name].is_expanded
+            local should_expand = state.expanded_server ~= server_name
+            state.expanded_server = should_expand and server_name or nil
+            if should_expand then
+                vim.schedule(function()
+                    async_populate_server_metadata(server_name)
+                end)
+            end
         end)
-        async_populate_server_metadata(server_name)
     end
 
     local function start_install(server_tuple, on_complete)
@@ -439,7 +454,6 @@ local function init(all_servers)
                     state.servers[server.name].installer.tailed_output = {}
                 end
                 state.servers[server.name].is_installed = success
-                state.servers[server.name].is_expanded = true
                 state.servers[server.name].installer.is_running = false
                 state.servers[server.name].installer.has_run = true
             end)
@@ -508,6 +522,10 @@ local function init(all_servers)
     end
 
     local function open()
+        mutate_state(function(state)
+            state.is_showing_help = false
+        end)
+
         window.open {
             win_width = 95,
             highlight_groups = {

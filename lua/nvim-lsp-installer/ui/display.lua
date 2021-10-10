@@ -183,6 +183,9 @@ function M.delete_win_buf(win_id, bufnr)
         if registered_effect_handlers_by_bufnr[bufnr] then
             registered_effect_handlers_by_bufnr[bufnr] = nil
         end
+        if registered_keymaps_by_bufnr[bufnr] then
+            registered_keymaps_by_bufnr[bufnr] = nil
+        end
     end)
 end
 

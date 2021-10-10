@@ -12,9 +12,9 @@ local DEFAULT_SETTINGS = {
             -- Keymap to expand a server in the UI
             toggle_server_expand = "<CR>",
             -- Keymap to install a server
-            install_server = "-",
-            -- Keymap to reinstall a server
-            reinstall_server = "r",
+            install_server = "i",
+            -- Keymap to reinstall/update a server
+            update_server = "u",
             -- Keymap to uninstall a server
             uninstall_server = "X",
         },
