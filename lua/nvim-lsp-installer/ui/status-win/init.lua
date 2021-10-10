@@ -396,7 +396,7 @@ local function init(all_servers)
 
     -- TODO: memoize or throttle.. or cache. Do something. Also, as opposed to what the naming currently suggests, this
     -- is not really doing anything async stuff, but will very likely do so in the future :tm:.
-    local function async_populate_server_metadata(server_name)
+    local async_populate_server_metadata = vim.schedule_wrap(function(server_name)
         local ok, server = lsp_servers.get_server(server_name)
         if not ok then
             return log.warn("Unable to get server when populating metadata.", server_name)
@@ -407,16 +407,14 @@ local function init(all_servers)
                 state.servers[server.name].metadata.install_timestamp_seconds = fstat.mtime.sec
             end
         end)
-    end
+    end)
 
     local function expand_server(server_name)
         mutate_state(function(state)
             local should_expand = state.expanded_server ~= server_name
             state.expanded_server = should_expand and server_name or nil
             if should_expand then
-                vim.schedule(function()
-                    async_populate_server_metadata(server_name)
-                end)
+                async_populate_server_metadata(server_name)
             end
         end)
     end
