@@ -16,8 +16,8 @@ On top of just providing commands for installing & uninstalling LSP servers, it:
 -   provides a graphical UI
 -   optimized for blazing fast startup times
 -   supports installing custom versions of LSP servers (for example `:LspInstall rust_analyzer@nightly`)
--   provides configurations for servers that aren't supported by nvim-lspconfig (`eslint`)
--   common install tasks are abstracted behind Lua APIs (has direct integration with libuv via vim.loop)
+-   common install tasks are abstracted behind composable Lua APIs (has direct integration with libuv via vim.loop)
+-   minimum requirements are relaxed by attempting multiple different utilities (for example, only one of `wget`, `curl`, or `Invoke-WebRequest` is required for HTTP requests)
 -   <img src="https://user-images.githubusercontent.com/6705160/131256603-cacf7f66-dfa9-4515-8ae4-0e42d08cfc6a.png" height="20"> full support for Windows
 
 ## Installation
@@ -26,7 +26,7 @@ Requires neovim `>= 0.5.0` and [nvim-lspconfig](https://github.com/neovim/nvim-l
 install all servers are:
 
 -   For Unix systems: bash(1), git(1), curl(1) or wget(1), unzip(1), tar(1), gzip(1)
--   For Windows systems: powershell, git, tar, and [7zip](7zip) or [peazip](peazip) or [archiver](archiver) or [winzip](winzip)
+-   For Windows systems: powershell, git, tar, and [7zip][7zip] or [peazip][peazip] or [archiver][archiver] or [winzip][winzip]
 -   Node.js (LTS) & npm
 -   Python3 & pip3
 -   go
@@ -116,33 +116,6 @@ require("nvim-lsp-installer").settings {
 }
 ```
 
-#### Default configuration
-
-```lua
-local DEFAULT_SETTINGS = {
-    ui = {
-        icons = {
-            -- The list icon to use for installed servers.
-            server_installed = "◍",
-            -- The list icon to use for servers that are pending installation.
-            server_pending = "◍",
-            -- The list icon to use for servers that are not installed.
-            server_uninstalled = "◍",
-        },
-    },
-
-    -- Controls to which degree logs are written to the log file. It's useful to set this to vim.log.levels.DEBUG when
-    -- debugging issues with server installations.
-    log_level = vim.log.levels.INFO,
-
-    -- Whether to allow LSP servers to share the same installation directory. For some servers, this effectively causes
-    -- more than one server to be installed (and uninstalled) when executing `:LspInstall` and `:LspUninstall`. For
-    -- example, installing `cssls` will also install both `jsonls` and `html` (and the other ways around), as these all
-    -- share the same underlying package.
-    allow_federated_servers = true,
-}
-```
-
 ## Available LSPs
 
 | Language                            | Server name              |
@@ -227,3 +200,44 @@ Illustrations in the logo are derived from [@Kaligule](https://schauderbasis.de/
 -   Command (and corresponding Lua API) to update outdated servers (e.g., `:LspUpdate {server}`)
 -   More helpful metadata displayed in the UI window
 -   Cross-platform CI for all server installers
+
+## Default configuration
+
+```lua
+local DEFAULT_SETTINGS = {
+    ui = {
+        icons = {
+            -- The list icon to use for installed servers.
+            server_installed = "◍",
+            -- The list icon to use for servers that are pending installation.
+            server_pending = "◍",
+            -- The list icon to use for servers that are not installed.
+            server_uninstalled = "◍",
+        },
+        keymaps = {
+            -- Keymap to expand a server in the UI
+            toggle_server_expand = "<CR>",
+            -- Keymap to install a server
+            install_server = "i",
+            -- Keymap to reinstall/update a server
+            update_server = "u",
+            -- Keymap to uninstall a server
+            uninstall_server = "X",
+        },
+    },
+
+    -- Controls to which degree logs are written to the log file. It's useful to set this to vim.log.levels.DEBUG when
+    -- debugging issues with server installations.
+    log_level = vim.log.levels.INFO,
+
+    -- Whether to allow LSP servers to share the same installation directory. For some servers, this effectively causes
+    -- more than one server to be installed (and uninstalled) when executing `:LspInstall` and `:LspUninstall`. For
+    -- example, installing `cssls` will also install both `jsonls` and `html` (and the other ways around), as these all
+    -- share the same underlying package.
+    allow_federated_servers = true,
+
+    -- Limit for the maximum amount of servers to be installed at the same time. Once this limit is reached, any further
+    -- servers that are requested to be installed will be put in a queue.
+    max_concurrent_installers = 4,
+}
+```
