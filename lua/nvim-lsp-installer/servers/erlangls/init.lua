@@ -8,6 +8,7 @@ return function(name, root_dir)
     return server.Server:new {
         name = name,
         root_dir = root_dir,
+        homepage = "https://erlang-ls.github.io/",
         installer = {
             std.ensure_executables {
                 { "rebar3", "rebar3 was not found in path. Refer to http://rebar3.org/docs/." },
