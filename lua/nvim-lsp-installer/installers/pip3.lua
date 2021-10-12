@@ -38,10 +38,9 @@ local function create_installer(python_executable, pip_executable, packages)
 end
 
 function M.packages(packages)
-    return installers.first_successful {
-        create_installer("python3", "pip3", packages),
-        create_installer("python", "pip", packages),
-    }
+    local py3 = create_installer("python3", "pip3", packages)
+    local py = create_installer("python", "pip", packages)
+    return installers.first_successful(platform.is_win and { py, py3 } or { py3, py }) -- see https://github.com/williamboman/nvim-lsp-installer/issues/128
 end
 
 function M.executable(root_dir, executable)
