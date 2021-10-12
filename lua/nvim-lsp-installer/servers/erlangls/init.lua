@@ -6,6 +6,7 @@ local context = require "nvim-lsp-installer.installers.context"
 local platform = require "nvim-lsp-installer.platform"
 
 return function(name, root_dir)
+    local erlang_ls_file_ext = platform.is_win and ".cmd" or ""
     return server.Server:new {
         name = name,
         root_dir = root_dir,
@@ -26,12 +27,14 @@ return function(name, root_dir)
                 c.run(rebar3, { "as", "dap", "escriptize" })
                 c.spawn(callback)
             end,
-            -- TODO: check this on Windows
-            std.rename("_build/default/bin/erlang_ls", "erlang_ls"),
+            std.rename(
+                ("_build/default/bin/erlang_ls%s"):format(erlang_ls_file_ext),
+                ("erlang_ls%s"):format(erlang_ls_file_ext)
+            ),
             std.chmod("+x", { "erlang_ls" }),
         },
         default_options = {
-            cmd = { path.concat { root_dir, "erlang_ls" } },
+            cmd = { path.concat { root_dir, ("erlang_ls%s"):format(erlang_ls_file_ext) } },
         },
     }
 end
