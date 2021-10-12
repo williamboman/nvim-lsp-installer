@@ -27,14 +27,9 @@ return function(name, root_dir)
                 c.run(rebar3, { "as", "dap", "escriptize" })
                 c.spawn(callback)
             end,
-            std.rename(
-                ("_build/default/bin/erlang_ls%s"):format(erlang_ls_file_ext),
-                ("erlang_ls%s"):format(erlang_ls_file_ext)
-            ),
-            std.chmod("+x", { "erlang_ls" }),
         },
         default_options = {
-            cmd = { path.concat { root_dir, ("erlang_ls%s"):format(erlang_ls_file_ext) } },
+            cmd = { path.concat { root_dir, ("_build/default/bin/erlang_ls%s"):format(erlang_ls_file_ext) } },
         },
     }
 end
