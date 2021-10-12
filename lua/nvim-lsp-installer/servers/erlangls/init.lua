@@ -3,6 +3,7 @@ local path = require "nvim-lsp-installer.path"
 local process = require "nvim-lsp-installer.process"
 local std = require "nvim-lsp-installer.installers.std"
 local context = require "nvim-lsp-installer.installers.context"
+local platform = require "nvim-lsp-installer.platform"
 
 return function(name, root_dir)
     return server.Server:new {
@@ -20,8 +21,9 @@ return function(name, root_dir)
                     cwd = server.root_dir,
                     stdio_sink = context.stdio_sink,
                 }
-                c.run("rebar3", { "escriptize" })
-                c.run("rebar3", { "as", "dap", "escriptize" })
+                local rebar3 = platform.is_win and "rebar3.cmd" or "rebar3"
+                c.run(rebar3, { "escriptize" })
+                c.run(rebar3, { "as", "dap", "escriptize" })
                 c.spawn(callback)
             end,
             -- TODO: check this on Windows
