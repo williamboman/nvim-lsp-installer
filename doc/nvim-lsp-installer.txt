@@ -157,7 +157,8 @@ The following settings are applied by default. >
 
         pip = {
             -- If set, this setting will be added as the --proxy flag to all pip calls. Note that it's recommended to use
-            -- HTTP_PROXY & HTTPS_PROXY environment variables instead of configuring the proxy on a per-utility basis.
+            -- HTTP_PROXY & HTTPS_PROXY environment variables instead of configuring the proxy on a per-utility basis. This
+            -- setting is provided for cases when that is not possible.
             proxy = nil,
         },
 
