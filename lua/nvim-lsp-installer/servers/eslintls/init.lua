@@ -22,7 +22,7 @@ return function(name, root_dir)
             npm.run "compile:server",
         },
         pre_setup = function()
-            notify([[eslintls is depracted, switch to "eslint" instead.]], vim.log.levels.WARN)
+            notify([[eslintls is deprecated, switch to "eslint" instead.]], vim.log.levels.WARN)
             local lspconfig = require "lspconfig"
             local configs = require "lspconfig/configs"
 
