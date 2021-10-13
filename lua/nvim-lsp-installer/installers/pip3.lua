@@ -4,6 +4,7 @@ local installers = require "nvim-lsp-installer.installers"
 local std = require "nvim-lsp-installer.installers.std"
 local platform = require "nvim-lsp-installer.platform"
 local process = require "nvim-lsp-installer.process"
+local settings = require "nvim-lsp-installer.settings"
 
 local M = {}
 
@@ -30,7 +31,13 @@ local function create_installer(python_executable, pip_executable, packages)
                 -- The "head" package is the recipient for the requested version. It's.. by design... don't ask.
                 pkgs[1] = ("%s==%s"):format(pkgs[1], context.requested_server_version)
             end
-            c.run(M.executable(server.root_dir, pip_executable), vim.list_extend({ "install", "-U" }, pkgs))
+
+            local install_command = { "install", "-U" }
+            if settings.current.pip.proxy then
+                vim.list_extend(install_command, { "--proxy", settings.current.pip.proxy })
+            end
+
+            c.run(M.executable(server.root_dir, pip_executable), vim.list_extend(install_command, pkgs))
 
             c.spawn(callback)
         end,
