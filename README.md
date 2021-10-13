@@ -226,6 +226,12 @@ local DEFAULT_SETTINGS = {
         },
     },
 
+    pip = {
+        -- If set, this setting will be added as the --proxy flag to all pip calls. Note that it's recommended to use
+        -- HTTP_PROXY & HTTPS_PROXY environment variables instead of configuring the proxy on a per-utility basis.
+        proxy = nil,
+    },
+
     -- Controls to which degree logs are written to the log file. It's useful to set this to vim.log.levels.DEBUG when
     -- debugging issues with server installations.
     log_level = vim.log.levels.INFO,
