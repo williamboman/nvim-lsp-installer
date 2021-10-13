@@ -43,10 +43,10 @@ local DEFAULT_SETTINGS = {
 
 local M = {}
 
-function M.set(opts)
-    M.current = vim.tbl_deep_extend("force", DEFAULT_SETTINGS, opts)
-end
-
 M.current = DEFAULT_SETTINGS
+
+function M.set(opts)
+    M.current = vim.tbl_deep_extend("force", M.current, opts)
+end
 
 return M
