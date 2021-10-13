@@ -15,12 +15,14 @@ return function(name, root_dir)
     return server.Server:new {
         name = name,
         root_dir = root_dir,
+        is_deprecated = true,
         installer = {
             std.git_clone "https://github.com/microsoft/vscode-eslint",
             npm.install(),
             npm.run "compile:server",
         },
         pre_setup = function()
+            notify([[eslintls is depracted, switch to "eslint" instead.]], vim.log.levels.WARN)
             local lspconfig = require "lspconfig"
             local configs = require "lspconfig/configs"
 
