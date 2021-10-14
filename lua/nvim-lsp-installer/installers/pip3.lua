@@ -10,14 +10,13 @@ local M = {}
 
 local REL_INSTALL_DIR = "venv"
 
-local function create_installer(python_executable, pip_executable, packages)
+local function create_installer(python_executable, packages)
     return installers.pipe {
         std.ensure_executables {
             {
                 python_executable,
                 ("%s was not found in path. Refer to https://www.python.org/downloads/."):format(python_executable),
             },
-            { pip_executable, ("%s was not found in path."):format(pip_executable) },
         },
         function(server, callback, context)
             local pkgs = Data.list_copy(packages or {})
@@ -37,7 +36,7 @@ local function create_installer(python_executable, pip_executable, packages)
                 vim.list_extend(install_command, { "--proxy", settings.current.pip.proxy })
             end
 
-            c.run(M.executable(server.root_dir, pip_executable), vim.list_extend(install_command, pkgs))
+            c.run(M.executable(server.root_dir, "python"), vim.list_extend({ "-m", "pip", "install", "-U" }, pkgs))
 
             c.spawn(callback)
         end,
@@ -45,8 +44,8 @@ local function create_installer(python_executable, pip_executable, packages)
 end
 
 function M.packages(packages)
-    local py3 = create_installer("python3", "pip3", packages)
-    local py = create_installer("python", "pip", packages)
+    local py3 = create_installer("python3", packages)
+    local py = create_installer("python", packages)
     return installers.first_successful(platform.is_win and { py, py3 } or { py3, py }) -- see https://github.com/williamboman/nvim-lsp-installer/issues/128
 end
 
