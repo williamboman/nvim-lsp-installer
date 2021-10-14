@@ -31,12 +31,12 @@ local function create_installer(python_executable, packages)
                 pkgs[1] = ("%s==%s"):format(pkgs[1], context.requested_server_version)
             end
 
-            local install_command = { "install", "-U" }
+            local install_command = { "-m", "pip", "install", "-U" }
             if settings.current.pip.proxy then
                 vim.list_extend(install_command, { "--proxy", settings.current.pip.proxy })
             end
 
-            c.run(M.executable(server.root_dir, "python"), vim.list_extend({ "-m", "pip", "install", "-U" }, pkgs))
+            c.run(M.executable(server.root_dir, "python"), vim.list_extend(install_command, pkgs))
 
             c.spawn(callback)
         end,
