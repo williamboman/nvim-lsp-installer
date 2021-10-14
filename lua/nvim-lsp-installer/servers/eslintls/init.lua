@@ -15,14 +15,16 @@ return function(name, root_dir)
     return server.Server:new {
         name = name,
         root_dir = root_dir,
-        is_deprecated = true,
+        deprecated = {
+            message = "eslintls has been replaced with eslint. It's still the same server - just a different name and upstream dependencies.",
+            replace_with = "eslint",
+        },
         installer = {
             std.git_clone "https://github.com/microsoft/vscode-eslint",
             npm.install(),
             npm.run "compile:server",
         },
         pre_setup = function()
-            notify([[eslintls is deprecated, switch to "eslint" instead.]], vim.log.levels.WARN)
             local lspconfig = require "lspconfig"
             local configs = require "lspconfig/configs"
 
