@@ -74,6 +74,28 @@ function M.Server:get_default_options()
     return vim.deepcopy(self._default_options)
 end
 
+function M.Server:get_supported_filetypes()
+    log.fmt_debug("got filetypes query request for: ", self.name)
+
+    if self._default_options.filetypes then
+        return self._default_options.filetypes
+    end
+
+    local configs = require "lspconfig/configs"
+    local default_server_config = "lspconfig/" .. self.name
+    pcall(require, default_server_config)
+    for _, config in pairs(configs) do
+        if config.name == self.name then
+            self._default_options.filetypes = vim.deepcopy(config.document_config.default_config.filetypes) or {}
+            -- it seems necessary to force lspconfig to reload the servers, otherwise some servers are reporting empty filetypes
+            -- consider generating cache instead
+            package.loaded["lspconfig/configs"] = nil
+            package.loaded[default_server_config] = nil
+            return self._default_options.filetypes
+        end
+    end
+end
+
 function M.Server:is_installed()
     return servers.is_server_installed(self.name)
 end
