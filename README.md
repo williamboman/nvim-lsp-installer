@@ -227,10 +227,11 @@ local DEFAULT_SETTINGS = {
     },
 
     pip = {
-        -- If set, this setting will be added as the --proxy flag to all pip calls. Note that it's recommended to use
-        -- HTTP_PROXY & HTTPS_PROXY environment variables instead of configuring the proxy on a per-utility basis. This
-        -- setting is provided for cases when that is not possible.
-        proxy = nil,
+        -- These args will be added to `pip install` calls. Note that setting extra args might impact intended behavior
+        -- and is not recommended.
+        --
+        -- Example: { "--proxy", "https://proxyserver" }
+        install_args = {},
     },
 
     -- Controls to which degree logs are written to the log file. It's useful to set this to vim.log.levels.DEBUG when
