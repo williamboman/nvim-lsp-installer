@@ -36,7 +36,7 @@ end
 function M.graft_env(env)
     local merged_env = {}
     for key, val in pairs(initial_environ) do
-        if not env[key] then
+        if env[key] == nil then
             merged_env[#merged_env + 1] = key .. "=" .. val
         end
     end
