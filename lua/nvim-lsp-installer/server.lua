@@ -74,6 +74,22 @@ function M.Server:get_default_options()
     return vim.deepcopy(self._default_options)
 end
 
+function M.Server:get_supported_filetypes()
+    log.fmt_debug("got filetypes query request for: ", self.name)
+    local metadata = require "nvim-lsp-installer._generated.metadata"
+
+    if self._default_options.filetypes then
+        return self._default_options.filetypes
+    end
+
+    for server, entry in pairs(metadata) do
+        if server == self.name then
+            self._default_options.filetypes = entry.filetyes or {}
+            return self._default_options.filetypes
+        end
+    end
+end
+
 function M.Server:is_installed()
     return servers.is_server_installed(self.name)
 end

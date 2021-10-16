@@ -112,6 +112,18 @@ local function Header()
     })
 end
 
+local function format_list(list)
+    if not list or vim.tbl_count(list) == 0 then
+        return ""
+    end
+    -- make sure the list isn't too long
+    if vim.tbl_count(list) > 5 then
+        list = vim.list_slice(list, 1, 5)
+        vim.list_extend(list, { ".." })
+    end
+    return string.format("{ %s }", table.concat(list, ", "))
+end
+
 local Seconds = {
     DAY = 86400, -- 60 * 60 * 24
     WEEK = 604800, -- 60 * 60 * 24 * 7
@@ -163,6 +175,10 @@ local function ServerMetadata(server)
                     { get_relative_install_time(server.metadata.install_timestamp_seconds), "" },
                 }
             end),
+            {
+                { "filetypes", "LspInstallerMuted" },
+                { format_list(server.metadata.filetypes), "" },
+            },
             Data.when(server.is_installed, {
                 { "path", "LspInstallerMuted" },
                 { server.metadata.install_dir, "" },
@@ -365,6 +381,7 @@ local function create_initial_server_state(server)
             homepage = server.homepage,
             install_timestamp_seconds = nil, -- lazy
             install_dir = server.root_dir,
+            filetypes = nil,
         },
         installer = {
             is_queued = false,
@@ -425,6 +442,7 @@ local function init(all_servers)
         mutate_state(function(state)
             if fstat_ok then
                 state.servers[server.name].metadata.install_timestamp_seconds = fstat.mtime.sec
+                state.servers[server.name].metadata.filetypes = server:get_supported_filetypes()
             end
         end)
     end)
