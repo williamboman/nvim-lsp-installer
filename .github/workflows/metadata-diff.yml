@@ -1,0 +1,23 @@
+name: Metadata diff checker
+
+on:
+    push:
+        branches:
+            - 'main'
+    pull_request:
+
+jobs:
+    metadata-diff-check:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v2
+            - uses: rhysd/action-setup-vim@v1
+              with:
+                neovim: true
+                version: nightly
+            - name: Run autogen_metadata.sh script
+              run: ./scripts/autogen_metadata.sh
+            - name: Ensure there are no diffs
+              run: |
+                git update-index --refresh
+                git diff-index --quiet HEAD --
