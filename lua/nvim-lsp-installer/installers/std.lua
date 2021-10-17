@@ -214,7 +214,7 @@ function M.ensure_executables(executables)
                 context.stdio_sink.stderr(error_msg .. "\n")
             end
         end
-        callback(has_error)
+        callback(not has_error)
     end)
 end
 
