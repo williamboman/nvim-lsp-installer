@@ -384,7 +384,7 @@ local function create_initial_server_state(server)
             homepage = server.homepage,
             install_timestamp_seconds = nil, -- lazy
             install_dir = server.root_dir,
-            filetypes = table.concat(server:get_supported_filetypes() or {"EMPTY"}, ", "),
+            filetypes = table.concat(server:get_supported_filetypes(), ", "),
         },
         installer = {
             is_queued = false,

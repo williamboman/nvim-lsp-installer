@@ -27,13 +27,18 @@ local function write_file(path, txt, flag)
     end)
 end
 
-local function get_supported_filetypes(server_name)
+local function get_supported_filetypes(server)
     local configs = require "lspconfig/configs"
-    pcall(require, ("lspconfig/" .. server_name))
-    for _, config in pairs(configs) do
-        if config.name == server_name then
-            return config.document_config.default_config.filetypes
-        end
+    pcall(require, ("lspconfig/" .. server.name))
+    local default_options = server:get_default_options()
+    if default_options.filetypes then
+        -- nvim-lsp-installer options has precedence
+        return default_options.filetypes
+    end
+    if configs[server.name] then
+        return configs[server.name].document_config.default_config.filetypes or {}
+    else
+        error(("Unexpected error: Could not find lspconfig entry for %q"):format(server.name))
     end
     -- it's probably still not safe to do this in runtime, but just in case
     package.loaded["lspconfig/configs"] = nil
@@ -42,13 +47,13 @@ end
 local function generate_metadata_table()
     local metadata = {}
 
-    local function create_metatada_entry(server)
-        return { filetypes = get_supported_filetypes(server.name) }
+    local function create_metadata_entry(server)
+        return { filetypes = get_supported_filetypes(server) }
     end
 
     local available_servers = servers.get_available_servers()
     for _, server in pairs(available_servers) do
-        metadata[server.name] = create_metatada_entry(server)
+        metadata[server.name] = create_metadata_entry(server)
     end
     print(string.format("found [%s] configurations", #vim.tbl_keys(metadata)))
 

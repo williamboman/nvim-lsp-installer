@@ -5,7 +5,7 @@ return {
     filetypes = { "typescript", "html", "typescriptreact", "typescript.tsx" }
   },
   ansiblels = {
-    filetypes = { "yaml" }
+    filetypes = { "yaml", "yaml.ansible" }
   },
   bashls = {
     filetypes = { "sh" }
@@ -37,7 +37,9 @@ return {
   dotls = {
     filetypes = { "dot" }
   },
-  efm = {},
+  efm = {
+    filetypes = {}
+  },
   elixirls = {
     filetypes = { "elixir", "eelixir" }
   },
@@ -56,7 +58,9 @@ return {
   eslint = {
     filetypes = { "javascript", "javascriptreact", "javascript.jsx", "typescript", "typescriptreact", "typescript.tsx", "vue" }
   },
-  eslintls = {},
+  eslintls = {
+    filetypes = { "javascript", "javascriptreact", "typescript", "typescriptreact" }
+  },
   fortls = {
     filetypes = { "fortran" }
   },
@@ -64,7 +68,7 @@ return {
     filetypes = { "go", "gomod" }
   },
   graphql = {
-    filetypes = { "graphql" }
+    filetypes = { "typescriptreact", "javascriptreact", "graphql" }
   },
   groovyls = {
     filetypes = { "groovy" }
@@ -93,7 +97,9 @@ return {
   lemminx = {
     filetypes = { "xml", "xsd", "svg" }
   },
-  ltex = {},
+  ltex = {
+    filetypes = { "tex", "bib", "markdown" }
+  },
   ocamlls = {
     filetypes = { "ocaml", "reason" }
   },
