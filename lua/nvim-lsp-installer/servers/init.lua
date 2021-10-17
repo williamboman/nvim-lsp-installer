@@ -28,6 +28,7 @@ local INSTALL_DIRS = {
     ["intelephense"] = "php",
     ["jsonls"] = vscode_langservers_extracted "jsonls",
     ["kotlin_language_server"] = "kotlin",
+    ["phpactor"] = "phpactor-source",
     ["purescriptls"] = "purescript",
     ["pyright"] = "python",
     ["rust_analyzer"] = "rust",
@@ -76,6 +77,7 @@ local CORE_SERVERS = Data.set_of {
     "ocamlls",
     "omnisharp",
     "phpactor",
+    "powershell_es",
     "prismals",
     "puppet",
     "purescriptls",
@@ -97,6 +99,7 @@ local CORE_SERVERS = Data.set_of {
     "texlab",
     "tflint",
     "tsserver",
+    "vala_ls",
     "vimls",
     "volar",
     "vuels",
@@ -113,7 +116,7 @@ local function scan_server_roots()
         return cached_server_roots
     end
     local result = {}
-    local ok, entries = pcall(fs.readdir, path.SERVERS_ROOT_DIR)
+    local ok, entries = pcall(fs.readdir, settings.current.install_root_dir)
     if not ok then
         -- presume servers root dir has not been created yet (i.e., no servers installed)
         return {}
@@ -136,7 +139,7 @@ local function get_server_install_dir(server_name)
 end
 
 function M.get_server_install_path(dirname)
-    return path.concat { path.SERVERS_ROOT_DIR, dirname }
+    return path.concat { settings.current.install_root_dir, dirname }
 end
 
 function M.is_server_installed(server_name)
