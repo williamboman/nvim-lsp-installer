@@ -49,7 +49,6 @@ function M.install()
             args = {
                 "install",
                 "--no-interaction",
-                "--no-progress",
                 "--no-dev",
                 "--optimize-autoloader",
                 "--classmap-authoritative",
