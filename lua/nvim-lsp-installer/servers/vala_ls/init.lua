@@ -36,7 +36,7 @@ return function(name, root_dir)
 
                 c.spawn(callback)
             end,
-            std.delete_dir "vala-language-server",
+            std.rmrf "vala-language-server",
         },
         default_options = {
             cmd = { path.concat { root_dir, "bin", "vala-language-server" } },

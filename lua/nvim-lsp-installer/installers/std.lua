@@ -43,7 +43,7 @@ function M.unzip(file, dest)
             end,
             win = shell.powershell(("Expand-Archive -Path %q -DestinationPath %q"):format(file, dest)),
         },
-        installers.always_succeed(M.delete_file(file)),
+        installers.always_succeed(M.rmrf(file)),
     }
 end
 
@@ -63,7 +63,7 @@ function M.untar(file)
                 stdio_sink = context.stdio_sink,
             }, callback)
         end,
-        installers.always_succeed(M.delete_file(file)),
+        installers.always_succeed(M.rmrf(file)),
     }
 end
 
@@ -91,7 +91,7 @@ local function win_extract(file)
                 on_finish = callback,
             }
         end,
-        installers.always_succeed(M.delete_file(file)),
+        installers.always_succeed(M.rmrf(file)),
     }
 end
 
@@ -112,7 +112,7 @@ local function win_arc_unarchive(file)
                 stdio_sink = context.stdio_sink,
             }, callback)
         end,
-        installers.always_succeed(M.delete_file(file)),
+        installers.always_succeed(M.rmrf(file)),
     }
 end
 
@@ -154,34 +154,24 @@ function M.gunzip_remote(url, out_file)
     return installers.pipe {
         M.download_file(url, archive),
         M.gunzip(archive),
-        installers.always_succeed(M.delete_file(archive)),
+        installers.always_succeed(M.rmrf(archive)),
     }
 end
 
-function M.delete_file(file)
-    return installers.when {
-        unix = function(server, callback, context)
-            process.spawn("rm", {
-                args = { "-f", file },
-                cwd = server.root_dir,
-                stdio_sink = context.stdio_sink,
-            }, callback)
-        end,
-        win = shell.powershell(("Remove-Item %q"):format(file)),
-    }
-end
-
-function M.delete_dir(dir)
-    return installers.when {
-        unix = function(server, callback, context)
-            process.spawn("rm", {
-                args = { "-rf", dir },
-                cwd = server.root_dir,
-                stdio_sink = context.stdio_sink,
-            }, callback)
-        end,
-        win = shell.powershell(("Remove-Item %q -Recurse"):format(dir)),
-    }
+function M.rmrf(rel_path)
+    return function(server, callback, context)
+        local abs_path = path.concat { server.root_dir, rel_path }
+        context.stdio_sink.stdout(("Deleting %q\n"):format(abs_path))
+        vim.schedule(function()
+            local ok = pcall(fs.rmrf, abs_path)
+            if ok then
+                callback(true)
+            else
+                context.stdio_sink.stderr(("Failed to delete %q.\n"):format(abs_path))
+                callback(false)
+            end
+        end)
+    end
 end
 
 function M.git_clone(repo_url)
