@@ -134,7 +134,7 @@ local function format_list(list)
     -- make sure the list isn't too long
     if vim.tbl_count(list) > 5 then
         list = vim.list_slice(list, 1, 5)
-        vim.list_extend(list, { ("... and %d more"):format(#list -5) })
+        vim.list_extend(list, { ("... and %d more"):format(#list - 5) })
     end
     return string.format("{ %s }", table.concat(list, ", "))
 end
@@ -396,7 +396,7 @@ local function create_initial_server_state(server)
             homepage = server.homepage,
             install_timestamp_seconds = nil, -- lazy
             install_dir = server.root_dir,
-            filetypes = nil,
+            filetypes = server:get_supported_filetypes(),
         },
         installer = {
             is_queued = false,
@@ -461,7 +461,6 @@ local function init(all_servers)
         mutate_state(function(state)
             if fstat_ok then
                 state.servers[server.name].metadata.install_timestamp_seconds = fstat.mtime.sec
-                state.servers[server.name].metadata.filetypes = server:get_supported_filetypes()
             end
         end)
     end)

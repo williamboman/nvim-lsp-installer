@@ -84,8 +84,7 @@ function M.Server:get_supported_filetypes()
 
     for server, entry in pairs(metadata) do
         if server == self.name then
-            self._default_options.filetypes = entry.filetyes or {}
-            return self._default_options.filetypes
+            return entry.filetypes
         end
     end
 end

@@ -5,15 +5,12 @@ package.loaded["nvim-lsp-installer.servers"] = nil
 package.loaded["nvim-lsp-installer.fs"] = nil
 local servers = require "nvim-lsp-installer.servers"
 
-local _generated_dir = Path.concat { vim.fn.getcwd(), "lua", "nvim-lsp-installer", "_generated" }
-local metadata_file = Path.concat { _generted_dir, "metadata.json" }
--- the metadata_table can be either a json or lua table
-local metadata_file_lua = Path.concat { _generted_dir, "metadata.lua" }
+local generated_dir = Path.concat { vim.fn.getcwd(), "lua", "nvim-lsp-installer", "_generated" }
 
-print("Creating directory" .. _generted_dir)
-vim.fn.mkdir(_generted_dir, "p")
+print("Creating directory" .. generated_dir)
+vim.fn.mkdir(generated_dir, "p")
 
-for _, file in ipairs(vim.fn.glob(_generted_dir .. "*", 1, 1)) do
+for _, file in ipairs(vim.fn.glob(generated_dir .. "*", 1, 1)) do
     print("Deleting " .. file)
     vim.fn.delete(file)
 end
@@ -30,13 +27,6 @@ local function write_file(path, txt, flag)
     end)
 end
 
-local function read_file(path)
-    local fd = assert(vim.loop.fs_open(path, "r", 438))
-    local stat = assert(vim.loop.fs_fstat(fd))
-    local data = assert(vim.loop.fs_read(fd, stat.size, 0))
-    assert(vim.loop.fs_close(fd))
-    return data
-end
 local function get_supported_filetypes(server_name)
     -- print("got filetypes query request for: " .. server_name)
     local configs = require "lspconfig/configs"
@@ -51,17 +41,15 @@ local function get_supported_filetypes(server_name)
 end
 
 local function generate_metadata_table()
-    local json_table = read_file(metadata_file)
-    local metadata = vim.json.decode(json_table) or {}
+    local metadata = {}
 
     local function create_metatada_entry(server)
-        return { filetypes = get_supported_filetypes(server.name), homepage = server.homepage or "" }
+        return { filetypes = get_supported_filetypes(server.name) }
     end
 
     local available_servers = servers.get_available_servers()
     for _, server in pairs(available_servers) do
-        -- metadata[server.name] = create_metatada_entry(server)
-        metadata[server.name].filetyes = get_supported_filetypes(server.name)
+        metadata[server.name] = create_metatada_entry(server)
     end
     print(string.format("found [%s] configurations", #vim.tbl_keys(metadata)))
 
@@ -70,5 +58,8 @@ end
 
 local mt = generate_metadata_table()
 
-write_file(metadata_file, vim.json.encode(mt), "w")
+-- We don't have any use for JSON file (yet) - skip generating to save bytes
+-- local metadata_json_file = Path.concat { generated_dir, "metadata.json" }
+-- write_file(metadata_json_file, vim.json.encode(mt), "w")
+local metadata_file_lua = Path.concat { generated_dir, "metadata.lua" }
 write_file(metadata_file_lua, "return " .. vim.inspect(mt), "w")
