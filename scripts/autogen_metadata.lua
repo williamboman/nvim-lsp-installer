@@ -32,12 +32,17 @@ end
 
 local function get_supported_filetypes(server)
     local configs = require "lspconfig/configs"
-    pcall(require, ("lspconfig/" .. server.name))
+    local lspconfig_server_ok = pcall(require, ("lspconfig/" .. server.name))
+    if not lspconfig_server_ok then
+        -- This is expected behavior for servers that does not exist in lspconfig.
+        print(("Unable to import lspconfig/%s, continuing..."):format(server.name))
+    end
     local default_options = server:get_default_options()
     local filetypes = coalesce(
         -- nvim-lsp-installer options has precedence
         default_options.filetypes,
-        configs[server.name].document_config.default_config.filetypes
+        lspconfig_server_ok and configs[server.name].document_config.default_config.filetypes,
+        {}
     )
     -- it's probably still not safe to do this in runtime, but just in case
     package.loaded["lspconfig/configs"] = nil
