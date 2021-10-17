@@ -1,3 +1,5 @@
+local path = require "nvim-lsp-installer.path"
+
 local DEFAULT_SETTINGS = {
     ui = {
         icons = {
@@ -19,6 +21,9 @@ local DEFAULT_SETTINGS = {
             uninstall_server = "X",
         },
     },
+
+    -- The directory in which to install all servers.
+    install_root_dir = path.concat { vim.fn.stdpath "data", "lsp_servers" },
 
     -- Controls to which degree logs are written to the log file. It's useful to set this to vim.log.levels.DEBUG when
     -- debugging issues with server installations.
