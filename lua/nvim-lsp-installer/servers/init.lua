@@ -98,6 +98,7 @@ local CORE_SERVERS = Data.set_of {
     "texlab",
     "tflint",
     "tsserver",
+    "vala_ls",
     "vimls",
     "volar",
     "vuels",

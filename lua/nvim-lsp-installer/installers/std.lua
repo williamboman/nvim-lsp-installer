@@ -10,7 +10,7 @@ local M = {}
 function M.download_file(url, out_file)
     return installers.when {
         unix = function(server, callback, context)
-            context.stdio_sink.stdout(("Downloading file %q..."):format(url))
+            context.stdio_sink.stdout(("Downloading file %q...\n"):format(url))
             process.attempt {
                 jobs = {
                     process.lazy_spawn("wget", {
@@ -167,7 +167,20 @@ function M.delete_file(file)
                 stdio_sink = context.stdio_sink,
             }, callback)
         end,
-        win = shell.powershell(("rm %q"):format(file)),
+        win = shell.powershell(("Remove-Item %q"):format(file)),
+    }
+end
+
+function M.delete_dir(dir)
+    return installers.when {
+        unix = function(server, callback, context)
+            process.spawn("rm", {
+                args = { "-rf", dir },
+                cwd = server.root_dir,
+                stdio_sink = context.stdio_sink,
+            }, callback)
+        end,
+        win = shell.powershell(("Remove-Item %q -Recurse"):format(dir)),
     }
 end
 
