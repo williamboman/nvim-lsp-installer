@@ -77,10 +77,6 @@ end
 function M.Server:get_supported_filetypes()
     local metadata = require "nvim-lsp-installer._generated.metadata"
 
-    if self._default_options.filetypes then
-        return self._default_options.filetypes
-    end
-
     if metadata[self.name] then
         return metadata[self.name].filetypes
     end
