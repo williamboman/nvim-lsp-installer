@@ -2,7 +2,7 @@
 -- stylua: ignore start
 return {
   angularls = {
-    filetypes = {"This should break CI pretty please"}
+    filetypes = { "typescript", "html", "typescriptreact", "typescript.tsx" }
   },
   ansiblels = {
     filetypes = { "yaml", "yaml.ansible" }
