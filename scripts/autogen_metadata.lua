@@ -1,5 +1,8 @@
 local uv = vim.loop
 local Path = require "nvim-lsp-installer.path"
+local Data = require "nvim-lsp-installer.data"
+
+local coalesce = Data.coalesce
 
 package.loaded["nvim-lsp-installer.servers"] = nil
 package.loaded["nvim-lsp-installer.fs"] = nil
@@ -31,17 +34,14 @@ local function get_supported_filetypes(server)
     local configs = require "lspconfig/configs"
     pcall(require, ("lspconfig/" .. server.name))
     local default_options = server:get_default_options()
-    if default_options.filetypes then
+    local filetypes = coalesce(
         -- nvim-lsp-installer options has precedence
-        return default_options.filetypes
-    end
-    if configs[server.name] then
-        return configs[server.name].document_config.default_config.filetypes or {}
-    else
-        error(("Unexpected error: Could not find lspconfig entry for %q"):format(server.name))
-    end
+        default_options.filetypes,
+        configs[server.name].document_config.default_config.filetypes
+    )
     -- it's probably still not safe to do this in runtime, but just in case
     package.loaded["lspconfig/configs"] = nil
+    return filetypes
 end
 
 local function generate_metadata_table()
