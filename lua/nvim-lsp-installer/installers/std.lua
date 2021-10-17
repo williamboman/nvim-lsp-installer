@@ -204,17 +204,17 @@ end
 
 function M.ensure_executables(executables)
     return vim.schedule_wrap(function(_, callback, context)
+        local has_error = false
         for i = 1, #executables do
             local entry = executables[i]
             local executable = entry[1]
             local error_msg = entry[2]
             if vim.fn.executable(executable) ~= 1 then
+                has_error = true
                 context.stdio_sink.stderr(error_msg .. "\n")
-                callback(false)
-                return
             end
         end
-        callback(true)
+        callback(has_error)
     end)
 end
 
