@@ -7,7 +7,7 @@ local servers = require "nvim-lsp-installer.servers"
 
 local generated_dir = Path.concat { vim.fn.getcwd(), "lua", "nvim-lsp-installer", "_generated" }
 
-print("Creating directory" .. generated_dir)
+print("Creating directory " .. generated_dir)
 vim.fn.mkdir(generated_dir, "p")
 
 for _, file in ipairs(vim.fn.glob(generated_dir .. "*", 1, 1)) do
@@ -28,7 +28,6 @@ local function write_file(path, txt, flag)
 end
 
 local function get_supported_filetypes(server_name)
-    -- print("got filetypes query request for: " .. server_name)
     local configs = require "lspconfig/configs"
     pcall(require, ("lspconfig/" .. server_name))
     for _, config in pairs(configs) do
@@ -62,4 +61,12 @@ local mt = generate_metadata_table()
 -- local metadata_json_file = Path.concat { generated_dir, "metadata.json" }
 -- write_file(metadata_json_file, vim.json.encode(mt), "w")
 local metadata_file_lua = Path.concat { generated_dir, "metadata.lua" }
-write_file(metadata_file_lua, "return " .. vim.inspect(mt), "w")
+write_file(
+    metadata_file_lua,
+    table.concat({
+        "-- THIS FILE IS GENERATED. DO NOT EDIT MANUALLY.",
+        "-- stylua: ignore start",
+        "return " .. vim.inspect(mt),
+    }, "\n"),
+    "w"
+)

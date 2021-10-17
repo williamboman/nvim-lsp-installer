@@ -1,3 +1,5 @@
+-- THIS FILE IS GENERATED. DO NOT EDIT MANUALLY.
+-- stylua: ignore start
 return {
   angularls = {
     filetypes = { "typescript", "html", "typescriptreact", "typescript.tsx" }
@@ -52,7 +54,7 @@ return {
     filetypes = { "erlang" }
   },
   eslint = {
-    filetypes = { "javascript", "javascriptreact", "javascript.jsx", "typescript", "typescriptreact", "typescript.tsx" }
+    filetypes = { "javascript", "javascriptreact", "javascript.jsx", "typescript", "typescriptreact", "typescript.tsx", "vue" }
   },
   eslintls = {},
   fortls = {

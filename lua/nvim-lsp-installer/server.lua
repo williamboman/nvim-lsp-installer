@@ -75,18 +75,17 @@ function M.Server:get_default_options()
 end
 
 function M.Server:get_supported_filetypes()
-    log.fmt_debug("got filetypes query request for: ", self.name)
     local metadata = require "nvim-lsp-installer._generated.metadata"
 
     if self._default_options.filetypes then
         return self._default_options.filetypes
     end
 
-    for server, entry in pairs(metadata) do
-        if server == self.name then
-            return entry.filetypes
-        end
+    if metadata[self.name] then
+        return metadata[self.name].filetypes
     end
+
+    return {}
 end
 
 function M.Server:is_installed()

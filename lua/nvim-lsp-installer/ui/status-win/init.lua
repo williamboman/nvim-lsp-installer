@@ -127,18 +127,6 @@ local function Header(props)
     })
 end
 
-local function format_list(list)
-    if not list or vim.tbl_count(list) == 0 then
-        return ""
-    end
-    -- make sure the list isn't too long
-    if vim.tbl_count(list) > 5 then
-        list = vim.list_slice(list, 1, 5)
-        vim.list_extend(list, { ("... and %d more"):format(#list - 5) })
-    end
-    return string.format("{ %s }", table.concat(list, ", "))
-end
-
 local Seconds = {
     DAY = 86400, -- 60 * 60 * 24
     WEEK = 604800, -- 60 * 60 * 24 * 7
@@ -192,7 +180,7 @@ local function ServerMetadata(server)
             end),
             {
                 { "filetypes", "LspInstallerMuted" },
-                { format_list(server.metadata.filetypes), "" },
+                { server.metadata.filetypes, "" },
             },
             Data.when(server.is_installed, {
                 { "path", "LspInstallerMuted" },
@@ -396,7 +384,7 @@ local function create_initial_server_state(server)
             homepage = server.homepage,
             install_timestamp_seconds = nil, -- lazy
             install_dir = server.root_dir,
-            filetypes = server:get_supported_filetypes(),
+            filetypes = table.concat(server:get_supported_filetypes() or {"EMPTY"}, ", "),
         },
         installer = {
             is_queued = false,
