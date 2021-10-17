@@ -119,7 +119,7 @@ local function format_list(list)
     -- make sure the list isn't too long
     if vim.tbl_count(list) > 5 then
         list = vim.list_slice(list, 1, 5)
-        vim.list_extend(list, { ".." })
+        vim.list_extend(list, { ("... and %d more"):format(#list -5) })
     end
     return string.format("{ %s }", table.concat(list, ", "))
 end

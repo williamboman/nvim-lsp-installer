@@ -5,14 +5,16 @@ package.loaded["nvim-lsp-installer.servers"] = nil
 package.loaded["nvim-lsp-installer.fs"] = nil
 local servers = require "nvim-lsp-installer.servers"
 
-local _generted_dir = Path.concat { vim.fn.getcwd(), "lua", "nvim-lsp-installer", "_generated" }
+local _generated_dir = Path.concat { vim.fn.getcwd(), "lua", "nvim-lsp-installer", "_generated" }
 local metadata_file = Path.concat { _generted_dir, "metadata.json" }
 -- the metadata_table can be either a json or lua table
 local metadata_file_lua = Path.concat { _generted_dir, "metadata.lua" }
 
+print("Creating directory" .. _generted_dir)
 vim.fn.mkdir(_generted_dir, "p")
 
 for _, file in ipairs(vim.fn.glob(_generted_dir .. "*", 1, 1)) do
+    print("Deleting " .. file)
     vim.fn.delete(file)
 end
 
@@ -53,7 +55,7 @@ local function generate_metadata_table()
     local metadata = vim.json.decode(json_table) or {}
 
     local function create_metatada_entry(server)
-        return { filetyes = get_supported_filetypes(server.name), homepage = server.homepage or "" }
+        return { filetypes = get_supported_filetypes(server.name), homepage = server.homepage or "" }
     end
 
     local available_servers = servers.get_available_servers()
