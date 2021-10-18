@@ -100,12 +100,18 @@ end
 ### Configuration
 
 You can configure certain behavior of nvim-lsp-installer by calling the `.settings()` function.
+
+Make sure to provide your settings before any other interactions with nvim-lsp-installer!
+
 Refer to the [default configuration](#default-configuration) for all available settings.
 
 Example:
 
 ```lua
-require("nvim-lsp-installer").settings {
+local lsp_installer = require("nvim-lsp-installer")
+
+-- Provide settings first!
+lsp_installer.settings {
     ui = {
         icons = {
             server_installed = "✓",
@@ -114,6 +120,8 @@ require("nvim-lsp-installer").settings {
         }
     }
 }
+
+lsp_installer.on_server_ready(function (server) server:setup {} end)
 ```
 
 ## Available LSPs
@@ -157,6 +165,7 @@ require("nvim-lsp-installer").settings {
 | OCaml                               | `ocamlls`                |
 | PHP                                 | `intelephense`           |
 | PHP                                 | `phpactor`               |
+| Powershell                          | `powershell_es`          |
 | Prisma                              | `prismals`               |
 | Puppet                              | `puppet`                 |
 | PureScript                          | `purescriptls`           |
@@ -175,6 +184,7 @@ require("nvim-lsp-installer").settings {
 | Terraform                           | `terraformls`            |
 | Terraform [(docs)][tflint]          | `tflint`                 |
 | TypeScript [(docs)][tsserver]       | `tsserver`               |
+| Vala                                | `vala_ls`                |
 | VimL                                | `vimls`                  |
 | Vue                                 | `volar`                  |
 | Vue                                 | `vuels`                  |
@@ -224,6 +234,17 @@ local DEFAULT_SETTINGS = {
             -- Keymap to uninstall a server
             uninstall_server = "X",
         },
+    },
+
+    -- The directory in which to install all servers.
+    install_root_dir = path.concat { vim.fn.stdpath "data", "lsp_servers" },
+
+    pip = {
+        -- These args will be added to `pip install` calls. Note that setting extra args might impact intended behavior
+        -- and is not recommended.
+        --
+        -- Example: { "--proxy", "https://proxyserver" }
+        install_args = {},
     },
 
     -- Controls to which degree logs are written to the log file. It's useful to set this to vim.log.levels.DEBUG when

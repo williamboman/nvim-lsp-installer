@@ -28,6 +28,7 @@ local INSTALL_DIRS = {
     ["intelephense"] = "php",
     ["jsonls"] = vscode_langservers_extracted "jsonls",
     ["kotlin_language_server"] = "kotlin",
+    ["phpactor"] = "phpactor-source",
     ["purescriptls"] = "purescript",
     ["pyright"] = "python",
     ["rust_analyzer"] = "rust",
@@ -76,6 +77,7 @@ local CORE_SERVERS = Data.set_of {
     "ocamlls",
     "omnisharp",
     "phpactor",
+    "powershell_es",
     "prismals",
     "puppet",
     "purescriptls",
@@ -97,6 +99,7 @@ local CORE_SERVERS = Data.set_of {
     "texlab",
     "tflint",
     "tsserver",
+    "vala_ls",
     "vimls",
     "volar",
     "vuels",
@@ -113,7 +116,7 @@ local function scan_server_roots()
         return cached_server_roots
     end
     local result = {}
-    local ok, entries = pcall(fs.readdir, path.SERVERS_ROOT_DIR)
+    local ok, entries = pcall(fs.readdir, settings.current.install_root_dir)
     if not ok then
         -- presume servers root dir has not been created yet (i.e., no servers installed)
         return {}
@@ -136,7 +139,7 @@ local function get_server_install_dir(server_name)
 end
 
 function M.get_server_install_path(dirname)
-    return path.concat { path.SERVERS_ROOT_DIR, dirname }
+    return path.concat { settings.current.install_root_dir, dirname }
 end
 
 function M.is_server_installed(server_name)
@@ -173,10 +176,6 @@ function M.get_server(server_name)
         ):format(server_name, "https://github.com/williamboman/nvim-lsp-installer", server_factory)
 end
 
-local function get_available_server_names()
-    return vim.tbl_keys(vim.tbl_extend("force", CORE_SERVERS, INITIALIZED_SERVERS))
-end
-
 local function resolve_servers(server_names)
     return Data.list_map(function(server_name)
         local ok, server = M.get_server(server_name)
@@ -187,20 +186,35 @@ local function resolve_servers(server_names)
     end, server_names)
 end
 
-function M.get_available_servers()
-    return resolve_servers(get_available_server_names())
+function M.get_available_server_names()
+    return vim.tbl_keys(vim.tbl_extend("force", CORE_SERVERS, INITIALIZED_SERVERS))
 end
 
-function M.get_installed_servers()
-    return resolve_servers(vim.tbl_filter(function(server_name)
+function M.get_installed_server_names()
+    return vim.tbl_filter(function(server_name)
         return M.is_server_installed(server_name)
-    end, get_available_server_names()))
+    end, M.get_available_server_names())
 end
 
-function M.get_uninstalled_servers()
-    return resolve_servers(vim.tbl_filter(function(server_name)
+function M.get_uninstalled_server_names()
+    return vim.tbl_filter(function(server_name)
         return not M.is_server_installed(server_name)
-    end, get_available_server_names()))
+    end, M.get_available_server_names())
+end
+
+-- Expensive to call the first time - loads all server modules.
+function M.get_available_servers()
+    return resolve_servers(M.get_available_server_names())
+end
+
+-- Somewhat expensive to call the first time (depends on how many servers are currently installed).
+function M.get_installed_servers()
+    return resolve_servers(M.get_installed_server_names())
+end
+
+-- Expensive to call the first time (depends on how many servers are currently not installed).
+function M.get_uninstalled_servers()
+    return resolve_servers(M.get_uninstalled_server_names())
 end
 
 function M.register(server)
