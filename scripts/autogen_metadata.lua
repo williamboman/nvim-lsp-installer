@@ -67,9 +67,6 @@ end
 
 local mt = generate_metadata_table()
 
--- We don't have any use for JSON file (yet) - skip generating to save bytes
--- local metadata_json_file = Path.concat { generated_dir, "metadata.json" }
--- write_file(metadata_json_file, vim.json.encode(mt), "w")
 local metadata_file_lua = Path.concat { generated_dir, "metadata.lua" }
 write_file(
     metadata_file_lua,
