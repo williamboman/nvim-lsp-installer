@@ -26,7 +26,7 @@ function M.install_sync(server_identifiers)
             error(("Could not find server %q."):format(server_name))
         end
         server:install_attached({
-            stdio_sink = process.simple_sink(server.name),
+            stdio_sink = process.simple_sink(),
             requested_server_version = version,
         }, function(success)
             table.insert(completed_installations, server)
