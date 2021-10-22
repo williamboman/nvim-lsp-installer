@@ -5,11 +5,15 @@ let s:save_cpo = &cpo
 set cpo&vim
 
 function! s:LspInstallCompletion(...) abort
-    return join(sort(luaeval("require'nvim-lsp-installer.servers'.get_available_server_names()")), "\n")
+    return sort(luaeval("require'nvim-lsp-installer.servers'.get_available_server_names()"))
 endfunction
 
 function! s:LspUninstallCompletion(...) abort
-    return join(sort(luaeval("require'nvim-lsp-installer.servers'.get_installed_server_names()")), "\n")
+    return sort(luaeval("require'nvim-lsp-installer.servers'.get_installed_server_names()"))
+endfunction
+
+function! s:LspUninstallAllCompletion(...) abort
+    return ["--no-confirm"]
 endfunction
 
 function! s:ParseArgs(args)
@@ -41,8 +45,8 @@ function! s:LspUninstall(args) abort
 endfunction
 
 function! s:LspUninstallAll(args) abort
-    let no_confirm = a:args[0] == "--no-confirm"
-    lua require'nvim-lsp-installer'.uninstall_all(no_confirm)
+    let no_confirm = get(a:args, 0, v:false)
+    call luaeval("require'nvim-lsp-installer'.uninstall_all(_A)", no_confirm)
 endfunction
 
 function! s:LspPrintInstalled() abort
@@ -57,10 +61,10 @@ function! s:LspInstallLog() abort
     exe 'tabnew ' .. luaeval("require'nvim-lsp-installer.log'.outfile")
 endfunction
 
-command! -bar -nargs=+ -complete=custom,s:LspInstallCompletion LspInstall call s:LspInstall([<f-args>])
-command! -bar -nargs=+ -complete=custom,s:LspUninstallCompletion LspUninstall call s:LspUninstall([<f-args>])
+command! -bar -nargs=+ -complete=customlist,s:LspInstallCompletion      LspInstall call s:LspInstall([<f-args>])
+command! -bar -nargs=+ -complete=customlist,s:LspUninstallCompletion    LspUninstall call s:LspUninstall([<f-args>])
+command! -bar -nargs=? -complete=customlist,s:LspUninstallAllCompletion LspUninstallAll call s:LspUninstallAll([<f-args>])
 
-command! LspUninstallAll call s:LspUninstallAll(<f-args>)
 command! LspPrintInstalled call s:LspPrintInstalled()
 command! LspInstallInfo call s:LspInstallInfo()
 command! LspInstallLog call s:LspInstallLog()
