@@ -20,7 +20,7 @@ function M.install_sync(server_identifiers)
     local failed_installations = {}
 
     for _, server_identifier in pairs(server_identifiers) do
-        local server_name, version = unpack(servers.parse_server_tuple(server_identifier))
+        local server_name, version = unpack(servers.parse_server_identifier(server_identifier))
         local ok, server = servers.get_server(server_name)
         if not ok then
             error(("Could not find server %q."):format(server_name))
@@ -49,7 +49,7 @@ end
 
 function M.uninstall_sync(server_identifiers)
     for _, server_identifier in pairs(server_identifiers) do
-        local server_name = unpack(servers.parse_server_tuple(server_identifier))
+        local server_name = unpack(servers.parse_server_identifier(server_identifier))
         local ok, server = servers.get_server(server_name)
         if not ok then
             error(("Could not find server %q."):format(server_name))
@@ -60,7 +60,7 @@ function M.uninstall_sync(server_identifiers)
 end
 
 function M.install(server_identifier)
-    local server_name, version = unpack(servers.parse_server_tuple(server_identifier))
+    local server_name, version = unpack(servers.parse_server_identifier(server_identifier))
     local ok, server = servers.get_server(server_name)
     if not ok then
         return notify(("Unable to find LSP server %s.\n\n%s"):format(server_name, server), vim.log.levels.ERROR)
