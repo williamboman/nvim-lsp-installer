@@ -179,10 +179,16 @@ function M.empty_sink()
     }
 end
 
-function M.simple_sink()
+local function prefix_write(printfn, prefix)
+    return prefix and function(str)
+        return printfn(("[%s] %s"):format(prefix, str))
+    end or printfn
+end
+
+function M.simple_sink(prefix)
     return {
-        stdout = vim.schedule_wrap(vim.api.nvim_out_write),
-        stderr = vim.schedule_wrap(vim.api.nvim_err_write),
+        stdout = vim.schedule_wrap(prefix_write(vim.api.nvim_out_write, prefix)),
+        stderr = vim.schedule_wrap(prefix_write(vim.api.nvim_err_write, prefix)),
     }
 end
 

@@ -15,8 +15,52 @@ function M.display()
     status_win().open()
 end
 
-function M.install(server_tuple)
-    local server_name, version = unpack(servers.parse_server_tuple(server_tuple))
+function M.install_sync(server_identifiers)
+    local completed_installations = {}
+    local failed_installations = {}
+
+    for _, server_identifier in pairs(server_identifiers) do
+        local server_name, version = unpack(servers.parse_server_tuple(server_identifier))
+        local ok, server = servers.get_server(server_name)
+        if not ok then
+            error(("Could not find server %q."):format(server_name))
+        end
+        server:install_attached({
+            stdio_sink = process.simple_sink(server.name),
+            requested_server_version = version,
+        }, function(success)
+            table.insert(completed_installations, server)
+            if not success then
+                table.insert(failed_installations, server)
+            end
+        end)
+    end
+
+    while #completed_installations < #server_identifiers do
+        pcall(vim.cmd, [[ sleep 100m ]])
+    end
+
+    if #failed_installations > 0 then
+        for _, server in pairs(failed_installations) do
+            vim.api.nvim_err_writeln(("Server %q failed to install."):format(server.name))
+        end
+    end
+end
+
+function M.uninstall_sync(server_identifiers)
+    for _, server_identifier in pairs(server_identifiers) do
+        local server_name = unpack(servers.parse_server_tuple(server_identifier))
+        local ok, server = servers.get_server(server_name)
+        if not ok then
+            error(("Could not find server %q."):format(server_name))
+        end
+        server:uninstall()
+        vim.api.nvim_out_write(("Uninstalled server %q.\n"):format(server.name))
+    end
+end
+
+function M.install(server_identifier)
+    local server_name, version = unpack(servers.parse_server_tuple(server_identifier))
     local ok, server = servers.get_server(server_name)
     if not ok then
         return notify(("Unable to find LSP server %s.\n\n%s"):format(server_name, server), vim.log.levels.ERROR)
@@ -34,35 +78,36 @@ function M.uninstall(server_name)
     status_win().open()
 end
 
-function M.uninstall_all()
-    local choice = vim.fn.confirm(
-        ("This will uninstall all servers currently installed at %q. Continue?"):format(
-            vim.fn.fnamemodify(settings.current.install_root_dir, ":~")
-        ),
-        "&Yes\n&No",
-        2
-    )
-    if settings.current.install_root_dir ~= settings._DEFAULT_SETTINGS.install_root_dir then
-        choice = vim.fn.confirm(
-            (
-                "WARNING: You are using a non-default install_root_dir (%q). This command will delete the entire directory. Continue?"
-            ):format(vim.fn.fnamemodify(settings.current.install_root_dir, ":~")),
+function M.uninstall_all(no_confirm)
+    if not no_confirm then
+        local choice = vim.fn.confirm(
+            ("This will uninstall all servers currently installed at %q. Continue?"):format(
+                vim.fn.fnamemodify(settings.current.install_root_dir, ":~")
+            ),
             "&Yes\n&No",
             2
         )
+        if settings.current.install_root_dir ~= settings._DEFAULT_SETTINGS.install_root_dir then
+            choice = vim.fn.confirm(
+                (
+                    "WARNING: You are using a non-default install_root_dir (%q). This command will delete the entire directory. Continue?"
+                ):format(vim.fn.fnamemodify(settings.current.install_root_dir, ":~")),
+                "&Yes\n&No",
+                2
+            )
+        end
+        if choice ~= 1 then
+            print "Uninstalling all servers was aborted."
+            return
+        end
     end
-    if choice == 1 then
-        log.info "Uninstalling all servers."
-        status_win().open()
-        vim.schedule(function()
-            if fs.dir_exists(settings.current.install_root_dir) then
-                fs.rmrf(settings.current.install_root_dir)
-                status_win().mark_all_servers_uninstalled()
-            end
-        end)
-    else
-        print "Uninstalling all servers was aborted."
+
+    log.info "Uninstalling all servers."
+    if fs.dir_exists(settings.current.install_root_dir) then
+        fs.rmrf(settings.current.install_root_dir)
     end
+    status_win().mark_all_servers_uninstalled()
+    status_win().open()
 end
 
 function M.on_server_ready(cb)
