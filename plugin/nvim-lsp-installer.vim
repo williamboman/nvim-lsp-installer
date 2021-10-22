@@ -4,6 +4,8 @@ let g:loaded_nvim_lsp_installer = v:true
 let s:save_cpo = &cpo
 set cpo&vim
 
+let s:no_confirm_flag = "--no-confirm"
+
 function! s:LspInstallCompletion(...) abort
     return join(sort(luaeval("require'nvim-lsp-installer.servers'.get_available_server_names()")), "\n")
 endfunction
@@ -13,7 +15,7 @@ function! s:LspUninstallCompletion(...) abort
 endfunction
 
 function! s:LspUninstallAllCompletion(...) abort
-    return "--no-confirm"
+    return s:no_confirm_flag
 endfunction
 
 function! s:ParseArgs(args)
@@ -45,8 +47,8 @@ function! s:LspUninstall(args) abort
 endfunction
 
 function! s:LspUninstallAll(args) abort
-    let no_confirm = get(a:args, 0, v:false)
-    call luaeval("require'nvim-lsp-installer'.uninstall_all(_A)", no_confirm)
+    let no_confirm = get(a:args, 0, "") == s:no_confirm_flag
+    call luaeval("require'nvim-lsp-installer'.uninstall_all(_A)", no_confirm ? v:true : v:false)
 endfunction
 
 function! s:LspPrintInstalled() abort
