@@ -181,7 +181,6 @@ function M.empty_sink()
     }
 end
 
-
 function M.simple_sink()
     return {
         stdout = vim.schedule_wrap(vim.api.nvim_out_write),
