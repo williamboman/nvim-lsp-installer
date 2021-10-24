@@ -289,12 +289,13 @@ get_server({server_name})
 
         Example: ~
 >
-            local lsp_installer = require'nvim-lsp-installer'
-            local ok, rust_server = lsp_installer.get_server("rust_analyzer")
-            if ok then
-                rust_server:install()
+            if not rust_analyzer:is_installed() then
+                rust_analyzer:install()
             end
-<
+            local opts = {}
+            -- (optional) Customize the options passed to the server 
+            -- see: https://github.com/neovim/nvim-lspconfig/wiki/Understanding-setup-%7B%7D
+            rust_analyzer:setup(opts)
 
 
 ==============================================================================

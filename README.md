@@ -89,11 +89,15 @@ For more advanced use cases you may also interact with more APIs nvim-lsp-instal
 ```lua
 local lsp_installer_servers = require'nvim-lsp-installer.servers'
 
-local ok, rust_analyzer = lsp_installer_servers.get_server("rust_analyzer")
-if ok then
+local server_available, rust_analyzer = lsp_installer_servers.get_server("rust_analyzer")
+if server_available then
     if not rust_analyzer:is_installed() then
         rust_analyzer:install()
     end
+    local opts = {}
+    -- (optional) Customize the options passed to the server 
+    -- https://github.com/neovim/nvim-lspconfig/wiki/Understanding-setup-%7B%7D
+    rust_analyzer:setup(opts)
 end
 ```
 
