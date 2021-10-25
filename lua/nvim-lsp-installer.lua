@@ -68,13 +68,13 @@ function M.install_sync(server_identifiers)
 
     if #failed_servers > 0 then
         for _, server in pairs(failed_servers) do
-            vim.api.nvim_err_writeln(("Server %q failed to install."):format(server.name))
+            log.fmt_error("Server %q failed to install.", server.name)
         end
         exit(("%d/%d servers failed to install."):format(#failed_servers, #completed_servers))
     end
 
     for _, server in pairs(completed_servers) do
-        vim.api.nvim_out_write(("Server %q was successfully installed.\n"):format(server.name))
+        log.fmt_info("Server %q was successfully installed.", server.name)
     end
 end
 
