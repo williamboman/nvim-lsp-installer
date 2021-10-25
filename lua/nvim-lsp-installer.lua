@@ -118,33 +118,36 @@ function M.uninstall(server_name)
 end
 
 --- Queues all servers to be uninstalled. Will also open the status window.
-function M.uninstall_all()
-    local choice = vim.fn.confirm(
-        ("This will uninstall all servers currently installed at %q. Continue?"):format(
-            vim.fn.fnamemodify(settings.current.install_root_dir, ":~")
-        ),
-        "&Yes\n&No",
-        2
-    )
-    if settings.current.install_root_dir ~= settings._DEFAULT_SETTINGS.install_root_dir then
-        choice = vim.fn.confirm(
-            (
-                "WARNING: You are using a non-default install_root_dir (%q). This command will delete the entire directory. Continue?"
-            ):format(vim.fn.fnamemodify(settings.current.install_root_dir, ":~")),
+function M.uninstall_all(no_confirm)
+    if not no_confirm then
+        local choice = vim.fn.confirm(
+            ("This will uninstall all servers currently installed at %q. Continue?"):format(
+                vim.fn.fnamemodify(settings.current.install_root_dir, ":~")
+            ),
             "&Yes\n&No",
             2
         )
-    end
+        if settings.current.install_root_dir ~= settings._DEFAULT_SETTINGS.install_root_dir then
+            choice = vim.fn.confirm(
+                (
+                    "WARNING: You are using a non-default install_root_dir (%q). This command will delete the entire directory. Continue?"
+                ):format(vim.fn.fnamemodify(settings.current.install_root_dir, ":~")),
+                "&Yes\n&No",
+                2
+            )
+        end
 
-    if choice ~= 1 then
-        print "Uninstalling all servers was aborted."
-        return
+        if choice ~= 1 then
+            print "Uninstalling all servers was aborted."
+            return
+        end
     end
 
     log.info "Uninstalling all servers."
     if fs.dir_exists(settings.current.install_root_dir) then
         fs.rmrf(settings.current.install_root_dir)
     end
+    print "Successfully uninstalled all servers."
     status_win().mark_all_servers_uninstalled()
     status_win().open()
 end
