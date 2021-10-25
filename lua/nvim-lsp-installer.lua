@@ -71,6 +71,10 @@ function M.install_sync(server_identifiers)
         end
         exit(("%d/%d servers failed to install."):format(#failed_servers, #completed_servers))
     end
+
+    for _, server in pairs(completed_servers) do
+        vim.api.nvim_out_write(("Server %q was successfully installed.\n"):format(server.name))
+    end
 end
 
 ---Unnstalls the provided servers synchronously (blocking call). It's recommended to only use this in headless environments.
@@ -80,7 +84,7 @@ function M.uninstall_sync(server_identifiers)
         local server_name = servers.parse_server_identifier(server_identifier)
         local ok, server = servers.get_server(server_name)
         if not ok then
-            error(("Could not find server %q."):format(server_name))
+            exit(("Could not find server %q."):format(server_name))
         end
         if not pcall(server.uninstall, server) then
             exit(("Failed to uninstall server %q."):format(server.name))
