@@ -40,8 +40,9 @@ local create_vader = Data.memoize(
         { { [[         Cowth Vader (alleged Neovim user)                               ]], "LspInstallerMuted" } },
         { { [[                                                                         ]], "LspInstallerMuted" } },
     }
-    -- stylua: ignore end
-end)
+        -- stylua: ignore end
+    end
+)
 
 ---@param is_current_settings_expanded boolean
 ---@param vader_saber_ticks number

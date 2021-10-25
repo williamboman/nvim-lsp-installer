@@ -23,7 +23,6 @@ function Data.set_of(list)
     return set
 end
 
-
 ---@generic T
 ---@param list T[]
 ---@return T[]

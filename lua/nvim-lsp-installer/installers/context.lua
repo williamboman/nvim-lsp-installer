@@ -126,7 +126,7 @@ end
 ---Access the context ojbect to create a new installer.
 ---@param fn fun(context: ServerInstallContext): ServerInstallerFunction
 function M.capture(fn)
-        ---@type ServerInstallerFunction
+    ---@type ServerInstallerFunction
     return function(server, callback, context)
         local installer = fn(context)
         installer(server, callback, context)
@@ -136,7 +136,7 @@ end
 ---Update the context object.
 ---@param fn fun(context: ServerInstallContext): ServerInstallerFunction
 function M.set(fn)
-        ---@type ServerInstallerFunction
+    ---@type ServerInstallerFunction
     return function(_, callback, context)
         fn(context)
         callback(true)

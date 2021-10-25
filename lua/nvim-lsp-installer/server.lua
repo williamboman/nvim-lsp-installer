@@ -40,7 +40,6 @@ function M.Server:new(opts)
     }, M.Server)
 end
 
-
 ---@param opts table @User-defined options. This is directly passed to the lspconfig's setup() method.
 function M.Server:setup(opts)
     if self._pre_setup then

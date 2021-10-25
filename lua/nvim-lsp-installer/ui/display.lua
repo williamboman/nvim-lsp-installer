@@ -47,10 +47,11 @@ local function render_node(viewport_context, node, _render_context, _output)
     ---@class RenderContext
     ---@field viewport_context ViewportContext
     ---@field applied_block_styles CascadingStyle[]
-    local render_context = _render_context or {
-        viewport_context = viewport_context,
-        applied_block_styles = {},
-    }
+    local render_context = _render_context
+        or {
+            viewport_context = viewport_context,
+            applied_block_styles = {},
+        }
     ---@class RenderHighlight
     ---@field hl_group string
     ---@field line number
