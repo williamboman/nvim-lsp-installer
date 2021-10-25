@@ -21,7 +21,7 @@ end
 ---@param code number @Exit code to use if in a headless environment.
 local function exit(msg, code)
     if platform.is_headless then
-        vim.schedule(function ()
+        vim.schedule(function()
             -- We schedule the exit to make sure the call stack is exhausted
             os.exit(code or 1)
         end)
@@ -68,13 +68,13 @@ function M.install_sync(server_identifiers)
 
     if #failed_servers > 0 then
         for _, server in pairs(failed_servers) do
-            log.fmt_error("Server %q failed to install.", server.name)
+            log.fmt_error("Server %s failed to install.", server.name)
         end
         exit(("%d/%d servers failed to install."):format(#failed_servers, #completed_servers))
     end
 
     for _, server in pairs(completed_servers) do
-        log.fmt_info("Server %q was successfully installed.", server.name)
+        log.fmt_info("Server %s was successfully installed.", server.name)
     end
 end
 
@@ -93,7 +93,7 @@ function M.uninstall_sync(server_identifiers)
             log.error(tostring(uninstall_error))
             exit(("Failed to uninstall server %q."):format(server.name))
         end
-        print(("Successfully uninstalled server %q."):format(server.name))
+        log.fmt_info("Successfully uninstalled server %s.", server.name)
     end
 end
 
@@ -155,7 +155,7 @@ function M.uninstall_all(no_confirm)
             exit "Failed to uninstall all servers."
         end
     end
-    print "Successfully uninstalled all servers."
+    log.info "Successfully uninstalled all servers."
     status_win().mark_all_servers_uninstalled()
     status_win().open()
 end
