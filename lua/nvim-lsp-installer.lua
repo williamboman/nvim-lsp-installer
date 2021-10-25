@@ -17,9 +17,11 @@ function M.display()
     status_win().open()
 end
 
+---Raises an error with the provided message. If in a headless environment,
+---will also schedule an immediate shutdown with the provided exit code.
 ---@param msg string
----@param code number @Exit code to use if in a headless environment.
-local function exit(msg, code)
+---@param code number @The exit code to use when in headless mode.
+local function raise_error(msg, code)
     if platform.is_headless then
         vim.schedule(function()
             -- We schedule the exit to make sure the call stack is exhausted
@@ -41,7 +43,7 @@ function M.install_sync(server_identifiers)
         local server_name, version = servers.parse_server_identifier(server_identifier)
         local ok, server = servers.get_server(server_name)
         if not ok then
-            exit(("Could not find server %q."):format(server_name))
+            raise_error(("Could not find server %q."):format(server_name))
         end
         table.insert(server_tuples, { server, version })
     end
@@ -70,7 +72,7 @@ function M.install_sync(server_identifiers)
         for _, server in pairs(failed_servers) do
             log.fmt_error("Server %s failed to install.", server.name)
         end
-        exit(("%d/%d servers failed to install."):format(#failed_servers, #completed_servers))
+        raise_error(("%d/%d servers failed to install."):format(#failed_servers, #completed_servers))
     end
 
     for _, server in pairs(completed_servers) do
@@ -86,12 +88,12 @@ function M.uninstall_sync(server_identifiers)
         local ok, server = servers.get_server(server_name)
         if not ok then
             log.error(server)
-            exit(("Could not find server %q."):format(server_name))
+            raise_error(("Could not find server %q."):format(server_name))
         end
         local uninstall_ok, uninstall_error = pcall(server.uninstall, server)
         if not uninstall_ok then
             log.error(tostring(uninstall_error))
-            exit(("Failed to uninstall server %q."):format(server.name))
+            raise_error(("Failed to uninstall server %q."):format(server.name))
         end
         log.fmt_info("Successfully uninstalled server %s.", server.name)
     end
@@ -152,7 +154,7 @@ function M.uninstall_all(no_confirm)
         local ok, err = pcall(fs.rmrf, settings.current.install_root_dir)
         if not ok then
             log.error(err)
-            exit "Failed to uninstall all servers."
+            raise_error "Failed to uninstall all servers."
         end
     end
     log.info "Successfully uninstalled all servers."
