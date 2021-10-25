@@ -84,12 +84,15 @@ function M.uninstall_sync(server_identifiers)
         local server_name = servers.parse_server_identifier(server_identifier)
         local ok, server = servers.get_server(server_name)
         if not ok then
+            vim.api.nvim_err_writeln(server)
             exit(("Could not find server %q."):format(server_name))
         end
-        if not pcall(server.uninstall, server) then
+        local uninstall_ok, uninstall_error = pcall(server.uninstall, server)
+        if not uninstall_ok then
+            vim.api.nvim_err_writeln(tostring(uninstall_error))
             exit(("Failed to uninstall server %q."):format(server.name))
         end
-        vim.api.nvim_out_write(("Uninstalled server %q.\n"):format(server.name))
+        print(("Successfully uninstalled server %q."):format(server.name))
     end
 end
 
@@ -145,7 +148,11 @@ function M.uninstall_all(no_confirm)
 
     log.info "Uninstalling all servers."
     if fs.dir_exists(settings.current.install_root_dir) then
-        fs.rmrf(settings.current.install_root_dir)
+        local ok, err = pcall(fs.rmrf, settings.current.install_root_dir)
+        if not ok then
+            vim.api.nvim_err_writeln(err)
+            exit "Failed to uninstall all servers."
+        end
     end
     print "Successfully uninstalled all servers."
     status_win().mark_all_servers_uninstalled()
