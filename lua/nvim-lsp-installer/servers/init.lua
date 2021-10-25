@@ -153,6 +153,8 @@ function M.parse_server_identifier(server_name)
     return vim.split(server_name, "@")
 end
 
+--- @param server_name string
+--- @return boolean,
 function M.get_server(server_name)
     if INITIALIZED_SERVERS[server_name] then
         return true, INITIALIZED_SERVERS[server_name]

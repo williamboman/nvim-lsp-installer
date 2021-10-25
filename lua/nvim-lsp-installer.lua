@@ -15,35 +15,56 @@ function M.display()
     status_win().open()
 end
 
-function M.install_sync(server_identifiers)
-    local completed_installations = {}
-    local failed_installations = {}
+local function exit(msg, code)
+    local is_headless = #vim.api.nvim_list_uis() == 0
+    if is_headless then
+        vim.api.nvim_err_writeln(msg)
+        os.exit(code or 1)
+    else
+        error(msg)
+    end
+end
 
+function M.install_sync(server_identifiers)
+    local completed_servers = {}
+    local failed_servers = {}
+    local server_tuples = {}
+
+    -- Collect all servers and exit early if unable to find one.
     for _, server_identifier in pairs(server_identifiers) do
         local server_name, version = unpack(servers.parse_server_identifier(server_identifier))
         local ok, server = servers.get_server(server_name)
         if not ok then
-            error(("Could not find server %q."):format(server_name))
+            exit(("Could not find server %q."):format(server_name))
         end
+        table.insert(server_tuples, { server, version })
+    end
+
+    -- Start all installations.
+    for _, server_tuple in ipairs(server_tuples) do
+        local server, version = unpack(server_tuple)
+
         server:install_attached({
             stdio_sink = process.simple_sink(),
             requested_server_version = version,
         }, function(success)
-            table.insert(completed_installations, server)
+            table.insert(completed_servers, server)
             if not success then
-                table.insert(failed_installations, server)
+                table.insert(failed_servers, server)
             end
         end)
     end
 
-    while #completed_installations < #server_identifiers do
+    -- Poll for completion.
+    while #completed_servers < #server_identifiers do
         pcall(vim.cmd, [[ sleep 100m ]])
     end
 
-    if #failed_installations > 0 then
-        for _, server in pairs(failed_installations) do
+    if #failed_servers > 0 then
+        for _, server in pairs(failed_servers) do
             vim.api.nvim_err_writeln(("Server %q failed to install."):format(server.name))
         end
+        exit(("%d/%d servers failed to install."):format(#failed_servers, #completed_servers))
     end
 end
 
@@ -54,7 +75,9 @@ function M.uninstall_sync(server_identifiers)
         if not ok then
             error(("Could not find server %q."):format(server_name))
         end
-        server:uninstall()
+        if not pcall(server.uninstall, server) then
+            exit(("Failed to uninstall server %q."):format(server.name))
+        end
         vim.api.nvim_out_write(("Uninstalled server %q.\n"):format(server.name))
     end
 end
