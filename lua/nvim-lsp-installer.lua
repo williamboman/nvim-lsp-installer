@@ -11,10 +11,13 @@ local M = {}
 
 M.settings = settings.set
 
+--- Opens the status window.
 function M.display()
     status_win().open()
 end
 
+---@param msg string
+---@param code number @Exit code to use if in a headless environment.
 local function exit(msg, code)
     local is_headless = #vim.api.nvim_list_uis() == 0
     if is_headless then
@@ -25,6 +28,8 @@ local function exit(msg, code)
     end
 end
 
+---Installs the provided servers synchronously (blocking call). It's recommended to only use this in headless environments.
+---@param server_identifiers string[] @A list of server identifiers (for example {"rust_analyzer@nightly", "tsserver"}).
 function M.install_sync(server_identifiers)
     local completed_servers = {}
     local failed_servers = {}
@@ -68,6 +73,8 @@ function M.install_sync(server_identifiers)
     end
 end
 
+---Unnstalls the provided servers synchronously (blocking call). It's recommended to only use this in headless environments.
+---@param server_identifiers string[] @A list of server identifiers (for example {"rust_analyzer@nightly", "tsserver"}).
 function M.uninstall_sync(server_identifiers)
     for _, server_identifier in pairs(server_identifiers) do
         local server_name = unpack(servers.parse_server_identifier(server_identifier))
@@ -82,6 +89,9 @@ function M.uninstall_sync(server_identifiers)
     end
 end
 
+--- Queues a server to be installed. Will also open the status window.
+--- Use the .on_server_ready(cb) function to register a handler to be executed when a server is ready to be set up.
+---@param server_identifier string @The server to install. This can also include a requested version, for example "rust_analyzer@nightly".
 function M.install(server_identifier)
     local server_name, version = unpack(servers.parse_server_identifier(server_identifier))
     local ok, server = servers.get_server(server_name)
@@ -92,6 +102,8 @@ function M.install(server_identifier)
     status_win().open()
 end
 
+--- Queues a server to be uninstalled. Will also open the status window.
+---@param server_name string The server to uninstall.
 function M.uninstall(server_name)
     local ok, server = servers.get_server(server_name)
     if not ok then
@@ -101,12 +113,20 @@ function M.uninstall(server_name)
     status_win().open()
 end
 
-function M.uninstall_all(no_confirm)
-    if not no_confirm then
-        local choice = vim.fn.confirm(
-            ("This will uninstall all servers currently installed at %q. Continue?"):format(
-                vim.fn.fnamemodify(settings.current.install_root_dir, ":~")
-            ),
+--- Queues all servers to be uninstalled. Will also open the status window.
+function M.uninstall_all()
+    local choice = vim.fn.confirm(
+        ("This will uninstall all servers currently installed at %q. Continue?"):format(
+            vim.fn.fnamemodify(settings.current.install_root_dir, ":~")
+        ),
+        "&Yes\n&No",
+        2
+    )
+    if settings.current.install_root_dir ~= settings._DEFAULT_SETTINGS.install_root_dir then
+        choice = vim.fn.confirm(
+            (
+                "WARNING: You are using a non-default install_root_dir (%q). This command will delete the entire directory. Continue?"
+            ):format(vim.fn.fnamemodify(settings.current.install_root_dir, ":~")),
             "&Yes\n&No",
             2
         )
@@ -133,6 +153,7 @@ function M.uninstall_all(no_confirm)
     status_win().open()
 end
 
+---@param cb fun(server: Server) @Callback to be executed whenever a server is ready to be set up.
 function M.on_server_ready(cb)
     dispatcher.register_server_ready_callback(cb)
     vim.schedule(function()
