@@ -6,6 +6,7 @@ local status_win = require "nvim-lsp-installer.ui.status-win"
 local servers = require "nvim-lsp-installer.servers"
 local settings = require "nvim-lsp-installer.settings"
 local log = require "nvim-lsp-installer.log"
+local platform = require "nvim-lsp-installer.platform"
 
 local M = {}
 
@@ -19,8 +20,7 @@ end
 ---@param msg string
 ---@param code number @Exit code to use if in a headless environment.
 local function exit(msg, code)
-    local is_headless = #vim.api.nvim_list_uis() == 0
-    if is_headless then
+    if platform.is_headless then
         vim.schedule(function ()
             -- We schedule the exit to make sure the call stack is exhausted
             os.exit(code or 1)
@@ -85,12 +85,12 @@ function M.uninstall_sync(server_identifiers)
         local server_name = servers.parse_server_identifier(server_identifier)
         local ok, server = servers.get_server(server_name)
         if not ok then
-            vim.api.nvim_err_writeln(server)
+            log.error(server)
             exit(("Could not find server %q."):format(server_name))
         end
         local uninstall_ok, uninstall_error = pcall(server.uninstall, server)
         if not uninstall_ok then
-            vim.api.nvim_err_writeln(tostring(uninstall_error))
+            log.error(tostring(uninstall_error))
             exit(("Failed to uninstall server %q."):format(server.name))
         end
         print(("Successfully uninstalled server %q."):format(server.name))
@@ -151,7 +151,7 @@ function M.uninstall_all(no_confirm)
     if fs.dir_exists(settings.current.install_root_dir) then
         local ok, err = pcall(fs.rmrf, settings.current.install_root_dir)
         if not ok then
-            vim.api.nvim_err_writeln(err)
+            log.error(err)
             exit "Failed to uninstall all servers."
         end
     end
