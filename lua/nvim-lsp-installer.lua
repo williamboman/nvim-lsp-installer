@@ -64,11 +64,9 @@ function M.install_sync(server_identifiers)
     end
 
     -- Poll for completion.
-    if
-        vim.wait(60000 * 15, function()
-            return #completed_servers >= #server_identifiers
-        end, 100)
-    then
+    if vim.wait(60000 * 15, function()
+        return #completed_servers >= #server_identifiers
+    end, 100) then
         if #failed_servers > 0 then
             for _, server in pairs(failed_servers) do
                 log.fmt_error("Server %s failed to install.", server.name)
