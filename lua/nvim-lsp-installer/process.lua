@@ -5,6 +5,10 @@ local uv = vim.loop
 
 local list_any = Data.list_any
 
+---@class StdioSink
+---@field stdout fun(chunk: string)
+---@field stderr fun(chunk: string)
+
 local M = {}
 
 local function connect_sink(pipe, sink)
