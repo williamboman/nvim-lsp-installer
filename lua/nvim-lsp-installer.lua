@@ -134,19 +134,11 @@ function M.uninstall_all()
             "&Yes\n&No",
             2
         )
-        if settings.current.install_root_dir ~= settings._DEFAULT_SETTINGS.install_root_dir then
-            choice = vim.fn.confirm(
-                (
-                    "WARNING: You are using a non-default install_root_dir (%q). This command will delete the entire directory. Continue?"
-                ):format(vim.fn.fnamemodify(settings.current.install_root_dir, ":~")),
-                "&Yes\n&No",
-                2
-            )
-        end
-        if choice ~= 1 then
-            print "Uninstalling all servers was aborted."
-            return
-        end
+    end
+
+    if choice ~= 1 then
+        print "Uninstalling all servers was aborted."
+        return
     end
 
     log.info "Uninstalling all servers."
