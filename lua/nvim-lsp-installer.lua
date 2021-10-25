@@ -21,11 +21,12 @@ end
 local function exit(msg, code)
     local is_headless = #vim.api.nvim_list_uis() == 0
     if is_headless then
-        vim.api.nvim_err_writeln(msg)
-        os.exit(code or 1)
-    else
-        error(msg)
+        vim.schedule(function ()
+            -- We schedule the exit to make sure the call stack is exhausted
+            os.exit(code or 1)
+        end)
     end
+    error(msg)
 end
 
 ---Installs the provided servers synchronously (blocking call). It's recommended to only use this in headless environments.
