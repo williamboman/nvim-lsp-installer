@@ -86,10 +86,6 @@ function M.Server:is_installed()
     return servers.is_server_installed(self.name)
 end
 
-function M.Server:create_root_dir()
-    fs.mkdirp(self.root_dir)
-end
-
 ---Queues the server to be asynchronously installed. Also opens the UI window.
 function M.Server:install()
     status_win().install_server(self)
@@ -98,27 +94,32 @@ end
 ---@param context ServerInstallContext
 ---@param callback ServerInstallCallback
 function M.Server:install_attached(context, callback)
-    local uninstall_ok, uninstall_err = pcall(self.uninstall, self)
-    if not uninstall_ok then
-        context.stdio_sink.stderr(tostring(uninstall_err) .. "\n")
-        callback(false)
-        return
-    end
-
-    self:create_root_dir()
-
-    local install_ok, install_err = pcall(self._installer, self, function(success)
-        if not success then
-            vim.schedule(function()
-                pcall(self.uninstall, self)
-            end)
-        else
-            vim.schedule(function()
-                dispatcher.dispatch_server_ready(self)
-            end)
-        end
-        callback(success)
-    end, context)
+    context.install_dir = vim.fn.tempname()
+    fs.mkdirp(context.install_dir)
+    local install_ok, install_err = pcall(
+        self._installer,
+        self,
+        vim.schedule_wrap(function(success)
+            if not success then
+                vim.schedule(function()
+                    pcall(self.uninstall, self)
+                end)
+            else
+                local uninstall_ok, uninstall_err = pcall(self.uninstall, self)
+                if not uninstall_ok then
+                    context.stdio_sink.stderr(tostring(uninstall_err) .. "\n")
+                    callback(false)
+                    return
+                end
+                fs.rename(context.install_dir, self.root_dir)
+                vim.schedule(function()
+                    dispatcher.dispatch_server_ready(self)
+                end)
+            end
+            callback(success)
+        end),
+        context
+    )
     if not install_ok then
         context.stdio_sink.stderr(tostring(install_err) .. "\n")
         callback(false)

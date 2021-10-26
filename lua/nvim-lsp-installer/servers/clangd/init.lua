@@ -4,7 +4,6 @@ local Data = require "nvim-lsp-installer.data"
 local std = require "nvim-lsp-installer.installers.std"
 local platform = require "nvim-lsp-installer.platform"
 local context = require "nvim-lsp-installer.installers.context"
-local installers = require "nvim-lsp-installer.installers"
 
 local uv = vim.loop
 
@@ -24,51 +23,36 @@ return function(name, root_dir)
             context.capture(function(ctx)
                 return std.unzip_remote(ctx.github_release_file)
             end),
-            installers.when {
-                unix = function(server, callback, context)
-                    local executable = path.concat {
-                        server.root_dir,
-                        ("clangd_%s"):format(context.requested_server_version),
-                        "bin",
-                        "clangd",
-                    }
-                    local new_path = path.concat { server.root_dir, "clangd" }
-                    context.stdio_sink.stdout(("Creating symlink from %s to %s\n"):format(executable, new_path))
-                    uv.fs_symlink(executable, new_path, { dir = false, junction = false }, function(err, success)
-                        if not success then
-                            context.stdio_sink.stderr(tostring(err) .. "\n")
+            ---@type ServerInstallerFunction
+            function(_, callback, ctx)
+                local executable = path.concat {
+                    ".",
+                    ("clangd_%s"):format(ctx.requested_server_version),
+                    "bin",
+                    platform.is_win and "clangd.exe" or "clangd",
+                }
+                local filename = platform.is_linux and "clangd.bat" or "clangd"
+                local script = platform.is_win and ("@call %q %%*"):format(executable)
+                    or table.concat({ "#/usr/bin/env sh", ("exec %q"):format(executable) }, "\n")
+
+                uv.fs_open(path.concat { ctx.install_dir, filename }, "w", 438, function(open_err, fd)
+                    if open_err then
+                        ctx.stdio_sink.stderr(tostring(open_err) .. "\n")
+                        return callback(false)
+                    end
+                    uv.fs_write(fd, script, -1, function(write_err)
+                        if write_err then
+                            ctx.stdio_sink.stderr(tostring(write_err) .. "\n")
                             callback(false)
                         else
+                            ctx.stdio_sink.stdout(("Created %s\n"):format(filename))
                             callback(true)
                         end
+                        assert(uv.fs_close(fd))
                     end)
-                end,
-                win = function(server, callback, context)
-                    context.stdio_sink.stdout "Creating clangd.bat...\n"
-                    uv.fs_open(path.concat { server.root_dir, "clangd.bat" }, "w", 438, function(open_err, fd)
-                        local executable = path.concat {
-                            server.root_dir,
-                            ("clangd_%s"):format(context.requested_server_version),
-                            "bin",
-                            "clangd.exe",
-                        }
-                        if open_err then
-                            context.stdio_sink.stderr(tostring(open_err) .. "\n")
-                            return callback(false)
-                        end
-                        uv.fs_write(fd, ("@call %q %%*"):format(executable), -1, function(write_err)
-                            if write_err then
-                                context.stdio_sink.stderr(tostring(write_err) .. "\n")
-                                callback(false)
-                            else
-                                context.stdio_sink.stdout "Created clangd.bat\n"
-                                callback(true)
-                            end
-                            assert(uv.fs_close(fd))
-                        end)
-                    end)
-                end,
-            },
+                end)
+            end,
+            std.chmod("+x", { "clangd" }),
         },
         default_options = {
             cmd = { path.concat { root_dir, platform.is_win and "clangd.bat" or "clangd" } },

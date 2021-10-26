@@ -32,43 +32,44 @@ return function(name, root_dir)
                 end
             end),
             installers.when {
-                unix = function(server, callback, context)
+                unix = function(_, callback, ctx)
                     local executable = path.concat {
-                        server.root_dir,
-                        ("ltex-ls-%s"):format(context.requested_server_version),
+                        ctx.install_dir,
+                        ("ltex-ls-%s"):format(ctx.requested_server_version),
                         "bin",
                         "ltex-ls",
                     }
-                    local new_path = path.concat { server.root_dir, "ltex-ls" }
-                    context.stdio_sink.stdout(("Creating symlink from %s to %s\n"):format(executable, new_path))
+                    local new_path = path.concat { ctx.install_dir, "ltex-ls" }
+                    -- TODO: symlinks broken
+                    ctx.stdio_sink.stdout(("Creating symlink from %s to %s\n"):format(executable, new_path))
                     uv.fs_symlink(executable, new_path, { dir = false, junction = false }, function(err, success)
                         if not success then
-                            context.stdio_sink.stderr(tostring(err) .. "\n")
+                            ctx.stdio_sink.stderr(tostring(err) .. "\n")
                             callback(false)
                         else
                             callback(true)
                         end
                     end)
                 end,
-                win = function(server, callback, context)
-                    context.stdio_sink.stdout "Creating ltex-ls.bat...\n"
-                    uv.fs_open(path.concat { server.root_dir, "ltex-ls.bat" }, "w", 438, function(open_err, fd)
+                win = function(_, callback, ctx)
+                    ctx.stdio_sink.stdout "Creating ltex-ls.bat...\n"
+                    uv.fs_open(path.concat { ctx.install_dir, "ltex-ls.bat" }, "w", 438, function(open_err, fd)
                         local executable = path.concat {
-                            server.root_dir,
-                            ("ltex-ls-%s"):format(context.requested_server_version),
+                            ctx.install_dir,
+                            ("ltex-ls-%s"):format(ctx.requested_server_version),
                             "bin",
                             "ltex-ls.bat",
                         }
                         if open_err then
-                            context.stdio_sink.stderr(tostring(open_err) .. "\n")
+                            ctx.stdio_sink.stderr(tostring(open_err) .. "\n")
                             return callback(false)
                         end
                         uv.fs_write(fd, ("@call %q %%*"):format(executable), -1, function(write_err)
                             if write_err then
-                                context.stdio_sink.stderr(tostring(write_err) .. "\n")
+                                ctx.stdio_sink.stderr(tostring(write_err) .. "\n")
                                 callback(false)
                             else
-                                context.stdio_sink.stdout "Created ltex-ls.bat\n"
+                                ctx.stdio_sink.stdout "Created ltex-ls.bat\n"
                                 callback(true)
                             end
                             assert(uv.fs_close(fd))

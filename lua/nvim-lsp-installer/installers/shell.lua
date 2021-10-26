@@ -6,9 +6,9 @@ local M = {}
 ---@param opts {shell: string, cmd: string[], env: table|nil}
 local function shell(opts)
     ---@type ServerInstallerFunction
-    return function(server, callback, context)
+    return function(_, callback, context)
         local _, stdio = process.spawn(opts.shell, {
-            cwd = server.root_dir,
+            cwd = context.install_dir,
             stdio_sink = context.stdio_sink,
             env = process.graft_env(opts.env or {}),
         }, callback)
