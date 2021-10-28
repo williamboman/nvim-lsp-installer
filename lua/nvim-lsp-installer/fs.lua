@@ -11,6 +11,7 @@ local function assert_ownership(path)
         return
     end
     if not pathm.is_subdirectory(settings.current.install_root_dir, path) then
+        log.fmt_error("assert_ownership() failed on path %s", path)
         error(
             ("Refusing to operate on path (%s) outside of the servers root dir (%s)."):format(
                 path,
@@ -66,6 +67,14 @@ function M.fstat(path)
     local fstat = assert(uv.fs_fstat(fd))
     assert(uv.fs_close(fd))
     return fstat
+end
+
+function M.write_file(path, contents)
+    log.fmt_debug("fs: write_file %s", path)
+    assert_ownership(path)
+    local fd = assert(uv.fs_open(path, "w", 438))
+    uv.fs_write(fd, contents, -1)
+    assert(uv.fs_close(fd))
 end
 
 function M.readdir(path)

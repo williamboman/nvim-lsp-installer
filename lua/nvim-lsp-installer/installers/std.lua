@@ -199,6 +199,31 @@ function M.rmrf(rel_path)
     end
 end
 
+---@param rel_path string @The relative path to the file to write.
+---@param contents string @The file contents.
+function M.write_file(rel_path, contents)
+    ---@type ServerInstallerFunction
+    return function(_, callback, ctx)
+        local file = path.concat { ctx.install_dir, rel_path }
+        ctx.stdio_sink.stdout(("Writing file %q\n"):format(file))
+        fs.write_file(file, contents)
+        callback(true)
+    end
+end
+
+function M.executable_alias(script_rel_path, target_executable)
+    local windows_script = [[
+@call %q %%*
+]]
+    local unix_script = [[#!/usr/bin/env sh
+exec %q
+]]
+    return installers.when {
+        unix = M.write_file(script_rel_path, unix_script:format(target_executable)),
+        win = M.write_file(script_rel_path, windows_script:format(target_executable)),
+    }
+end
+
 ---Shallow git clone.
 ---@param repo_url string
 function M.git_clone(repo_url)
