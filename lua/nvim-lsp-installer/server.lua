@@ -106,14 +106,10 @@ function M.Server:install_attached(context, callback)
         self._installer,
         self,
         vim.schedule_wrap(function(success)
-            if not success then
-                log.fmt_error("Server %q failed to install.", self.name)
-                vim.schedule(function()
-                    pcall(self.uninstall, self)
-                end)
-            else
+            if success then
                 local uninstall_ok, uninstall_err = pcall(self.uninstall, self)
                 if not uninstall_ok then
+                    context.stdio_sink.stderr "Failed to remove current installation.\n"
                     context.stdio_sink.stderr(tostring(uninstall_err) .. "\n")
                     callback(false)
                     return
