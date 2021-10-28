@@ -95,7 +95,13 @@ end
 ---@param callback ServerInstallCallback
 function M.Server:install_attached(context, callback)
     context.install_dir = vim.fn.tempname()
-    fs.mkdirp(context.install_dir)
+    local mkdir_ok, mkdir_err = pcall(fs.mkdirp, context.install_dir)
+    if not mkdir_ok then
+        context.stdio_sink.stderr(("Failed to create directory %q.\n"):format(context.install_dir))
+        context.stdio_sink.stderr(tostring(mkdir_err) .. "\n")
+        callback(false)
+        return
+    end
     local install_ok, install_err = pcall(
         self._installer,
         self,
@@ -111,10 +117,19 @@ function M.Server:install_attached(context, callback)
                     callback(false)
                     return
                 end
-                fs.rename(context.install_dir, self.root_dir)
-                vim.schedule(function()
-                    dispatcher.dispatch_server_ready(self)
-                end)
+                local rename_ok, rename_err = pcall(fs.rename, context.install_dir, self.root_dir)
+                if rename_ok then
+                    vim.schedule(function()
+                        dispatcher.dispatch_server_ready(self)
+                    end)
+                else
+                    context.stdio_sink.stderr(
+                        ("Failed to rename %q to %q.\n"):format(context.install_dir, self.root_dir)
+                    )
+                    context.stdio_sink.stderr(tostring(rename_err) .. "\n")
+                    callback(false)
+                    return
+                end
             end
             callback(success)
         end),
