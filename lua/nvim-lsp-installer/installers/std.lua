@@ -211,6 +211,8 @@ function M.write_file(rel_path, contents)
     end
 end
 
+---@param script_rel_path string @The relative path to the script file to write.
+---@param target_executable string @The absolute path to the executable that is being aliased.
 function M.executable_alias(script_rel_path, target_executable)
     local windows_script = [[
 @call %q %%*
