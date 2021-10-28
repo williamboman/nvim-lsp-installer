@@ -107,6 +107,7 @@ function M.Server:install_attached(context, callback)
         self,
         vim.schedule_wrap(function(success)
             if not success then
+                log.fmt_error("Server %q failed to install.", self.name)
                 vim.schedule(function()
                     pcall(self.uninstall, self)
                 end)
