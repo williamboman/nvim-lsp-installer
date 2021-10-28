@@ -31,7 +31,7 @@ return function(name, root_dir)
                     "bin",
                     platform.is_win and "clangd.exe" or "clangd",
                 }
-                local filename = platform.is_linux and "clangd.bat" or "clangd"
+                local filename = platform.is_win and "clangd.bat" or "clangd"
                 local script = platform.is_win and ("@call %q %%*"):format(executable)
                     or table.concat({ "#/usr/bin/env sh", ("exec %q"):format(executable) }, "\n")
 
