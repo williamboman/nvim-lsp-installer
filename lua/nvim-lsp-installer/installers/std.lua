@@ -212,8 +212,8 @@ function M.write_file(rel_path, contents)
 end
 
 ---@param script_rel_path string @The relative path to the script file to write.
----@param target_executable string @The absolute path to the executable that is being aliased.
-function M.executable_alias(script_rel_path, target_executable)
+---@param abs_target_executable_path string @The absolute path to the executable that is being aliased.
+function M.executable_alias(script_rel_path, abs_target_executable_path)
     local windows_script = [[
 @call %q %%*
 ]]
@@ -221,8 +221,8 @@ function M.executable_alias(script_rel_path, target_executable)
 exec %q
 ]]
     return installers.when {
-        unix = M.write_file(script_rel_path, unix_script:format(target_executable)),
-        win = M.write_file(script_rel_path, windows_script:format(target_executable)),
+        unix = M.write_file(script_rel_path, unix_script:format(abs_target_executable_path)),
+        win = M.write_file(script_rel_path, windows_script:format(abs_target_executable_path)),
     }
 end
 
