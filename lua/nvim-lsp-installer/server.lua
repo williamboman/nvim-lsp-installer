@@ -86,7 +86,7 @@ function M.Server:is_installed()
     return servers.is_server_installed(self.name)
 end
 
----Queues the server to be asynchronously installed. Also opens the UI window.
+---Queues the server to be asynchronously installed.
 function M.Server:install()
     status_win().install_server(self)
 end
