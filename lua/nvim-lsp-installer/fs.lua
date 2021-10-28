@@ -5,12 +5,13 @@ local settings = require "nvim-lsp-installer.settings"
 local uv = vim.loop
 local M = {}
 
+local tmpdir_root = vim.fn.fnamemodify(vim.fn.tempname(), ":h")
+
 local function assert_ownership(path)
-    if true then
-        -- TODO allow tmpdir
-        return
-    end
-    if not pathm.is_subdirectory(settings.current.install_root_dir, path) then
+    if
+        not pathm.is_subdirectory(settings.current.install_root_dir, path)
+        and not pathm.is_subdirectory(tmpdir_root, path)
+    then
         log.fmt_error("assert_ownership() failed on path %s", path)
         error(
             ("Refusing to operate on path (%s) outside of the servers root dir (%s)."):format(
