@@ -214,9 +214,7 @@ end
 ---@param script_rel_path string @The relative path to the script file to write.
 ---@param abs_target_executable_path string @The absolute path to the executable that is being aliased.
 function M.executable_alias(script_rel_path, abs_target_executable_path)
-    local windows_script = [[
-@call %q %%*
-]]
+    local windows_script = "@call %q %%"
     local unix_script = [[#!/usr/bin/env sh
 exec %q
 ]]
