@@ -203,12 +203,6 @@ The following settings are applied by default. >
         -- debugging issues with server installations.
         log_level = vim.log.levels.INFO,
 
-        -- Whether to allow LSP servers to share the same installation directory. For some servers, this effectively causes
-        -- more than one server to be installed (and uninstalled) when executing `:LspInstall` and `:LspUninstall`. For
-        -- example, installing `cssls` will also install both `jsonls` and `html` (and the other ways around), as these all
-        -- share the same underlying package.
-        allow_federated_servers = true,
-
         -- Limit for the maximum amount of servers to be installed at the same time. Once this limit is reached, any further
         -- servers that are requested to be installed will be put in a queue.
         max_concurrent_installers = 4,
@@ -237,6 +231,9 @@ install({server_name})
         desired version of the server here, through the @version notation, for
         example `"rust_analyzer@nightly"`.
 
+        This will also open the `:LspInstallInfo` UI window. To install a
+        server without opening the window, see |nvim-lsp-installer.Server|.
+
         Parameters: ~
             {server_name} (string) The server to install.
 
@@ -262,6 +259,14 @@ on_server_ready({cb})
         Return: ~
             Returns a function which when called will de-register the {cb}
             from any future dispatches.
+
+                                      *nvim-lsp-installer.info_window.open()*
+info_window.open()
+    Opens the `:LspInstallInfo` UI window.
+
+                                      *nvim-lsp-installer.info_window.close()*
+info_window.close()
+    Closes the `:LspInstallInfo` UI window.
 
 ==============================================================================
 Lua module: nvim-lsp-installer.servers           *nvim-lsp-installer.servers*
