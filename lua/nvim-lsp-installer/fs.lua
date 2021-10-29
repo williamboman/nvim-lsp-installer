@@ -51,6 +51,13 @@ function M.mkdirp(path)
     end
 end
 
+---@param path string @The full path to the directory to create. Will refuse to operate on paths outside of the install_root dir setting.
+function M.mkdir(path)
+    log.debug("fs: mkdir", path)
+    assert_ownership(path)
+    assert(uv.fs_mkdir(path, 493)) -- 493(10) == 755(8)
+end
+
 ---@param path string @The full path to check if it 1) exists, and 2) is a directory.
 ---@return boolean
 function M.dir_exists(path)

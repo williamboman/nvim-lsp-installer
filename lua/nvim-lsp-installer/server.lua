@@ -1,6 +1,7 @@
 local dispatcher = require "nvim-lsp-installer.dispatcher"
 local fs = require "nvim-lsp-installer.fs"
 local log = require "nvim-lsp-installer.log"
+local settings = require "nvim-lsp-installer.settings"
 local installers = require "nvim-lsp-installer.installers"
 local servers = require "nvim-lsp-installer.servers"
 local status_win = require "nvim-lsp-installer.ui.status-win"
@@ -94,11 +95,23 @@ end
 ---@param context ServerInstallContext
 ---@param callback ServerInstallCallback
 function M.Server:install_attached(context, callback)
+    ---@param path string
+    local function mkdir(path)
+        local mkdir_ok, mkdir_err = pcall(fs.mkdir, path)
+        if not mkdir_ok then
+            context.stdio_sink.stderr(("Failed to create directory %q.\n"):format(path))
+            context.stdio_sink.stderr(tostring(mkdir_err) .. "\n")
+            return false
+        end
+        return true
+    end
+
     context.install_dir = vim.fn.tempname()
-    local mkdir_ok, mkdir_err = pcall(fs.mkdirp, context.install_dir)
-    if not mkdir_ok then
-        context.stdio_sink.stderr(("Failed to create directory %q.\n"):format(context.install_dir))
-        context.stdio_sink.stderr(tostring(mkdir_err) .. "\n")
+    if not mkdir(context.install_dir) then
+        callback(false)
+        return
+    end
+    if not fs.dir_exists(settings.current.install_root_dir) and not mkdir(settings.current.install_root_dir) then
         callback(false)
         return
     end
