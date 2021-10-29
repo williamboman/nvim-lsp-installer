@@ -729,6 +729,12 @@ local function init(all_servers)
         start_delay_ms = 1000,
     }
 
+    local function close()
+        if window then
+            window.close()
+        end
+    end
+
     local function open()
         local current_buf = vim.fn.bufnr "%"
         local open_filetypes = vim.split(vim.api.nvim_exec([[ bufdo echo &filetype ]], true), "\n")
@@ -773,7 +779,7 @@ local function init(all_servers)
                     end)
                 end,
                 ["CLOSE_WINDOW"] = function()
-                    window.close()
+                    close()
                 end,
                 ["TOGGLE_EXPAND_CURRENT_SETTINGS"] = function()
                     mutate_state(function(state)
@@ -813,6 +819,7 @@ local function init(all_servers)
 
     return {
         open = open,
+        close = close,
         install_server = install_server,
         uninstall_server = uninstall_server,
         mark_all_servers_uninstalled = mark_all_servers_uninstalled,

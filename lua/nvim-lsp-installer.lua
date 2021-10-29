@@ -12,10 +12,16 @@ local M = {}
 
 M.settings = settings.set
 
---- Opens the status window.
-function M.display()
-    status_win().open()
-end
+M.info_window = {
+    ---Opens the status window.
+    open = function()
+        status_win().open()
+    end,
+    ---Closes the status window.
+    close = function()
+        status_win().close()
+    end,
+}
 
 ---Raises an error with the provided message. If in a headless environment,
 ---will also schedule an immediate shutdown with the provided exit code.
