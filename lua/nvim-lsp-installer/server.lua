@@ -102,6 +102,7 @@ end
 
 ---Queues the server to be asynchronously installed.
 function M.Server:install()
+    log.fmt_debug("Received request to install server %s.", self.name)
     status_win().install_server(self)
 end
 
