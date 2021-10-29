@@ -120,6 +120,14 @@ function M.Server:install_attached(context, callback)
         self,
         vim.schedule_wrap(function(success)
             if success then
+                if fs.dir_exists(self.root_dir) then
+                    local rmrf_ok, rmrf_err = pcall(fs.rmrf, self.root_dir)
+                    if not rmrf_ok then
+                        context.stdio_sink.stderr "Failed to delete existing installation.\n"
+                        context.stdio_sink.stderr(tostring(rmrf_err) .. "\n")
+                        return
+                    end
+                end
                 local rename_ok, rename_err = pcall(fs.rename, context.install_dir, self.root_dir)
                 if rename_ok then
                     vim.schedule(function()
