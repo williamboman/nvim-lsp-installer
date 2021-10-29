@@ -25,6 +25,7 @@ M.info_window = {
 
 ---Deprecated. Use info_window.open().
 function M.display()
+    notify("The lsp_installer.display() function has been deprecated. Use lsp_installer.info_window.open() instead.", vim.log.levels.WARN)
     status_win().open()
 end
 
