@@ -23,6 +23,11 @@ M.info_window = {
     end,
 }
 
+---Deprecated. Use info_window.open().
+function M.display()
+    status_win().open()
+end
+
 ---Raises an error with the provided message. If in a headless environment,
 ---will also schedule an immediate shutdown with the provided exit code.
 ---@param msg string
