@@ -33,10 +33,7 @@ function M.rename(path, new_path)
     log.debug("fs: rename", path, new_path)
     assert_ownership(path)
     assert_ownership(new_path)
-    if vim.fn.rename(path, new_path) ~= 0 then
-        log.debug "fs: rename failed"
-        error(("rename: Could not rename directory %q to %q."):format(path, new_path))
-    end
+    assert(uv.fs_rename(path, new_path))
 end
 
 ---@param path string @The full path to the directory to create. Will refuse to operate on paths outside of the install_root dir setting.

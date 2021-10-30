@@ -126,6 +126,7 @@ function M.Server:install_attached(context, callback)
                         return
                     end
                 end
+                fs.mkdir(self.root_dir)
                 local rename_ok, rename_err = pcall(fs.rename, context.install_dir, self.root_dir)
                 if rename_ok then
                     vim.schedule(function()
