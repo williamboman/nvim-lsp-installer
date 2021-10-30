@@ -17,7 +17,7 @@ local function assert_ownership(path)
     end
 end
 
----@param path @The full path to the file/dir to recursively delete. Will refuse to operate on paths outside of the install_root dir setting.
+---@param path string @The full path to the file/dir to recursively delete. Will refuse to operate on paths outside of the install_root dir setting.
 function M.rmrf(path)
     log.debug("fs: rmrf", path)
     assert_ownership(path)
