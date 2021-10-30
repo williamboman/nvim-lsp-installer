@@ -20,10 +20,9 @@ return function(name, root_dir)
             "-Dlog.level=ALL",
             "-Xms1g",
             "-Xmx2G",
+            "-javaagent:" .. lombok,
             "-jar",
             jar,
-            "-javaagent:" .. lombok,
-            "-Xbootclasspath/a:" .. lombok,
             "-configuration",
             path.concat {
                 root_dir,
