@@ -117,22 +117,25 @@ function M.Server:install_attached(context, callback)
         self,
         vim.schedule_wrap(function(success)
             if success then
-                if fs.dir_exists(self.root_dir) then
-                    local rmrf_ok, rmrf_err = pcall(fs.rmrf, self.root_dir)
-                    if not rmrf_ok then
-                        log.fmt_error("Failed to rmrf. path=%s error=%s", self.root_dir, rmrf_err)
-                        context.stdio_sink.stderr "Failed to delete existing installation.\n"
-                        context.stdio_sink.stderr(tostring(rmrf_err) .. "\n")
-                        return
-                    end
+                -- 1. Remove and recreate final installation directory
+                local rmrf_ok, rmrf_err = pcall(fs.rm_mkdirp, self.root_dir)
+                if not rmrf_ok then
+                    log.fmt_error("Failed to rm_mkdirp. path=%s error=%s", self.root_dir, rmrf_err)
+                    context.stdio_sink.stderr "Failed to remove and recreate final installation directory.\n"
+                    context.stdio_sink.stderr(tostring(rmrf_err) .. "\n")
+                    callback(false)
+                    return
                 end
-                fs.mkdir(self.root_dir)
+
+                -- 2. Move the temporary install dir to the final installation directory
                 local rename_ok, rename_err = pcall(fs.rename, context.install_dir, self.root_dir)
                 if rename_ok then
+                    -- 3a. Dispatch the server is ready
                     vim.schedule(function()
                         dispatcher.dispatch_server_ready(self)
                     end)
                 else
+                    --- 3b. We failed to rename the temporary dir to the final installation dir
                     log.fmt_error(
                         "Failed to rename. path=%s new_path=%s error=%s",
                         context.install_dir,
