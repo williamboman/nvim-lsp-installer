@@ -99,7 +99,7 @@ function M.Server:_setup_install_context(context)
     fs.rm_mkdirp(context.install_dir)
 
     if not fs.dir_exists(settings.current.install_root_dir) then
-        fs.rm_mkdirp(settings.current.install_root_dir)
+        fs.mkdirp(settings.current.install_root_dir)
     end
 end
 
