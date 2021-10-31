@@ -21,7 +21,7 @@ M.get_server_root_path = servers.get_server_install_path
 ---@field public  root_dir string @The directory where the server should be installed in.
 ---@field public  homepage string|nil @The homepage where users can find more information. This is shown to users in the UI.
 ---@field public  deprecated ServerDeprecation|nil @The existence (not nil) of this field indicates this server is depracted.
----@field private _installer ServerInstallerFunction
+---@field private _installer Installer
 ---@field private _on_ready_handlers fun(server: Server)[]
 ---@field private _default_options table @The server's default options. This is used in @see Server#setup.
 ---@field private _pre_setup fun()|nil @Function to be called in @see Server#setup, before trying to setup.
@@ -38,7 +38,7 @@ function M.Server:new(opts)
         homepage = opts.homepage,
         deprecated = opts.deprecated,
         _on_ready_handlers = {},
-        _installer = type(opts.installer) == "function" and opts.installer or installers.pipe(opts.installer),
+        _installer = installers.wrap(opts.installer),
         _default_options = opts.default_options,
         _pre_setup = opts.pre_setup,
         _post_setup = opts.post_setup,
@@ -126,12 +126,51 @@ end
 
 ---@param context ServerInstallContext
 function M.Server:_setup_install_context(context)
-    context.install_dir = path.concat { settings.current.install_root_dir, ("%s.tmp"):format(self.name) }
+    local use_tmp_dir = self._installer.meta.use_tmp_dir
+    context.install_dir = path.concat {
+        settings.current.install_root_dir,
+        use_tmp_dir and ("%s.tmp"):format(self.name) or self.name,
+    }
     fs.rm_mkdirp(context.install_dir)
 
     if not fs.dir_exists(settings.current.install_root_dir) then
         fs.mkdirp(settings.current.install_root_dir)
     end
+end
+
+function M.Server:_finalize_successful_installation(context)
+    if not self._installer.meta.use_tmp_dir then
+        log.debug("Finalization of succesful installation not needed bcause installer did not run in tmpdir", self.name)
+        -- The installer ran in its final install directory, nothing more to do here.
+        return true
+    end
+
+    log.debug("Finalizing successful server installation", self.name)
+    -- 1. Remove final installation directory, if it exists
+    if fs.dir_exists(self.root_dir) then
+        local rmrf_ok, rmrf_err = pcall(fs.rmrf, self.root_dir)
+        if not rmrf_ok then
+            log.fmt_error("Failed to remove final installation directory. path=%s error=%s", self.root_dir, rmrf_err)
+            context.stdio_sink.stderr "Failed to remove final installation directory.\n"
+            context.stdio_sink.stderr(tostring(rmrf_err) .. "\n")
+            return false
+        end
+    end
+
+    -- 2. Move the temporary install dir to the final installation directory
+    if platform.is_unix then
+        -- Some Unix systems will raise an error when renaming a directory to a destination that does not already exist.
+        fs.mkdir(self.root_dir)
+    end
+    local rename_ok, rename_err = pcall(fs.rename, context.install_dir, self.root_dir)
+    if not rename_ok then
+        --- 3b. We failed to rename the temporary dir to the final installation dir
+        log.fmt_error("Failed to rename. path=%s new_path=%s error=%s", context.install_dir, self.root_dir, rename_err)
+        context.stdio_sink.stderr(("Failed to rename %q to %q.\n"):format(context.install_dir, self.root_dir))
+        context.stdio_sink.stderr(tostring(rename_err) .. "\n")
+        return false
+    end
+    return true
 end
 
 ---@param context ServerInstallContext
@@ -147,55 +186,18 @@ function M.Server:install_attached(context, callback)
         self._installer,
         self,
         vim.schedule_wrap(function(success)
-            if success then
-                -- 1. Remove final installation directory, if it exists
-                if fs.dir_exists(self.root_dir) then
-                    local rmrf_ok, rmrf_err = pcall(fs.rmrf, self.root_dir)
-                    if not rmrf_ok then
-                        log.fmt_error(
-                            "Failed to remove final installation directory. path=%s error=%s",
-                            self.root_dir,
-                            rmrf_err
-                        )
-                        context.stdio_sink.stderr "Failed to remove final installation directory.\n"
-                        context.stdio_sink.stderr(tostring(rmrf_err) .. "\n")
-                        callback(false)
-                        return
+            if success and self:_finalize_successful_installation(context) then
+                -- Dispatch the server is ready
+                vim.schedule(function()
+                    dispatcher.dispatch_server_ready(self)
+                    for _, on_ready_handler in ipairs(self._on_ready_handlers) do
+                        on_ready_handler(self)
                     end
-                end
-
-                -- 2. Move the temporary install dir to the final installation directory
-                if platform.is_unix then
-                    -- Some Unix systems will raise an error when renaming a directory to a destination that does not
-                    -- already exist.
-                    fs.mkdir(self.root_dir)
-                end
-                local rename_ok, rename_err = pcall(fs.rename, context.install_dir, self.root_dir)
-                if rename_ok then
-                    -- 3a. Dispatch the server is ready
-                    vim.schedule(function()
-                        dispatcher.dispatch_server_ready(self)
-                        for _, on_ready_handler in ipairs(self._on_ready_handlers) do
-                            on_ready_handler(self)
-                        end
-                    end)
-                else
-                    --- 3b. We failed to rename the temporary dir to the final installation dir
-                    log.fmt_error(
-                        "Failed to rename. path=%s new_path=%s error=%s",
-                        context.install_dir,
-                        self.root_dir,
-                        rename_err
-                    )
-                    context.stdio_sink.stderr(
-                        ("Failed to rename %q to %q.\n"):format(context.install_dir, self.root_dir)
-                    )
-                    context.stdio_sink.stderr(tostring(rename_err) .. "\n")
-                    callback(false)
-                    return
-                end
+                end)
+                callback(true)
+            else
+                callback(false)
             end
-            callback(success)
         end),
         context
     )

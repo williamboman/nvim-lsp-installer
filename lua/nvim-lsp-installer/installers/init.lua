@@ -97,7 +97,7 @@ function M.always_succeed(installer)
 end
 
 ---@param platform_table table<Platform, ServerInstallerFunction>
----@return ServerInstallerFunction | nil
+---@return ServerInstallerFunction | ServerInstallerFunction[] | nil
 local function get_by_platform(platform_table)
     if platform.is_mac then
         return platform_table.mac or platform_table.unix
@@ -133,7 +133,7 @@ end
 
 --- Creates a server installer that executes the given installer for the current platform.
 --- If there is no server installer provided for the current platform, the installer will instantly exit with a failure.
----@param platform_table table<Platform, ServerInstallerFunction>
+---@param platform_table table<Platform, ServerInstallerFunction|ServerInstallerFunction[]>
 ---@return ServerInstallerFunction
 function M.when(platform_table)
     return function(server, callback, context)
@@ -151,6 +151,42 @@ function M.when(platform_table)
             callback(false)
         end
     end
+end
+
+---@param installer ServerInstallerFunction | ServerInstallerFunction[] | Installer
+---@return Installer
+function M.wrap(installer)
+    if getmetatable(installer) == M.Installer then
+        return installer
+    elseif type(installer) == "function" then
+        return M.meta(installer)
+    else
+        return M.meta(M.pipe(installer))
+    end
+end
+
+---@alias InstallerMeta {use_tmp_dir:boolean}
+
+---@class Installer
+---@field installer ServerInstallerFunction
+---@field meta InstallerMeta
+M.Installer = {}
+M.Installer.__index = M.Installer
+
+function M.Installer:__call(...)
+    return self.installer(...)
+end
+
+---@param installer ServerInstallerFunction
+---@param meta InstallerMeta | nil @The metadata to associate with the installer.
+function M.meta(installer, meta)
+    meta = meta or {
+        use_tmp_dir = true,
+    }
+    return setmetatable({
+        installer = installer,
+        meta = meta,
+    }, M.Installer)
 end
 
 return M

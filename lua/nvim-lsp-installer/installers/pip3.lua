@@ -47,7 +47,12 @@ end
 function M.packages(packages)
     local py3 = create_installer("python3", packages)
     local py = create_installer("python", packages)
-    return installers.first_successful(platform.is_win and { py, py3 } or { py3, py }) -- see https://github.com/williamboman/nvim-lsp-installer/issues/128
+    return installers.meta(
+        installers.first_successful(platform.is_win and { py, py3 } or { py3, py }), -- see https://github.com/williamboman/nvim-lsp-installer/issues/128
+        {
+            use_tmp_dir = false,
+        }
+    )
 end
 
 ---@param root_dir string @The directory to resolve the executable from.
