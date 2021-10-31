@@ -70,6 +70,16 @@ function M.Server:setup(opts)
     end
 end
 
+function M.Server:attach_buffers()
+    log.debug("Attaching server to buffers", self.name)
+    local lspserver = require("lspconfig")[self.name]
+    for _, bufnr in ipairs(vim.api.nvim_list_bufs()) do
+        log.fmt_trace("Attaching server=%s to bufnr=%s", self.name, bufnr)
+        lspserver.manager.try_add_wrapper(bufnr)
+    end
+    log.debug("lspconfig.manager.try_add_wrapper() successfully called", self.name)
+end
+
 ---Registers a handler (callback) to be executed when the server is ready to be setup.
 ---@param handler fun(server: Server)
 function M.Server:on_ready(handler)

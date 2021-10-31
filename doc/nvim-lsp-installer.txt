@@ -85,7 +85,7 @@ Then, somewhere in your initialization script (see `:h init.lua`): >
         -- end
 
         server:setup(opts)
-        vim.cmd [[ do User LspAttachBuffers ]]
+        server:attach_buffers()
     end)
 <
 
@@ -327,6 +327,10 @@ class: Server
                     signature as the setup function in nvim-lspconfig.
 
                     Refer to nvim-lspconfig for more information on {opts}.
+
+            - attach_buffers()
+                    Attaches this server to all current open buffers with a
+                    'filetype' that matches the server's configured filetypes.
 
             - get_default_options()
                     Returns a deep copy of the default options provided to
