@@ -183,6 +183,9 @@ function M.Server:install_attached(context, callback)
         vim.schedule_wrap(function(success)
             if success then
                 if not self:promote_install_dir(context.install_dir) then
+                    context.stdio_sink.stderr(
+                        ("Failed to promote the temporary installation directory %q.\n"):format(context.install_dir)
+                    )
                     callback(false)
                     return
                 end
