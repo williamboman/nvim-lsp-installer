@@ -173,20 +173,29 @@ end
 M.Installer = {}
 M.Installer.__index = M.Installer
 
-function M.Installer:__call(...)
-    return self.installer(...)
-end
-
 ---@param installer ServerInstallerFunction
 ---@param meta InstallerMeta | nil @The metadata to associate with the installer.
-function M.meta(installer, meta)
-    meta = meta or {
+function M.Installer:new(installer, meta)
+    meta = vim.tbl_deep_extend("force", {
         use_tmp_dir = true,
-    }
+    }, meta or {})
+
     return setmetatable({
         installer = installer,
         meta = meta,
     }, M.Installer)
+end
+
+function M.Installer:__call(...)
+    return self.installer(...)
+end
+
+---Shorthand for the Installer constructor.
+---@param installer ServerInstallerFunction
+---@param meta InstallerMeta | nil @The metadata to associate with the installer.
+---@return Installer
+function M.meta(installer, meta)
+    return M.Installer:new(installer, meta)
 end
 
 return M
