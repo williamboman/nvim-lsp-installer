@@ -44,6 +44,10 @@ end
 
 ---@param server Server
 local function get_supported_filetypes(server)
+    -- temporary workaround: https://github.com/neovim/nvim-lspconfig/pull/1358
+    if server.name == "dockerls" then
+        return { "dockerfile" }
+    end
     local config = require("lspconfig")[server.name]
     if not config then
         -- No default server config exists in lspconfig
