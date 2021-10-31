@@ -84,7 +84,7 @@ function M.Server:attach_buffers()
         log.fmt_trace("Attaching server=%s to bufnr=%s", self.name, bufnr)
         lspserver.manager.try_add_wrapper(bufnr)
     end
-    log.debug("lspconfig.manager.try_add_wrapper() successfully called", self.name)
+    log.debug("Successfully attached server to buffers", self.name)
 end
 
 ---Registers a handler (callback) to be executed when the server is ready to be setup.
