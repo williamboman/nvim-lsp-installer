@@ -70,6 +70,7 @@ function M.Server:setup(opts)
     end
 end
 
+---Attaches this server to all current open buffers with a 'filetype' that matches the server's configured filetypes.
 function M.Server:attach_buffers()
     log.debug("Attaching server to buffers", self.name)
     local lspserver = require("lspconfig")[self.name]
