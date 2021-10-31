@@ -85,7 +85,6 @@ Then, somewhere in your initialization script (see `:h init.lua`): >
         -- end
 
         server:setup(opts)
-        server:attach_buffers()
     end)
 <
 

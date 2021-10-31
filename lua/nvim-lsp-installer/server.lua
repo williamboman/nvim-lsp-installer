@@ -46,7 +46,7 @@ function M.Server:new(opts)
 end
 
 ---@param opts table @User-defined options. This is directly passed to the lspconfig's setup() method.
-function M.Server:setup(opts)
+function M.Server:lspconfig_setup(opts)
     if self._pre_setup then
         log.fmt_debug("Calling pre_setup for server=%s", self.name)
         self._pre_setup()
@@ -68,6 +68,12 @@ function M.Server:setup(opts)
             ):format(self.name)
         )
     end
+end
+
+---@param opts table @User-defined options. This is directly passed to the lspconfig's setup() method.
+function M.Server:setup(opts)
+    self:lspconfig_setup(opts)
+    self:attach_buffers()
 end
 
 ---Attaches this server to all current open buffers with a 'filetype' that matches the server's configured filetypes.
