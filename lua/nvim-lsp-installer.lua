@@ -228,22 +228,23 @@ end
 function M.get_install_completion()
     local uncommon_names = {}
     local skipped_filetypes = {}
-    for k, v in pairs(filetype_map) do
-        if vim.tbl_count(v) == 1 then
-            if not vim.startswith(k, v[1]:sub(1, 3)) then
-                table.insert(uncommon_names, k)
-            else
-                table.insert(skipped_filetypes, k)
-            end
+    local has_matching_prefix = function(s1, s2)
+        return vim.startswith(s1, s2[1]:sub(1, 3))
+    end
+
+    for ft, names in pairs(filetype_map) do
+        if not has_matching_prefix(ft, names) and not vim.tbl_contains(names, ft) then
+            table.insert(uncommon_names, ft)
         else
-            table.insert(uncommon_names, k)
+            table.insert(skipped_filetypes, ft)
         end
     end
+
     local result = {}
     local server_names = servers.get_available_server_names()
     vim.list_extend(result, server_names)
     vim.list_extend(result, uncommon_names)
-    vim.fn.sort(result)
+    table.sort(result)
     log.trace("nrOfFiletypes: " .. vim.tbl_count(filetype_map))
     log.trace("nrOfUniqueNames: " .. vim.tbl_count(uncommon_names))
     log.trace("unique names: " .. vim.inspect(uncommon_names))
