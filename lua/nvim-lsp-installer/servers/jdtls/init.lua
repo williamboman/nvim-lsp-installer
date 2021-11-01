@@ -42,6 +42,7 @@ return function(name, root_dir)
     return server.Server:new {
         name = name,
         root_dir = root_dir,
+        languages = { "java" },
         homepage = "https://github.com/eclipse/eclipse.jdt.ls",
         installer = {
             context.capture(function(ctx)
