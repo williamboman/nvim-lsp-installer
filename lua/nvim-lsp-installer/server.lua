@@ -38,7 +38,7 @@ function M.Server:new(opts)
         root_dir = opts.root_dir,
         homepage = opts.homepage,
         deprecated = opts.deprecated,
-        languages = opts.languages,
+        languages = opts.languages or {},
         _on_ready_handlers = {},
         _installer = type(opts.installer) == "function" and opts.installer or installers.pipe(opts.installer),
         _default_options = opts.default_options,
