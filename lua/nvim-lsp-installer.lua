@@ -129,7 +129,7 @@ local function translate_language_alias(server_name, version)
     local language_aliases = language_autocomplete_map[server_name]
     if language_aliases then
         if #language_aliases == 1 then
-            notify(
+            print(
                 ("The server %q was automatically chosen for %q as no other options exists."):format(
                     language_aliases[1],
                     server_name
