@@ -13,11 +13,6 @@ local generated_dir = Path.concat { vim.fn.getcwd(), "lua", "nvim-lsp-installer"
 print("Creating directory " .. generated_dir)
 vim.fn.mkdir(generated_dir, "p")
 
-for _, file in ipairs(vim.fn.glob(generated_dir .. "*", 1, 1)) do
-    print("Deleting " .. file)
-    vim.fn.delete(file)
-end
-
 ---@param path string
 ---@param txt string
 ---@param flag string|number

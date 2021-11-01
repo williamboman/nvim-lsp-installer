@@ -2,6 +2,7 @@ local Data = require "nvim-lsp-installer.data"
 local path = require "nvim-lsp-installer.path"
 local fs = require "nvim-lsp-installer.fs"
 local settings = require "nvim-lsp-installer.settings"
+local servers_metadata = require "nvim-lsp-installer._generated.metadata"
 
 local M = {}
 
@@ -31,72 +32,7 @@ local INSTALL_DIRS = {
     ["yamlls"] = "yaml",
 }
 
-local CORE_SERVERS = Data.set_of {
-    "angularls",
-    "ansiblels",
-    "bashls",
-    "bicep",
-    "clangd",
-    "clojure_lsp",
-    "cmake",
-    "cssls",
-    "denols",
-    "diagnosticls",
-    "dockerls",
-    "dotls",
-    "efm",
-    "elixirls",
-    "elmls",
-    "ember",
-    "emmet_ls",
-    "erlangls",
-    "eslint",
-    "eslintls",
-    "fortls",
-    "gopls",
-    "graphql",
-    "groovyls",
-    "hls",
-    "html",
-    "intelephense",
-    "jdtls",
-    "jedi_language_server",
-    "jsonls",
-    "kotlin_language_server",
-    "lemminx",
-    "ltex",
-    "ocamlls",
-    "omnisharp",
-    "phpactor",
-    "powershell_es",
-    "prismals",
-    "puppet",
-    "purescriptls",
-    "pylsp",
-    "pyright",
-    "rescriptls",
-    "rome",
-    "rust_analyzer",
-    "serve_d",
-    "solang",
-    "solargraph",
-    "sqlls",
-    "sqls",
-    "stylelint_lsp",
-    "sumneko_lua",
-    "svelte",
-    "tailwindcss",
-    "terraformls",
-    "texlab",
-    "tflint",
-    "tsserver",
-    "vala_ls",
-    "vimls",
-    "volar",
-    "vuels",
-    "yamlls",
-    "zls",
-}
+local CORE_SERVERS = Data.set_of(vim.tbl_keys(servers_metadata))
 
 ---@type table<string, Server>
 local INITIALIZED_SERVERS = {}

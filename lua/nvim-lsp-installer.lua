@@ -7,6 +7,7 @@ local servers = require "nvim-lsp-installer.servers"
 local settings = require "nvim-lsp-installer.settings"
 local log = require "nvim-lsp-installer.log"
 local platform = require "nvim-lsp-installer.platform"
+local filetype_map = require "nvim-lsp-installer._generated.filetype_map"
 
 local M = {}
 
@@ -44,6 +45,38 @@ local function raise_error(msg, code)
         end)
     end
     error(msg)
+end
+
+---@param request string
+---@return string|boolean
+local function translate_language_alias(request, version)
+    local server_names = servers.get_available_server_names()
+    local is_server_request = vim.tbl_contains(server_names, request) and true
+    if is_server_request then
+        return request, version
+    end
+
+    local supported_servers = filetype_map[request]
+    if #supported_servers == 1 then
+        notify(
+            ("The server %q was automatically chosen for %q as no other options exists."):format(
+                supported_servers[1],
+                request
+            )
+        )
+        return supported_servers[1]
+    else
+        local choices = {}
+        for idx, supported_server in ipairs(supported_servers) do
+            table.insert(choices, ("&%d %s"):format(idx, supported_server))
+        end
+        local choice = vim.fn.confirm(
+            "Multiple options are available, please select which server you want to install:",
+            table.concat(choices, "\n"),
+            0
+        )
+        return supported_servers[choice]
+    end
 end
 
 ---Installs the provided servers synchronously (blocking call). It's recommended to only use this in headless environments.
@@ -118,7 +151,11 @@ end
 --- Use the .on_server_ready(cb) function to register a handler to be executed when a server is ready to be set up.
 ---@param server_identifier string @The server to install. This can also include a requested version, for example "rust_analyzer@nightly".
 function M.install(server_identifier)
-    local server_name, version = servers.parse_server_identifier(server_identifier)
+    local server_name, version = translate_language_alias(servers.parse_server_identifier(server_identifier))
+    if not server_name then
+        -- No selection was made
+        return
+    end
     local ok, server = servers.get_server(server_name)
     if not ok then
         return notify(("Unable to find LSP server %s.\n\n%s"):format(server_name, server), vim.log.levels.ERROR)
@@ -186,6 +223,33 @@ function M.on_server_ready(cb)
             dispatcher.dispatch_server_ready(installed_servers[i])
         end
     end)
+end
+
+function M.get_install_completion()
+    local uncommon_names = {}
+    local skipped_filetypes = {}
+    for k, v in pairs(filetype_map) do
+        if vim.tbl_count(v) == 1 then
+            if not vim.startswith(k, v[1]:sub(1, 3)) then
+                table.insert(uncommon_names, k)
+            else
+                table.insert(skipped_filetypes, k)
+            end
+        else
+            table.insert(uncommon_names, k)
+        end
+    end
+    local result = {}
+    local server_names = servers.get_available_server_names()
+    vim.list_extend(result, server_names)
+    vim.list_extend(result, uncommon_names)
+    vim.fn.sort(result)
+    log.trace("nrOfFiletypes: " .. vim.tbl_count(filetype_map))
+    log.trace("nrOfUniqueNames: " .. vim.tbl_count(uncommon_names))
+    log.trace("unique names: " .. vim.inspect(uncommon_names))
+    log.debug("completion list length: " .. vim.tbl_count(result))
+    log.debug("completion list: " .. vim.inspect(result))
+    return result
 end
 
 -- old API
