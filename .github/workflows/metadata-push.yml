@@ -7,7 +7,7 @@ on:
 jobs:
     metadata-diff-check:
         steps:
-            - uses: williamboman/nvim-lsp-installer/.github/workflows/setup-project.yml
+            - uses: williamboman/nvim-lsp-installer/.github/workflows/setup-project.yml@main
             - name: Run autogen_metadata.sh script
               run: ./scripts/autogen_metadata.sh
             - uses: stefanzweifel/git-auto-commit-action@v4
