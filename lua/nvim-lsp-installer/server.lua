@@ -1,56 +1,53 @@
 local dispatcher = require "nvim-lsp-installer.dispatcher"
 local fs = require "nvim-lsp-installer.fs"
 local log = require "nvim-lsp-installer.log"
+local platform = require "nvim-lsp-installer.platform"
+local settings = require "nvim-lsp-installer.settings"
 local installers = require "nvim-lsp-installer.installers"
 local servers = require "nvim-lsp-installer.servers"
 local status_win = require "nvim-lsp-installer.ui.status-win"
+local path = require "nvim-lsp-installer.path"
 
 local M = {}
 
 -- old, but also somewhat convenient, API
 M.get_server_root_path = servers.get_server_install_path
 
+---@alias ServerDeprecation {message:string, replace_with:string|nil}
+---@alias ServerOpts {name:string, root_dir:string, homepage:string|nil, deprecated:ServerDeprecation, installer:ServerInstallerFunction|ServerInstallerFunction[], default_options:table, pre_setup:fun()|nil, post_setup:fun()|nil}
+
+---@class Server
+---@field public  name string @The server name. This is the same as lspconfig's server names.
+---@field public  root_dir string @The directory where the server should be installed in.
+---@field public  homepage string|nil @The homepage where users can find more information. This is shown to users in the UI.
+---@field public  deprecated ServerDeprecation|nil @The existence (not nil) of this field indicates this server is depracted.
+---@field private _installer ServerInstallerFunction
+---@field private _on_ready_handlers fun(server: Server)[]
+---@field private _default_options table @The server's default options. This is used in @see Server#setup.
+---@field private _pre_setup fun()|nil @Function to be called in @see Server#setup, before trying to setup.
+---@field private _post_setup fun()|nil @Function to be called in @see Server#setup, after successful setup.
 M.Server = {}
 M.Server.__index = M.Server
 
----@class Server
---@param opts table
--- @field name (string)                  The name of the LSP server. This MUST correspond with lspconfig's naming.
---
--- @field homepage (string)              A URL to the homepage of this server. This is for example where users can
---                                       report issues and receive support.
---
--- @field installer (function)           The function that installs the LSP (see the .installers module). The function signature should be `function (server, callback)`, where
---                                       `server` is the Server instance being installed, and `callback` is a function that must be called upon completion. The `callback` function
---                                       has the signature `function (success, result)`, where `success` is a boolean and `result` is of any type (similar to `pcall`).
---
--- @field default_options (table)        The default options to be passed to lspconfig's .setup() function. Each server should provide at least the `cmd` field.
---
--- @field root_dir (string)              The absolute path to the directory of the installation.
---                                       This MUST be a directory inside nvim-lsp-installer's designated root install directory inside stdpath("data"). Most servers will make use of server.get_server_root_path() to produce its root_dir path.
---
--- @field post_setup (function)          An optional function to be executed after the setup function has been successfully called.
---                                       Use this to defer setting up server specific things until they're actually
---                                       needed, like custom commands.
---
--- @field pre_setup (function)           An optional function to be executed prior to calling lspconfig's setup().
---                                       Use this to defer setting up server specific things until they're actually needed.
---
+---@param opts ServerOpts
+---@return Server
 function M.Server:new(opts)
     return setmetatable({
         name = opts.name,
         root_dir = opts.root_dir,
         homepage = opts.homepage,
         deprecated = opts.deprecated,
-        _root_dir = opts.root_dir, -- @deprecated Use the `root_dir` property instead.
+        _on_ready_handlers = {},
         _installer = type(opts.installer) == "function" and opts.installer or installers.pipe(opts.installer),
         _default_options = opts.default_options,
-        _post_setup = opts.post_setup,
         _pre_setup = opts.pre_setup,
+        _post_setup = opts.post_setup,
     }, M.Server)
 end
 
-function M.Server:setup(opts)
+---Sets up the language server via lspconfig. This function has the same signature as the setup function in nvim-lspconfig.
+---@param opts table @The lspconfig server configuration.
+function M.Server:setup_lsp(opts)
     if self._pre_setup then
         log.fmt_debug("Calling pre_setup for server=%s", self.name)
         self._pre_setup()
@@ -74,10 +71,41 @@ function M.Server:setup(opts)
     end
 end
 
+---Sets up the language server and attaches all open buffers.
+---@param opts table @The lspconfig server configuration.
+function M.Server:setup(opts)
+    self:setup_lsp(opts)
+    if not (opts.autostart == false) then
+        self:attach_buffers()
+    end
+end
+
+---Attaches this server to all current open buffers with a 'filetype' that matches the server's configured filetypes.
+function M.Server:attach_buffers()
+    log.debug("Attaching server to buffers", self.name)
+    local lsp_server = require("lspconfig")[self.name]
+    for _, bufnr in ipairs(vim.api.nvim_list_bufs()) do
+        log.fmt_trace("Attaching server=%s to bufnr=%s", self.name, bufnr)
+        lsp_server.manager.try_add_wrapper(bufnr)
+    end
+    log.debug("Successfully attached server to buffers", self.name)
+end
+
+---Registers a handler (callback) to be executed when the server is ready to be setup.
+---@param handler fun(server: Server)
+function M.Server:on_ready(handler)
+    table.insert(self._on_ready_handlers, handler)
+    if self:is_installed() then
+        handler(self)
+    end
+end
+
+---@return table @A deep copy of this server's default options. Note that these default options are nvim-lsp-installer specific, and does not include any default options provided by lspconfig.
 function M.Server:get_default_options()
     return vim.deepcopy(self._default_options)
 end
 
+---@return string[] @The list of supported filetypes.
 function M.Server:get_supported_filetypes()
     local metadata = require "nvim-lsp-installer._generated.metadata"
 
@@ -88,41 +116,97 @@ function M.Server:get_supported_filetypes()
     return {}
 end
 
+---@return boolean
 function M.Server:is_installed()
     return servers.is_server_installed(self.name)
 end
 
-function M.Server:create_root_dir()
-    fs.mkdirp(self.root_dir)
-end
-
+---Queues the server to be asynchronously installed.
 function M.Server:install()
     status_win().install_server(self)
 end
 
+---@param context ServerInstallContext
+function M.Server:_setup_install_context(context)
+    context.install_dir = path.concat { settings.current.install_root_dir, ("%s.tmp"):format(self.name) }
+    fs.rm_mkdirp(context.install_dir)
+
+    if not fs.dir_exists(settings.current.install_root_dir) then
+        fs.mkdirp(settings.current.install_root_dir)
+    end
+end
+
+---Removes any existing installation of the server, and moves/promotes the provided install_dir directory to its place.
+---@param install_dir string @The installation directory to move to the server's root directory.
+function M.Server:promote_install_dir(install_dir)
+    if self.root_dir == install_dir then
+        log.fmt_debug("Install dir %s is already promoted for %s", install_dir, self.name)
+        return true
+    end
+    log.fmt_debug("Promoting installation directory %s for %s", install_dir, self.name)
+    -- 1. Remove final installation directory, if it exists
+    if fs.dir_exists(self.root_dir) then
+        local rmrf_ok, rmrf_err = pcall(fs.rmrf, self.root_dir)
+        if not rmrf_ok then
+            log.fmt_error("Failed to remove final installation directory. path=%s error=%s", self.root_dir, rmrf_err)
+            return false
+        end
+    end
+
+    -- 2. Move the temporary install dir to the final installation directory
+    if platform.is_unix then
+        -- Some Unix systems will raise an error when renaming a directory to a destination that does not already exist.
+        fs.mkdir(self.root_dir)
+    end
+    local rename_ok, rename_err = pcall(fs.rename, install_dir, self.root_dir)
+    if not rename_ok then
+        --- 2a. We failed to rename the temporary dir to the final installation dir
+        log.fmt_error("Failed to rename. path=%s new_path=%s error=%s", install_dir, self.root_dir, rename_err)
+        return false
+    end
+    log.fmt_debug("Successfully promoted install_dir=%s for %s", install_dir, self.name)
+    return true
+end
+
+---@param context ServerInstallContext
+---@param callback ServerInstallCallback
 function M.Server:install_attached(context, callback)
-    local uninstall_ok, uninstall_err = pcall(self.uninstall, self)
-    if not uninstall_ok then
-        context.stdio_sink.stderr(tostring(uninstall_err) .. "\n")
+    local context_ok, context_err = pcall(self._setup_install_context, self, context)
+    if not context_ok then
+        log.error("Failed to setup installation context.", context_err)
         callback(false)
         return
     end
+    local install_ok, install_err = pcall(
+        self._installer,
+        self,
+        vim.schedule_wrap(function(success)
+            if success then
+                if not self:promote_install_dir(context.install_dir) then
+                    context.stdio_sink.stderr(
+                        ("Failed to promote the temporary installation directory %q.\n"):format(context.install_dir)
+                    )
+                    callback(false)
+                    return
+                end
 
-    self:create_root_dir()
-
-    local install_ok, install_err = pcall(self._installer, self, function(success)
-        if not success then
-            vim.schedule(function()
-                pcall(self.uninstall, self)
-            end)
-        else
-            vim.schedule(function()
-                dispatcher.dispatch_server_ready(self)
-            end)
-        end
-        callback(success)
-    end, context)
+                -- Dispatch the server is ready
+                vim.schedule(function()
+                    dispatcher.dispatch_server_ready(self)
+                    for _, on_ready_handler in ipairs(self._on_ready_handlers) do
+                        on_ready_handler(self)
+                    end
+                end)
+                callback(true)
+            else
+                pcall(fs.rmrf, context.install_dir)
+                callback(false)
+            end
+        end),
+        context
+    )
     if not install_ok then
+        log.error("Installer raised an unexpected error.", install_err)
         context.stdio_sink.stderr(tostring(install_err) .. "\n")
         callback(false)
     end

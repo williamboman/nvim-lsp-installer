@@ -84,8 +84,9 @@ Then, somewhere in your initialization script (see `:h init.lua`): >
         --     opts.root_dir = function() ... end
         -- end
 
+        -- This setup() function is exactly the same as lspconfig's setup function.
+        -- Refer to https://github.com/neovim/nvim-lspconfig/blob/master/ADVANCED_README.md
         server:setup(opts)
-        vim.cmd [[ do User LspAttachBuffers ]]
     end)
 <
 
@@ -98,19 +99,30 @@ COMMANDS                                        *nvim-lsp-installer-commands*
 Opens the UI for nvim-lsp-installer.
 
                                                                 *:LspInstall*
-:LspInstall {server_name} ...
+:LspInstall [--sync] {server_name} ...
 
-Installs language servers.
+Installs language servers. If the `--sync` argument is passed, the command will
+be blocking until all installations complete. This is useful for headless
+installations, for example: >
 
+    $ nvim --headless -c "LspInstall --sync rust_analyzer clangd clojure_lsp" -c q
+
+<
                                                               *:LspUninstall*
-:LspUninstall {server_name} ...
+:LspUninstall [--sync] {server_name} ...
 
-Uninstalls language servers.
+Uninstalls language servers. If the `--sync` argument is passed, the command will
+be blocking until all installations complete. This is useful for headless
+installations, for example: >
+
+    $ nvim --headless -c "LspUninstall --sync rust_analyzer clangd clojure_lsp" -c q
+<
 
                                                            *:LspUninstallAll*
-:LspUninstallAll
+:LspUninstallAll [--no-confirm]
 
-Uninstalls all installed language servers.
+Uninstalls all installed language servers. If the --no-confirm argument is
+passed, there will be no confirmation prompt before uninstalling all servers.
 
                                                              *:LspInstallLog*
 :LspInstallLog
@@ -149,7 +161,9 @@ Example: >
         }
     }
 
-    lsp_installer.on_server_ready(function (server) server:setup {} end)
+    lsp_installer.on_server_ready(function (server)
+        server:setup {}
+    end)
 <
                                        *nvim-lsp-installer-default-settings*
 
@@ -192,12 +206,6 @@ The following settings are applied by default. >
         -- debugging issues with server installations.
         log_level = vim.log.levels.INFO,
 
-        -- Whether to allow LSP servers to share the same installation directory. For some servers, this effectively causes
-        -- more than one server to be installed (and uninstalled) when executing `:LspInstall` and `:LspUninstall`. For
-        -- example, installing `cssls` will also install both `jsonls` and `html` (and the other ways around), as these all
-        -- share the same underlying package.
-        allow_federated_servers = true,
-
         -- Limit for the maximum amount of servers to be installed at the same time. Once this limit is reached, any further
         -- servers that are requested to be installed will be put in a queue.
         max_concurrent_installers = 4,
@@ -226,6 +234,9 @@ install({server_name})
         desired version of the server here, through the @version notation, for
         example `"rust_analyzer@nightly"`.
 
+        This will also open the `:LspInstallInfo` UI window. To install a
+        server without opening the window, see |nvim-lsp-installer.Server|.
+
         Parameters: ~
             {server_name} (string) The server to install.
 
@@ -251,6 +262,14 @@ on_server_ready({cb})
         Return: ~
             Returns a function which when called will de-register the {cb}
             from any future dispatches.
+
+                                      *nvim-lsp-installer.info_window.open()*
+info_window.open()
+    Opens the `:LspInstallInfo` UI window.
+
+                                      *nvim-lsp-installer.info_window.close()*
+info_window.close()
+    Closes the `:LspInstallInfo` UI window.
 
 ==============================================================================
 Lua module: nvim-lsp-installer.servers           *nvim-lsp-installer.servers*
@@ -308,14 +327,40 @@ class: Server
 
         Methods: ~
             - setup({opts})
-                    Sets up the language server. This has the same function
-                    signature as the setup function in nvim-lspconfig.
+                    Sets up the language server and attaches all open buffers.
 
-                    Refer to nvim-lspconfig for more information on {opts}.
+                    See:
+                        - setup_lsp({opts})
+                        - attach_buffers()
+
+                    Parameters: ~
+                        {opts} (table) The lspconfig server configuration.
+                        See https://github.com/neovim/nvim-lspconfig/blob/master/CONFIG.md
+
+            - setup_lsp({opts})
+                    Sets up the language server via lspconfig.
+                    This function has the same signature as the setup function
+                    in nvim-lspconfig.
+
+                    Parameters: ~
+                        {opts} (table) The lspconfig server configuration.
+                        See https://github.com/neovim/nvim-lspconfig/blob/master/CONFIG.md
+
+            - attach_buffers()
+                    Attaches this server to all current open buffers with a
+                    'filetype' that matches the server's configured filetypes.
 
             - get_default_options()
                     Returns a deep copy of the default options provided to
                     lspconfig in the setup({opts}) method.
+
+            - on_ready({handler})
+                    Registers the provided {handler} to be called when the
+                    server is ready to be setup.
+
+                    Parameters: ~
+                        {handler} (function) Function to be called when the
+                        server is ready.
 
             - is_installed()
                     Returns {true} is server is installed, else returns {false}.

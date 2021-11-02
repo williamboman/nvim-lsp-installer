@@ -1,7 +1,6 @@
 -- THIS FILE IS GENERATED. DO NOT EDIT MANUALLY.
 -- stylua: ignore start
 return {
-  Dockerfile = { "dockerls" },
   aspnetcorerazor = { "tailwindcss" },
   astro = { "tailwindcss" },
   ["astro-markdown"] = { "tailwindcss" },
@@ -61,7 +60,9 @@ return {
   objc = { "clangd" },
   objcpp = { "clangd" },
   ocaml = { "ocamlls" },
+  org = { "ltex" },
   php = { "intelephense", "phpactor", "tailwindcss" },
+  plaintex = { "ltex" },
   postcss = { "tailwindcss" },
   prisma = { "prismals" },
   ps1 = { "powershell_es" },
@@ -71,6 +72,8 @@ return {
   razor = { "tailwindcss" },
   reason = { "ocamlls", "tailwindcss" },
   rescript = { "rescriptls", "tailwindcss" },
+  rnoweb = { "ltex" },
+  rst = { "ltex" },
   ruby = { "solargraph" },
   rust = { "rust_analyzer" },
   sass = { "tailwindcss" },

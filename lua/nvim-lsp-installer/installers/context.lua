@@ -6,6 +6,8 @@ local platform = require "nvim-lsp-installer.platform"
 
 local M = {}
 
+---@param url string @The url to fetch.
+---@param callback fun(err: string|nil, raw_data: string)
 local function fetch(url, callback)
     local stdio = process.in_memory_sink()
     log.fmt_debug("Fetching URL %s", url)
@@ -40,7 +42,7 @@ local function fetch(url, callback)
             job_variants,
             1,
             process.lazy_spawn("powershell.exe", {
-                args = { "-Command", table.concat(ps_script, ";") },
+                args = { "-NoProfile", "-Command", table.concat(ps_script, ";") },
                 stdio_sink = stdio.sink,
             })
         )
@@ -57,7 +59,9 @@ local function fetch(url, callback)
     }
 end
 
+---@param repo string @The GitHub repo ("username/repo").
 function M.use_github_release(repo)
+    ---@type ServerInstallerFunction
     return function(server, callback, context)
         if context.requested_server_version then
             log.fmt_debug(
@@ -84,6 +88,8 @@ function M.use_github_release(repo)
     end
 end
 
+---@param repo string @The GitHub report ("username/repo").
+---@param file string|fun(resolved_version: string): string @The name of a file available in the provided repo's GitHub releases.
 function M.use_github_release_file(repo, file)
     return installers.pipe {
         M.use_github_release(repo),
@@ -117,14 +123,36 @@ function M.use_github_release_file(repo, file)
     }
 end
 
-function M.capture(fn)
-    return function(server, callback, context, ...)
-        local installer = fn(context)
-        installer(server, callback, context, ...)
+---Creates an installer that moves the current installation directory to the server's root directory.
+function M.promote_install_dir()
+    ---@type ServerInstallerFunction
+    return function(server, callback, context)
+        if server:promote_install_dir(context.install_dir) then
+            context.install_dir = server.root_dir
+            callback(true)
+        else
+            context.stdio_sink.stderr(
+                ("Failed to promote temporary install directory to %s.\n"):format(server.root_dir)
+            )
+            callback(false)
+        end
     end
 end
 
+---Access the context ojbect to create a new installer.
+---@param fn fun(context: ServerInstallContext): ServerInstallerFunction
+function M.capture(fn)
+    ---@type ServerInstallerFunction
+    return function(server, callback, context)
+        local installer = fn(context)
+        installer(server, callback, context)
+    end
+end
+
+---Update the context object.
+---@param fn fun(context: ServerInstallContext): ServerInstallerFunction
 function M.set(fn)
+    ---@type ServerInstallerFunction
     return function(_, callback, context)
         fn(context)
         callback(true)

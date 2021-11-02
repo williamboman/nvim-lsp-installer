@@ -1,10 +1,11 @@
+![repo size](https://img.shields.io/github/repo-size/williamboman/nvim-lsp-installer?style=flat-square)
+![checks status](https://img.shields.io/github/checks-status/williamboman/nvim-lsp-installer/main?style=flat-square)
+
 <p align="center">
   <img src="https://user-images.githubusercontent.com/6705160/118490159-f064bb00-b71d-11eb-883e-4affbd020074.png" alt="nvim-lsp-installer" width="60%" />
 </p>
 
-<p align="center">
-    <img src="https://user-images.githubusercontent.com/6705160/135912610-9d7ac377-b3bc-4db5-b72c-aa987ae23da4.gif" width="650" />
-</p>
+<img src="https://user-images.githubusercontent.com/6705160/138860384-ec041595-2c23-43b7-a5a7-979b0efb3daf.gif" />
 
 ## About
 
@@ -59,9 +60,9 @@ Plug 'williamboman/nvim-lsp-installer'
 ### Commands
 
 -   `:LspInstallInfo` - opens a graphical overview of your language servers
--   `:LspInstall <server> ...` - installs/reinstalls language servers
--   `:LspUninstall <server> ...` - uninstalls language servers
--   `:LspUninstallAll` - uninstalls all language servers
+-   `:LspInstall [--sync] <server> ...` - installs/reinstalls language servers. Runs in a blocking fashion if the `--sync` argument is passed (only recommended for scripting purposes).
+-   `:LspUninstall [--sync] <server> ...` - uninstalls language servers. Runs in a blocking fashion if the `--sync` argument is passed (only recommended for scripting purposes).
+-   `:LspUninstallAll [--no-confirm]` - uninstalls all language servers
 -   `:LspInstallLog` - opens the log file in a new tab window
 -   `:LspPrintInstalled` - prints all installed language servers
 
@@ -78,9 +79,9 @@ lsp_installer.on_server_ready(function(server)
     --     opts.root_dir = function() ... end
     -- end
 
-    -- This setup() function is exactly the same as lspconfig's setup function (:help lspconfig-quickstart)
+    -- This setup() function is exactly the same as lspconfig's setup function.
+    -- Refer to https://github.com/neovim/nvim-lspconfig/blob/master/ADVANCED_README.md
     server:setup(opts)
-    vim.cmd [[ do User LspAttachBuffers ]]
 end)
 ```
 
@@ -254,12 +255,6 @@ local DEFAULT_SETTINGS = {
     -- Controls to which degree logs are written to the log file. It's useful to set this to vim.log.levels.DEBUG when
     -- debugging issues with server installations.
     log_level = vim.log.levels.INFO,
-
-    -- Whether to allow LSP servers to share the same installation directory. For some servers, this effectively causes
-    -- more than one server to be installed (and uninstalled) when executing `:LspInstall` and `:LspUninstall`. For
-    -- example, installing `cssls` will also install both `jsonls` and `html` (and the other ways around), as these all
-    -- share the same underlying package.
-    allow_federated_servers = true,
 
     -- Limit for the maximum amount of servers to be installed at the same time. Once this limit is reached, any further
     -- servers that are requested to be installed will be put in a queue.

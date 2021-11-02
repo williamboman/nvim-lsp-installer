@@ -2,7 +2,8 @@ local path = require "nvim-lsp-installer.path"
 
 local M = {}
 
-M._DEFAULT_SETTINGS = {
+---@class LspInstallerSettings
+local DEFAULT_SETTINGS = {
     ui = {
         icons = {
             -- The list icon to use for installed servers.
@@ -39,19 +40,15 @@ M._DEFAULT_SETTINGS = {
     -- debugging issues with server installations.
     log_level = vim.log.levels.INFO,
 
-    -- Whether to allow LSP servers to share the same installation directory. For some servers, this effectively causes
-    -- more than one server to be installed (and uninstalled) when executing `:LspInstall` and `:LspUninstall`. For
-    -- example, installing `cssls` will also install both `jsonls` and `html` (and the other ways around), as these all
-    -- share the same underlying package.
-    allow_federated_servers = true,
-
     -- Limit for the maximum amount of servers to be installed at the same time. Once this limit is reached, any further
     -- servers that are requested to be installed will be put in a queue.
     max_concurrent_installers = 4,
 }
 
+M._DEFAULT_SETTINGS = DEFAULT_SETTINGS
 M.current = M._DEFAULT_SETTINGS
 
+---@param opts LspInstallerSettings
 function M.set(opts)
     M.current = vim.tbl_deep_extend("force", M.current, opts)
 end

@@ -5,18 +5,12 @@ local settings = require "nvim-lsp-installer.settings"
 
 local M = {}
 
-local function vscode_langservers_extracted(name)
-    return settings.current.allow_federated_servers and "vscode-langservers-extracted"
-        or "vscode-langservers-extracted_" .. name
-end
-
 -- By default the install dir will be the same as the server's name.
 -- There are two cases when servers should install to a different location:
---  1. federated server installations, (see :help nvim-lsp-installer-settings)
---  2. legacy reasons, where some servers were previously installed to a location different than their name
+--  1. Legacy reasons, where some servers were previously installed to a location different than their name
+--  2. There is a breaking change to a server that motivates changing its install dir (e.g. to "bust" existing installations).
 local INSTALL_DIRS = {
     ["bashls"] = "bash",
-    ["cssls"] = vscode_langservers_extracted "cssls",
     ["dockerls"] = "dockerfile",
     ["elixirls"] = "elixir",
     ["elmls"] = "elm",
@@ -24,9 +18,7 @@ local INSTALL_DIRS = {
     ["eslintls"] = "eslint",
     ["gopls"] = "go",
     ["hls"] = "haskell",
-    ["html"] = vscode_langservers_extracted "html",
     ["intelephense"] = "php",
-    ["jsonls"] = vscode_langservers_extracted "jsonls",
     ["kotlin_language_server"] = "kotlin",
     ["phpactor"] = "phpactor-source",
     ["purescriptls"] = "purescript",
@@ -39,7 +31,6 @@ local INSTALL_DIRS = {
     ["yamlls"] = "yaml",
 }
 
--- :'<,'>!sort
 local CORE_SERVERS = Data.set_of {
     "angularls",
     "ansiblels",
@@ -107,6 +98,7 @@ local CORE_SERVERS = Data.set_of {
     "zls",
 }
 
+---@type table<string, Server>
 local INITIALIZED_SERVERS = {}
 
 local cached_server_roots
@@ -115,6 +107,7 @@ local function scan_server_roots()
     if cached_server_roots then
         return cached_server_roots
     end
+    ---@type string[]
     local result = {}
     local ok, entries = pcall(fs.readdir, settings.current.install_root_dir)
     if not ok then
@@ -134,6 +127,8 @@ local function scan_server_roots()
     return cached_server_roots
 end
 
+---@param server_name string
+---@return string
 local function get_server_install_dir(server_name)
     return INSTALL_DIRS[server_name] or server_name
 end
@@ -142,17 +137,21 @@ function M.get_server_install_path(dirname)
     return path.concat { settings.current.install_root_dir, dirname }
 end
 
+---@param server_name string
 function M.is_server_installed(server_name)
     local scanned_server_dirs = scan_server_roots()
     local dirname = get_server_install_dir(server_name)
     return scanned_server_dirs[dirname] or false
 end
 
--- returns a tuple of [server_name, requested_version], where requested_version may be nil
-function M.parse_server_tuple(server_name)
-    return vim.split(server_name, "@")
+---@param server_identifier string @The server identifier to parse.
+---@return string, string|nil @Returns a (server_name, requested_version) tuple, where requested_version may be nil.
+function M.parse_server_identifier(server_identifier)
+    return unpack(vim.split(server_identifier, "@"))
 end
 
+---@param server_name string
+---@return boolean, Server
 function M.get_server(server_name)
     if INITIALIZED_SERVERS[server_name] then
         return true, INITIALIZED_SERVERS[server_name]
@@ -176,6 +175,8 @@ function M.get_server(server_name)
         ):format(server_name, "https://github.com/williamboman/nvim-lsp-installer", server_factory)
 end
 
+---@param server_names string[]
+---@return Server[]
 local function resolve_servers(server_names)
     return Data.list_map(function(server_name)
         local ok, server = M.get_server(server_name)
@@ -186,16 +187,19 @@ local function resolve_servers(server_names)
     end, server_names)
 end
 
+---@return string[]
 function M.get_available_server_names()
     return vim.tbl_keys(vim.tbl_extend("force", CORE_SERVERS, INITIALIZED_SERVERS))
 end
 
+---@return string[]
 function M.get_installed_server_names()
     return vim.tbl_filter(function(server_name)
         return M.is_server_installed(server_name)
     end, M.get_available_server_names())
 end
 
+---@return string[]
 function M.get_uninstalled_server_names()
     return vim.tbl_filter(function(server_name)
         return not M.is_server_installed(server_name)
@@ -217,6 +221,7 @@ function M.get_uninstalled_servers()
     return resolve_servers(M.get_uninstalled_server_names())
 end
 
+---@param server Server @The server to register.
 function M.register(server)
     INSTALL_DIRS[server.name] = vim.fn.fnamemodify(server.root_dir, ":t")
     INITIALIZED_SERVERS[server.name] = server

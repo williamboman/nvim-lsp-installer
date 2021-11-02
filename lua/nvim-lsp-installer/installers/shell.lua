@@ -3,10 +3,13 @@ local process = require "nvim-lsp-installer.process"
 
 local M = {}
 
+---@param opts {shell: string, cmd: string[], env: table|nil}
 local function shell(opts)
-    return function(server, callback, context)
+    ---@type ServerInstallerFunction
+    return function(_, callback, context)
         local _, stdio = process.spawn(opts.shell, {
-            cwd = server.root_dir,
+            args = opts.args,
+            cwd = context.install_dir,
             stdio_sink = context.stdio_sink,
             env = process.graft_env(opts.env or {}),
         }, callback)
@@ -21,6 +24,8 @@ local function shell(opts)
     end
 end
 
+---@param raw_script string @The bash script to execute as-is.
+---@param opts {prefix: string, env: table}
 function M.bash(raw_script, opts)
     local default_opts = {
         prefix = "set -euo pipefail;",
@@ -35,6 +40,8 @@ function M.bash(raw_script, opts)
     }
 end
 
+---@param raw_script string @The sh script to execute as-is.
+---@param opts {prefix: string, env: table}
 function M.sh(raw_script, opts)
     local default_opts = {
         prefix = "set -eu;",
@@ -49,6 +56,8 @@ function M.sh(raw_script, opts)
     }
 end
 
+---@param raw_script string @The cmd.exe script to execute as-is.
+---@param opts {env: table}
 function M.cmd(raw_script, opts)
     local default_opts = {
         env = {},
@@ -62,6 +71,8 @@ function M.cmd(raw_script, opts)
     }
 end
 
+---@param raw_script string @The powershell script to execute as-is.
+---@param opts {prefix: string, env: table}
 function M.powershell(raw_script, opts)
     local default_opts = {
         env = {},
@@ -72,15 +83,21 @@ function M.powershell(raw_script, opts)
 
     return shell {
         shell = "powershell.exe",
+        args = { "-NoProfile" },
         cmd = (opts.prefix or "") .. raw_script,
         env = opts.env,
     }
 end
 
+---@deprecated Unsafe.
+---@param url string @The url to the powershell script to execute.
+---@param opts {prefix: string, env: table}
 function M.remote_powershell(url, opts)
     return M.powershell(("iwr -UseBasicParsing %q | iex"):format(url), opts)
 end
 
+---@param raw_script string @A script that is compatible with bash and cmd.exe.
+---@param opts {env: table}
 function M.polyshell(raw_script, opts)
     local default_opts = {
         env = {},

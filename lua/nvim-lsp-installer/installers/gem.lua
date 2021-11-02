@@ -9,13 +9,15 @@ local M = {}
 
 local gem = platform.is_win and "gem.cmd" or "gem"
 
+---@param packages string[] @The Gem packages to install. The first item in this list will be the recipient of the server version, should the user request a specific one.
 function M.packages(packages)
     return installers.pipe {
         std.ensure_executables {
             { "ruby", "ruby was not found in path, refer to https://wiki.openstack.org/wiki/RubyGems." },
             { "gem", "gem was not found in path, refer to https://wiki.openstack.org/wiki/RubyGems." },
         },
-        function(server, callback, context)
+        ---@type ServerInstallerFunction
+        function(_, callback, context)
             local pkgs = Data.list_copy(packages or {})
             if context.requested_server_version then
                 -- The "head" package is the recipient for the requested version. It's.. by design... don't ask.
@@ -31,17 +33,20 @@ function M.packages(packages)
                     "--no-document",
                     table.concat(pkgs, " "),
                 },
-                cwd = server.root_dir,
+                cwd = context.install_dir,
                 stdio_sink = context.stdio_sink,
             }, callback)
         end,
     }
 end
 
+---@param root_dir string @The directory to resolve the executable from.
+---@param executable string
 function M.executable(root_dir, executable)
     return path.concat { root_dir, "bin", executable }
 end
 
+---@param root_dir string
 function M.env(root_dir)
     return {
         GEM_HOME = root_dir,

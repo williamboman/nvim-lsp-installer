@@ -5,11 +5,14 @@ local std = require "nvim-lsp-installer.installers.std"
 local platform = require "nvim-lsp-installer.platform"
 local process = require "nvim-lsp-installer.process"
 local settings = require "nvim-lsp-installer.settings"
+local context = require "nvim-lsp-installer.installers.context"
 
 local M = {}
 
 local REL_INSTALL_DIR = "venv"
 
+---@param python_executable string
+---@param packages string[]
 local function create_installer(python_executable, packages)
     return installers.pipe {
         std.ensure_executables {
@@ -18,10 +21,11 @@ local function create_installer(python_executable, packages)
                 ("%s was not found in path. Refer to https://www.python.org/downloads/."):format(python_executable),
             },
         },
-        function(server, callback, context)
+        ---@type ServerInstallerFunction
+        function(_, callback, context)
             local pkgs = Data.list_copy(packages or {})
             local c = process.chain {
-                cwd = server.root_dir,
+                cwd = context.install_dir,
                 stdio_sink = context.stdio_sink,
             }
 
@@ -33,19 +37,25 @@ local function create_installer(python_executable, packages)
 
             local install_command = { "-m", "pip", "install", "-U" }
             vim.list_extend(install_command, settings.current.pip.install_args)
-            c.run(M.executable(server.root_dir, "python"), vim.list_extend(install_command, pkgs))
+            c.run(M.executable(context.install_dir, "python"), vim.list_extend(install_command, pkgs))
 
             c.spawn(callback)
         end,
     }
 end
 
+---@param packages string[] @The pip packages to install. The first item in this list will be the recipient of the server version, should the user request a specific one.
 function M.packages(packages)
     local py3 = create_installer("python3", packages)
     local py = create_installer("python", packages)
-    return installers.first_successful(platform.is_win and { py, py3 } or { py3, py }) -- see https://github.com/williamboman/nvim-lsp-installer/issues/128
+    return installers.pipe {
+        context.promote_install_dir(),
+        installers.first_successful(platform.is_win and { py, py3 } or { py3, py }), -- see https://github.com/williamboman/nvim-lsp-installer/issues/128
+    }
 end
 
+---@param root_dir string @The directory to resolve the executable from.
+---@param executable string
 function M.executable(root_dir, executable)
     return path.concat { root_dir, REL_INSTALL_DIR, platform.is_win and "Scripts" or "bin", executable }
 end
