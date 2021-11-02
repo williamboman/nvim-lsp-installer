@@ -71,6 +71,8 @@ Plug 'williamboman/nvim-lsp-installer'
 ```lua
 local lsp_installer = require("nvim-lsp-installer")
 
+-- Register a handler that will be called for all installed servers.
+-- Alternatively, you may also register handlers on specific server instances instead (see example below).
 lsp_installer.on_server_ready(function(server)
     local opts = {}
 
@@ -85,20 +87,19 @@ lsp_installer.on_server_ready(function(server)
 end)
 ```
 
-For more advanced use cases you may also interact with more APIs nvim-lsp-installer has to offer, for example the following (refer to `:help nvim-lsp-installer` for more docs):
+For more advanced use cases you may also interact with more APIs nvim-lsp-installer has to offer, for example the following (refer to `:help nvim-lsp-installer` for more docs).
 
 ```lua
 local lsp_installer_servers = require'nvim-lsp-installer.servers'
 
-local server_available, rust_analyzer = lsp_installer_servers.get_server("rust_analyzer")
-if server_available then
+local ok, rust_analyzer = lsp_installer_servers.get_server("rust_analyzer")
+if ok then
+    rust_analyzer:on_ready(function ()
+        rust_analyzer:setup {}
+    end)
     if not rust_analyzer:is_installed() then
         rust_analyzer:install()
     end
-    local opts = {}
-    -- (optional) Customize the options passed to the server 
-    -- https://github.com/neovim/nvim-lspconfig/wiki/Understanding-setup-%7B%7D
-    rust_analyzer:setup(opts)
 end
 ```
 
