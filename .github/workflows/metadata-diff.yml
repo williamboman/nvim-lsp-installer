@@ -10,6 +10,7 @@ jobs:
     setup-project:
         uses: williamboman/nvim-lsp-installer/.github/workflows/setup-project.yml@main
     metadata-diff-check:
+        runs-on: ubuntu-latest
         needs: setup-project
         steps:
             - name: Run autogen_metadata.sh script
