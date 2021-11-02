@@ -7,8 +7,10 @@ on:
     pull_request:
 
 jobs:
-    metadata-diff-check:
+    setup-project:
         uses: williamboman/nvim-lsp-installer/.github/workflows/setup-project.yml@main
+    metadata-diff-check:
+        needs: setup-project
         steps:
             - name: Run autogen_metadata.sh script
               run: ./scripts/autogen_metadata.sh
