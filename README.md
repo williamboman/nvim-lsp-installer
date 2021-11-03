@@ -99,6 +99,7 @@ if server_available then
         requested_server:setup(opts)
     end)
     if not requested_server:is_installed() then
+        -- Queue the server to be installed
         requested_server:install()
     end
 end
