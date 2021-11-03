@@ -16,13 +16,15 @@ A clear and concise description of what you expected to happen.
 **Screenshots**
 If applicable, add screenshots to help explain your problem.
 
-**System (please complete the following information):**
+**System info (please complete the following information):**
  - OS: [e.g. macOS 12.1]
- - Neovim version
+ - Neovim version:
+
+Please also include any other system information you think is relevant!
 
 **Install log**
 If applicable, include nvim-lsp-installer's logs. See `:help nvim-lsp-installer-debugging` for instructions on how to set the log level and access the logs.
 
 ```
-Paste your install log here
+Paste your logs here
 ```
