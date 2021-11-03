@@ -157,6 +157,7 @@ lsp_installer.on_server_ready(function (server) server:setup {} end)
 | HTML                                | `html`                   |
 | Haskell                             | `hls`                    |
 | JSON                                | `jsonls`                 |
+| Jsonnet                             | `jsonnet`                |
 | Java                                | `jdtls`                  |
 | Jedi                                | `jedi_language_server`   |
 | Kotlin                              | `kotlin_language_server` |
