@@ -92,13 +92,14 @@ For more advanced use cases you may also interact with more APIs nvim-lsp-instal
 ```lua
 local lsp_installer_servers = require'nvim-lsp-installer.servers'
 
-local ok, rust_analyzer = lsp_installer_servers.get_server("rust_analyzer")
-if ok then
-    rust_analyzer:on_ready(function ()
-        rust_analyzer:setup {}
+local server_available, requested_server = lsp_installer_servers.get_server("rust_analyzer")
+if server_available then
+    requested_server:on_ready(function ()
+        local opts = {}
+        requested_server:setup(opts)
     end)
-    if not rust_analyzer:is_installed() then
-        rust_analyzer:install()
+    if not requested_server:is_installed() then
+        requested_server:install()
     end
 end
 ```
