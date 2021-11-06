@@ -9,6 +9,8 @@ return function(name, root_dir)
     local function get_cmd(workspace_name)
         local executable = vim.env.JAVA_HOME and path.concat { vim.env.JAVA_HOME, "bin", "java" } or "java"
         local jar = vim.fn.expand(path.concat { root_dir, "plugins", "org.eclipse.equinox.launcher_*.jar" })
+        local lombok = vim.fn.expand(path.concat { root_dir, "lombok.jar" })
+
         return {
             platform.is_win and ("%s.exe"):format(executable) or executable,
             "-Declipse.application=org.eclipse.jdt.ls.core.id1",
@@ -18,6 +20,12 @@ return function(name, root_dir)
             "-Dlog.level=ALL",
             "-Xms1g",
             "-Xmx2G",
+            "-javaagent:" .. lombok,
+            "--add-modules=ALL-SYSTEM",
+            "--add-opens",
+            "java.base/java.util=ALL-UNNAMED",
+            "--add-opens",
+            "java.base/java.lang=ALL-UNNAMED",
             "-jar",
             jar,
             "-configuration",
@@ -31,11 +39,6 @@ return function(name, root_dir)
             },
             "-data",
             workspace_name,
-            "--add-modules=ALL-SYSTEM",
-            "--add-opens",
-            "java.base/java.util=ALL-UNNAMED",
-            "--add-opens",
-            "java.base/java.lang=ALL-UNNAMED",
         }
     end
 
