@@ -133,7 +133,9 @@ local function translate_language_alias(server_identifier, version)
             table.insert(choices, ("&%d %s"):format(idx, server_alias))
         end
         local choice = vim.fn.confirm(
-            ("The following servers were found for language %q, please select which one you want to install:"):format(server_identifier),
+            ("The following servers were found for language %q, please select which one you want to install:"):format(
+                server_identifier
+            ),
             table.concat(choices, "\n"),
             0
         )
