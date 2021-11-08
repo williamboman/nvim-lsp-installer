@@ -10,7 +10,7 @@ return function(name, root_dir)
         local executable = vim.env.JAVA_HOME and path.concat { vim.env.JAVA_HOME, "bin", "java" } or "java"
         local jar = vim.fn.expand(path.concat { root_dir, "plugins", "org.eclipse.equinox.launcher_*.jar" })
         local lombok = vim.fn.expand(path.concat { root_dir, "lombok.jar" })
-        local workspace_dir = vim.fn.fnamemodify(vim.fn.getcwd(), ':p:h:t')
+        local workspace_dir = vim.fn.fnamemodify(vim.fn.getcwd(), ":p:h:t")
 
         return {
             platform.is_win and ("%s.exe"):format(executable) or executable,
