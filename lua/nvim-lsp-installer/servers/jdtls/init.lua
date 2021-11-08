@@ -10,6 +10,7 @@ return function(name, root_dir)
         local executable = vim.env.JAVA_HOME and path.concat { vim.env.JAVA_HOME, "bin", "java" } or "java"
         local jar = vim.fn.expand(path.concat { root_dir, "plugins", "org.eclipse.equinox.launcher_*.jar" })
         local lombok = vim.fn.expand(path.concat { root_dir, "lombok.jar" })
+        local workspace_dir = vim.fn.fnamemodify(vim.fn.getcwd(), ':p:h:t')
 
         return {
             platform.is_win and ("%s.exe"):format(executable) or executable,
@@ -38,7 +39,7 @@ return function(name, root_dir)
                 ),
             },
             "-data",
-            workspace_name,
+            workspace_name .. workspace_dir,
         }
     end
 
@@ -57,7 +58,7 @@ return function(name, root_dir)
             std.download_file("https://projectlombok.org/downloads/lombok.jar", "lombok.jar"),
         },
         default_options = {
-            cmd = get_cmd(vim.env.WORKSPACE and vim.env.WORKSPACE or path.concat { vim.env.HOME, "workspace" }),
+            cmd = get_cmd(vim.env.WORKSPACE and vim.env.WORKSPACE or path.concat { vim.env.HOME, "workspace/" }),
         },
     }
 end
