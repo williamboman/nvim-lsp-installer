@@ -24,6 +24,7 @@ return function(name, root_dir)
         end
         return cmd
     end
+
     return server.Server:new {
         name = name,
         root_dir = root_dir,
