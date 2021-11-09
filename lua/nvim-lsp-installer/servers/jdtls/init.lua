@@ -39,7 +39,7 @@ return function(name, root_dir)
                 ),
             },
             "-data",
-            workspace_name .. workspace_dir,
+            path.concat { workspace_name, workspace_dir },
         }
     end
 
@@ -58,7 +58,7 @@ return function(name, root_dir)
             std.download_file("https://projectlombok.org/downloads/lombok.jar", "lombok.jar"),
         },
         default_options = {
-            cmd = get_cmd(vim.env.WORKSPACE and vim.env.WORKSPACE or path.concat { vim.env.HOME, "workspace/" }),
+            cmd = get_cmd(vim.env.WORKSPACE and vim.env.WORKSPACE or path.concat { vim.env.HOME, "workspace" }),
         },
     }
 end
