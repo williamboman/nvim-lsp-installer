@@ -159,6 +159,7 @@ lsp_installer.on_server_ready(function (server) server:setup {} end)
 | Emmet                               | `emmet_ls`               |
 | Erlang                              | `erlangls`               |
 | Fortran                             | `fortls`                 |
+| FSharp                              | `fsautocomplete`         |
 | Go                                  | `gopls`                  |
 | GraphQL                             | `graphql`                |
 | Groovy                              | `groovyls`               |
