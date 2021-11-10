@@ -35,6 +35,7 @@ local DEFAULT_SETTINGS = {
         -- Example: { "--proxy", "https://proxyserver" }
         install_args = {},
     },
+    python3_exeutable = vim.api.nvim_get_var("python3_host_prog"),
 
     -- Controls to which degree logs are written to the log file. It's useful to set this to vim.log.levels.DEBUG when
     -- debugging issues with server installations.
