@@ -5,7 +5,7 @@ return function(name, root_dir)
     return server.Server:new {
         name = name,
         root_dir = root_dir,
-        languages = { "rst" },
+        languages = { "sphinx" },
         homepage = "https://pypi.org/project/esbonio/",
         installer = pip3.packages { "esbonio" },
         default_options = {
