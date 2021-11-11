@@ -46,9 +46,13 @@ end
 
 ---@param packages string[] @The pip packages to install. The first item in this list will be the recipient of the server version, should the user request a specific one.
 function M.packages(packages)
-    local py3_host_prog = settings.current.python3_exeutable
+    local py3 = create_installer("python3", packages)
+    local py = create_installer("python", packages)
+    local py3_host_prog = vim.api.nvim_get_var "python3_host_prog"
+
     return installers.pipe {
         context.promote_install_dir(),
+        -- see https://github.com/williamboman/nvim-lsp-installer/issues/128
         installers.first_successful(platform.is_win and { py3_host_prog, py, py3 } or { py3_host_prog, py3, py }),
     }
 end
