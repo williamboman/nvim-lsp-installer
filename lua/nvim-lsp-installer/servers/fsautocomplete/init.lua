@@ -14,14 +14,14 @@ return function(name, root_dir)
                 { "dotnet", "dotnet was not found in path." },
             },
             ---@type ServerInstallerFunction
-            function (_, callback, ctx)
+            function(_, callback, ctx)
                 process.spawn("dotnet", {
                     args = { "tool", "update", "--tool-path", ".", "fsautocomplete" },
                     cwd = ctx.install_dir,
                     stdio_sink = ctx.stdio_sink,
-                }, function (success)
+                }, function(success)
                     if not success then
-                        ctx.stdio_sink.stderr("Failed to install fsautocomplete.\n")
+                        ctx.stdio_sink.stderr "Failed to install fsautocomplete.\n"
                         callback(false)
                     else
                         callback(true)
