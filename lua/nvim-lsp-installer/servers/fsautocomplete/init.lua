@@ -13,15 +13,13 @@ return function(name, root_dir)
             std.ensure_executables {
                 { "dotnet", "dotnet was not found in path. fsautocomplete is installed as global dotnet tool." },
             },
-            shell.polyshell[[dotnet tool update --global fsautocomplete]],
-            shell.polyshell[[dotnet tool update --global fantomas-tool --version "*-*"]],
+            shell.polyshell[[dotnet tool update --tool-path ./ fsautocomplete]],
         },
         default_options = {
-            cmd = { "dotnet", "fsautocomplete", "--background-service-enabled" },
-            filetypes = { "fsharp" },
-            init_options = {
-               AutomaticWorkspaceInit = true,
-            },
+            cmd = { 
+                path.concat { root_dir, "fsautocomplete", "dotnet-fsautocomplete" },
+                "--background-service-enabled",
+            }
         },
     }
 end
