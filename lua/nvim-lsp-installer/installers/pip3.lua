@@ -46,9 +46,10 @@ end
 
 ---@param packages string[] @The pip packages to install. The first item in this list will be the recipient of the server version, should the user request a specific one.
 function M.packages(packages)
+    local py3_host_prog = settings.current.python3_exeutable
     return installers.pipe {
         context.promote_install_dir(),
-        create_installer(settings.current.python3_exeutable, packages),
+        installers.first_successful(platform.is_win and { py3_host_prog, py, py3 } or { py3_host_prog, py3, py }),
     }
 end
 
