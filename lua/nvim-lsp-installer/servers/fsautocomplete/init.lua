@@ -8,12 +8,12 @@ return function(name, root_dir)
         name = name,
         root_dir = root_dir,
         languages = { "fsharp" },
-        homepage = "https://fsharp.org",
+        homepage = "https://github.com/fsharp/FsAutoComplete",
         installer = {
             std.ensure_executables {
-                { "dotnet", "dotnet was not found in path. fsautocomplete is installed as global dotnet tool." },
+                { "dotnet", "dotnet was not found in path." },
             },
-            shell.polyshell[[dotnet tool update --tool-path ./ fsautocomplete]],
+            shell.polyshell[[dotnet tool update --tool-path . fsautocomplete]],
         },
         default_options = {
             cmd = { 
