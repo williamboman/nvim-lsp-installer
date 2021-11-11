@@ -6,6 +6,7 @@ local platform = require "nvim-lsp-installer.platform"
 local process = require "nvim-lsp-installer.process"
 local settings = require "nvim-lsp-installer.settings"
 local context = require "nvim-lsp-installer.installers.context"
+local log = require "nvim-lsp-installer.log"
 
 local M = {}
 
@@ -48,13 +49,13 @@ end
 function M.packages(packages)
     local py3 = create_installer("python3", packages)
     local py = create_installer("python", packages)
-    local py3_host_prog = vim.api.nvim_get_var "python3_host_prog"
-
     -- see https://github.com/williamboman/nvim-lsp-installer/issues/128
     local installer_variants = platform.is_win and { py, py3 } or { py3, py }
 
+    local py3_host_prog = vim.g.python3_host_prog
     if py3_host_prog then
-        table.insert(installer_variants, 1, py3_host_prog)
+        log.fmt_debug("Found python3_host_prog (%s)", py3_host_prog)
+        table.insert(installer_variants, 1, create_installer(py3_host_prog, packages))
     end
 
     return installers.pipe {
