@@ -13,13 +13,13 @@ return function(name, root_dir)
             std.ensure_executables {
                 { "dotnet", "dotnet was not found in path." },
             },
-            shell.polyshell[[dotnet tool update --tool-path . fsautocomplete]],
+            shell.polyshell [[dotnet tool update --tool-path . fsautocomplete]],
         },
         default_options = {
-            cmd = { 
+            cmd = {
                 path.concat { root_dir, "fsautocomplete", "dotnet-fsautocomplete" },
                 "--background-service-enabled",
-            }
+            },
         },
     }
 end
