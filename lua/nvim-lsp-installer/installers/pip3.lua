@@ -50,10 +50,16 @@ function M.packages(packages)
     local py = create_installer("python", packages)
     local py3_host_prog = vim.api.nvim_get_var "python3_host_prog"
 
+    -- see https://github.com/williamboman/nvim-lsp-installer/issues/128
+    local installer_variants = platform.is_win and { py, py3 } or { py3, py }
+
+    if py3_host_prog then
+        table.insert(installer_variants, 1, py3_host_prog)
+    end
+
     return installers.pipe {
         context.promote_install_dir(),
-        -- see https://github.com/williamboman/nvim-lsp-installer/issues/128
-        installers.first_successful(platform.is_win and { py3_host_prog, py, py3 } or { py3_host_prog, py3, py }),
+        installers.first_successful(installer_variants),
     }
 end
 
