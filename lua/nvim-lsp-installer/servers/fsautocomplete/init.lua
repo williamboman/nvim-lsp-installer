@@ -11,7 +11,10 @@ return function(name, root_dir)
         homepage = "https://github.com/fsharp/FsAutoComplete",
         installer = {
             std.ensure_executables {
-                { "dotnet", "dotnet was not found in path." },
+                {
+                    "dotnet",
+                    "dotnet was not found in path. Refer to https://dotnet.microsoft.com/download for installation instructions.",
+                },
             },
             ---@type ServerInstallerFunction
             function(_, callback, ctx)
