@@ -53,6 +53,7 @@ local CORE_SERVERS = Data.set_of {
     "esbonio",
     "eslint",
     "fortls",
+    "fsautocomplete",
     "gopls",
     "graphql",
     "groovyls",

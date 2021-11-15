@@ -1,9 +1,10 @@
 -- THIS FILE IS GENERATED. DO NOT EDIT MANUALLY.
 -- stylua: ignore start
 return {
+  ["c#"] = { "omnisharp" },
   ["c++"] = { "clangd" },
-  csharp = { "omnisharp" },
   d = { "serve_d" },
+  ["f#"] = { "fsautocomplete" },
   fortran = { "fortls" },
   haskell = { "hls" },
   java = { "jdtls" },
