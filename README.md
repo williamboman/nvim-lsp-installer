@@ -71,6 +71,8 @@ Plug 'williamboman/nvim-lsp-installer'
 ```lua
 local lsp_installer = require("nvim-lsp-installer")
 
+-- Register a handler that will be called for all installed servers.
+-- Alternatively, you may also register handlers on specific server instances instead (see example below).
 lsp_installer.on_server_ready(function(server)
     local opts = {}
 
@@ -80,20 +82,25 @@ lsp_installer.on_server_ready(function(server)
     -- end
 
     -- This setup() function is exactly the same as lspconfig's setup function.
-    -- Refer to https://github.com/neovim/nvim-lspconfig/blob/master/ADVANCED_README.md
+    -- Refer to https://github.com/neovim/nvim-lspconfig/blob/master/doc/server_configurations.md
     server:setup(opts)
 end)
 ```
 
-For more advanced use cases you may also interact with more APIs nvim-lsp-installer has to offer, for example the following (refer to `:help nvim-lsp-installer` for more docs):
+For more advanced use cases you may also interact with more APIs nvim-lsp-installer has to offer, for example the following (refer to `:help nvim-lsp-installer` for more docs).
 
 ```lua
 local lsp_installer_servers = require'nvim-lsp-installer.servers'
 
-local ok, rust_analyzer = lsp_installer_servers.get_server("rust_analyzer")
-if ok then
-    if not rust_analyzer:is_installed() then
-        rust_analyzer:install()
+local server_available, requested_server = lsp_installer_servers.get_server("rust_analyzer")
+if server_available then
+    requested_server:on_ready(function ()
+        local opts = {}
+        requested_server:setup(opts)
+    end)
+    if not requested_server:is_installed() then
+        -- Queue the server to be installed
+        requested_server:install()
     end
 end
 ```
@@ -112,7 +119,7 @@ Example:
 local lsp_installer = require("nvim-lsp-installer")
 
 -- Provide settings first!
-lsp_installer.settings {
+lsp_installer.settings({
     ui = {
         icons = {
             server_installed = "✓",
@@ -120,7 +127,7 @@ lsp_installer.settings {
             server_uninstalled = "✗"
         }
     }
-}
+})
 
 lsp_installer.on_server_ready(function (server) server:setup {} end)
 ```
@@ -138,6 +145,7 @@ lsp_installer.on_server_ready(function (server) server:setup {} end)
 | CMake                               | `cmake`                  |
 | CSS                                 | `cssls`                  |
 | Clojure                             | `clojure_lsp`            |
+| CodeQL                              | `codeqlls`               |
 | Deno                                | `denols`                 |
 | Diagnostic (general purpose server) | `diagnosticls`           |
 | Dlang                               | `serve_d`                |
@@ -150,6 +158,7 @@ lsp_installer.on_server_ready(function (server) server:setup {} end)
 | Ember                               | `ember`                  |
 | Emmet                               | `emmet_ls`               |
 | Erlang                              | `erlangls`               |
+| F#                                  | `fsautocomplete`         |
 | Fortran                             | `fortls`                 |
 | Go                                  | `gopls`                  |
 | GraphQL                             | `graphql`                |
@@ -157,11 +166,11 @@ lsp_installer.on_server_ready(function (server) server:setup {} end)
 | HTML                                | `html`                   |
 | Haskell                             | `hls`                    |
 | JSON                                | `jsonls`                 |
-| Jsonnet                             | `jsonnet`                |
 | Java                                | `jdtls`                  |
 | Jedi                                | `jedi_language_server`   |
+| Jsonnet                             | `jsonnet`                |
 | Kotlin                              | `kotlin_language_server` |
-| LaTeX (unstable preview)            | `ltex`                   |
+| LaTeX                               | `ltex`                   |
 | LaTeX                               | `texlab`                 |
 | Lua                                 | `sumneko_lua`            |
 | OCaml                               | `ocamlls`                |
@@ -180,6 +189,8 @@ lsp_installer.on_server_ready(function (server) server:setup {} end)
 | SQL                                 | `sqlls`                  |
 | SQL                                 | `sqls`                   |
 | Solang Solidity                     | `solang`                 |
+| Sorbet                              | `sorbet`                 |
+| Sphinx                              | `esbonio`                |
 | Stylelint                           | `stylelint_lsp`          |
 | Svelte                              | `svelte`                 |
 | Tailwind CSS                        | `tailwindcss`            |

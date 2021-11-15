@@ -48,12 +48,13 @@ return function(name, root_dir)
         name = name,
         root_dir = root_dir,
         homepage = "https://solang.readthedocs.io/en/latest/",
+        languages = { "solang" },
         installer = {
             solang_executable_installer,
             llvm_installer,
         },
         default_options = {
-            cmd = { path.concat { root_dir, "solang" }, "--language-server" },
+            cmd = { path.concat { root_dir, "solang" }, "--language-server", "--target", "ewasm" },
             cmd_env = {
                 PATH = table.concat({ path.concat { root_dir, "llvm12.0", "bin" }, vim.env.PATH }, platform.path_sep),
             },

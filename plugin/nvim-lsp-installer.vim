@@ -7,7 +7,7 @@ set cpo&vim
 let s:no_confirm_flag = "--no-confirm"
 
 function! s:LspInstallCompletion(...) abort
-    return join(sort(luaeval("require'nvim-lsp-installer.servers'.get_available_server_names()")), "\n")
+    return join(sort(luaeval("require'nvim-lsp-installer'.get_install_completion()")), "\n")
 endfunction
 
 function! s:LspUninstallCompletion(...) abort
@@ -73,14 +73,3 @@ command! LspInstallLog call s:LspInstallLog()
 
 let &cpo = s:save_cpo
 unlet s:save_cpo
-
-
-
-"""
-""" Backward compat for deprecated g:lsp_installer* options. Remove by 2021-12-01-ish.
-"""
-if exists("g:lsp_installer_log_level")
-    " legacy global variable option
-    call luaeval("require('nvim-lsp-installer').settings { log_level = _A }", g:lsp_installer_log_level)
-    lua vim.notify("[Deprecation notice] Providing settings via global variables (g:lsp_installer_log_level) is deprecated. Please refer to https://github.com/williamboman/nvim-lsp-installer#configuration.", vim.log.levels.WARN)
-endif

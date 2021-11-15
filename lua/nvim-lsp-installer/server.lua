@@ -14,18 +14,17 @@ local M = {}
 M.get_server_root_path = servers.get_server_install_path
 
 ---@alias ServerDeprecation {message:string, replace_with:string|nil}
----@alias ServerOpts {name:string, root_dir:string, homepage:string|nil, deprecated:ServerDeprecation, installer:ServerInstallerFunction|ServerInstallerFunction[], default_options:table, pre_setup:fun()|nil, post_setup:fun()|nil}
+---@alias ServerOpts {name:string, root_dir:string, homepage:string|nil, deprecated:ServerDeprecation, installer:ServerInstallerFunction|ServerInstallerFunction[], default_options:table, languages: string[]}
 
 ---@class Server
 ---@field public  name string @The server name. This is the same as lspconfig's server names.
 ---@field public  root_dir string @The directory where the server should be installed in.
 ---@field public  homepage string|nil @The homepage where users can find more information. This is shown to users in the UI.
 ---@field public  deprecated ServerDeprecation|nil @The existence (not nil) of this field indicates this server is depracted.
+---@field public  languages string[]
 ---@field private _installer ServerInstallerFunction
 ---@field private _on_ready_handlers fun(server: Server)[]
 ---@field private _default_options table @The server's default options. This is used in @see Server#setup.
----@field private _pre_setup fun()|nil @Function to be called in @see Server#setup, before trying to setup.
----@field private _post_setup fun()|nil @Function to be called in @see Server#setup, after successful setup.
 M.Server = {}
 M.Server.__index = M.Server
 
@@ -37,31 +36,22 @@ function M.Server:new(opts)
         root_dir = opts.root_dir,
         homepage = opts.homepage,
         deprecated = opts.deprecated,
+        languages = opts.languages or {},
         _on_ready_handlers = {},
         _installer = type(opts.installer) == "function" and opts.installer or installers.pipe(opts.installer),
         _default_options = opts.default_options,
-        _pre_setup = opts.pre_setup,
-        _post_setup = opts.post_setup,
     }, M.Server)
 end
 
 ---Sets up the language server via lspconfig. This function has the same signature as the setup function in nvim-lspconfig.
 ---@param opts table @The lspconfig server configuration.
 function M.Server:setup_lsp(opts)
-    if self._pre_setup then
-        log.fmt_debug("Calling pre_setup for server=%s", self.name)
-        self._pre_setup()
-    end
     -- We require the lspconfig server here in order to do it as late as possible.
     -- The reason for this is because once a lspconfig server has been imported, it's
     -- automatically registered with lspconfig and causes it to show up in :LspInfo and whatnot.
     local lsp_server = require("lspconfig")[self.name]
     if lsp_server then
         lsp_server.setup(vim.tbl_deep_extend("force", self._default_options, opts or {}))
-        if self._post_setup then
-            log.fmt_debug("Calling post_setup for server=%s", self.name)
-            self._post_setup()
-        end
     else
         error(
             (
@@ -85,8 +75,13 @@ function M.Server:attach_buffers()
     log.debug("Attaching server to buffers", self.name)
     local lsp_server = require("lspconfig")[self.name]
     for _, bufnr in ipairs(vim.api.nvim_list_bufs()) do
-        log.fmt_trace("Attaching server=%s to bufnr=%s", self.name, bufnr)
-        lsp_server.manager.try_add_wrapper(bufnr)
+        if lsp_server.filetypes then
+            log.fmt_trace("Attaching server=%s to bufnr=%s using filetypes wrapper", self.name, bufnr)
+            lsp_server.manager.try_add_wrapper(bufnr)
+        else
+            log.fmt_trace("Attaching server=%s to bufnr=%s", self.name, bufnr)
+            lsp_server.manager.try_add(bufnr)
+        end
     end
     log.debug("Successfully attached server to buffers", self.name)
 end

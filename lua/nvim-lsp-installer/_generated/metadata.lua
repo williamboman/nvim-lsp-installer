@@ -22,6 +22,9 @@ return {
   cmake = {
     filetypes = { "cmake" }
   },
+  codeqlls = {
+    filetypes = { "ql" }
+  },
   cssls = {
     filetypes = { "css", "scss", "less" }
   },
@@ -55,14 +58,17 @@ return {
   erlangls = {
     filetypes = { "erlang" }
   },
+  esbonio = {
+    filetypes = { "rst" }
+  },
   eslint = {
     filetypes = { "javascript", "javascriptreact", "javascript.jsx", "typescript", "typescriptreact", "typescript.tsx", "vue" }
   },
-  eslintls = {
-    filetypes = { "javascript", "javascriptreact", "typescript", "typescriptreact" }
-  },
   fortls = {
     filetypes = { "fortran" }
+  },
+  fsautocomplete = {
+    filetypes = { "fsharp" }
   },
   gopls = {
     filetypes = { "go", "gomod" }
@@ -98,7 +104,7 @@ return {
     filetypes = { "xml", "xsd", "svg" }
   },
   ltex = {
-    filetypes = { "tex", "bib", "markdown" }
+    filetypes = { "bib", "markdown", "org", "plaintex", "rst", "rnoweb", "tex" }
   },
   ocamlls = {
     filetypes = { "ocaml", "reason" }
@@ -143,6 +149,9 @@ return {
     filetypes = { "solidity" }
   },
   solargraph = {
+    filetypes = { "ruby" }
+  },
+  sorbet = {
     filetypes = { "ruby" }
   },
   sqlls = {

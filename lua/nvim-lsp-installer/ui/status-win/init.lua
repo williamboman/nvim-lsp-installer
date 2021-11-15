@@ -5,7 +5,6 @@ local Data = require "nvim-lsp-installer.data"
 local display = require "nvim-lsp-installer.ui.display"
 local settings = require "nvim-lsp-installer.settings"
 local lsp_servers = require "nvim-lsp-installer.servers"
-local filetype_map = require "nvim-lsp-installer._generated.filetype_map"
 
 local HELP_KEYMAP = "?"
 local CLOSE_WINDOW_KEYMAP_1 = "<Esc>"
@@ -89,7 +88,12 @@ local function Help(is_current_settings_expanded, vader_saber_ticks)
         Ui.EmptyLine(),
         Ui.HlTextNode {
             { { "Problems with server functionality", "LspInstallerLabel" } },
-            { { "Please refer to each language server's own homepage for further assistance.", "LspInstallerMuted" } },
+            {
+                {
+                    "Please refer to each language server's own homepage for further assistance.",
+                    "LspInstallerMuted",
+                },
+            },
         },
         Ui.EmptyLine(),
         Ui.HlTextNode {
@@ -121,8 +125,7 @@ local function Header(props)
             {
                 { props.is_showing_help and props.help_command_text or "", "LspInstallerHighlighted" },
                 {
-                    props.is_showing_help
-                            and "nvim-lsp-installer" .. (" "):rep(#props.help_command_text)
+                    props.is_showing_help and "nvim-lsp-installer" .. (" "):rep(#props.help_command_text)
                         or "nvim-lsp-installer",
                     props.is_showing_help and "LspInstallerHighlighted" or "LspInstallerHeader",
                 },
@@ -459,6 +462,7 @@ local function normalize_chunks_line_endings(chunk, dest)
 end
 
 local function init(all_servers)
+    local filetype_map = require "nvim-lsp-installer._generated.filetype_map"
     local window = display.new_view_only_win "LSP servers"
 
     window.view(

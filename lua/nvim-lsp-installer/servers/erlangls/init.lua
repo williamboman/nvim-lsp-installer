@@ -10,6 +10,7 @@ return function(name, root_dir)
     return server.Server:new {
         name = name,
         root_dir = root_dir,
+        languages = { "erlang" },
         homepage = "https://erlang-ls.github.io/",
         installer = {
             std.ensure_executables {
@@ -29,7 +30,9 @@ return function(name, root_dir)
             end,
         },
         default_options = {
-            cmd = { path.concat { root_dir, "_build", "default", "bin", ("erlang_ls%s"):format(erlang_ls_file_ext) } },
+            cmd = {
+                path.concat { root_dir, "_build", "default", "bin", ("erlang_ls%s"):format(erlang_ls_file_ext) },
+            },
         },
     }
 end
