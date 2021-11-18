@@ -48,7 +48,7 @@ local function get_supported_filetypes(server)
     local default_options = server:get_default_options()
     local filetypes = coalesce(
         -- nvim-lsp-installer options has precedence
-        default_options.filetypes,
+        default_options and default_options.filetypes,
         config.document_config.default_config.filetypes,
         {}
     )
