@@ -146,6 +146,7 @@ lsp_installer.on_server_ready(function (server) server:setup {} end)
 | CSS                                 | `cssls`                  |
 | Clojure                             | `clojure_lsp`            |
 | CodeQL                              | `codeqlls`               |
+| Dart                                | `dartls`                 |
 | Deno                                | `denols`                 |
 | Diagnostic (general purpose server) | `diagnosticls`           |
 | Dlang                               | `serve_d`                |
@@ -168,7 +169,7 @@ lsp_installer.on_server_ready(function (server) server:setup {} end)
 | JSON                                | `jsonls`                 |
 | Java                                | `jdtls`                  |
 | Jedi                                | `jedi_language_server`   |
-| Jsonnet                             | `jsonnet_ls`                |
+| Jsonnet                             | `jsonnet_ls`             |
 | Kotlin                              | `kotlin_language_server` |
 | LaTeX                               | `ltex`                   |
 | LaTeX                               | `texlab`                 |
