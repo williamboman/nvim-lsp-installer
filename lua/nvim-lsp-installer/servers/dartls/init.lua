@@ -13,5 +13,6 @@ return function(name, root_dir)
                 "dart was not found in path. Refer to https://dart.dev/get-dart for installation instructions.",
             },
         },
+        default_options = {},
     }
 end
