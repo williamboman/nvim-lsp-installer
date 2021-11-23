@@ -47,9 +47,9 @@ end
 
 ---Merges the provided env param with the user's full environent. Provided env has precedence.
 ---@param env table<string, string>
----@param excluded_var_names string[]
+---@param excluded_var_names string[]|nil
 function M.graft_env(env, excluded_var_names)
-    local excluded_var_names_set = Data.set_of(excluded_var_names)
+    local excluded_var_names_set = excluded_var_names and Data.set_of(excluded_var_names) or {}
     local merged_env = {}
     for key, val in pairs(initial_environ) do
         if not excluded_var_names_set[key] and env[key] == nil then
