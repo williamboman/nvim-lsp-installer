@@ -109,7 +109,7 @@ end
 
 You can configure certain behavior of nvim-lsp-installer by calling the `.settings()` function.
 
-Make sure to provide your settings before any other interactions with nvim-lsp-installer!
+_Make sure to provide your settings before any other interactions with nvim-lsp-installer!_
 
 Refer to the [default configuration](#default-configuration) for all available settings.
 
@@ -118,7 +118,6 @@ Example:
 ```lua
 local lsp_installer = require("nvim-lsp-installer")
 
--- Provide settings first!
 lsp_installer.settings({
     ui = {
         icons = {
@@ -128,8 +127,6 @@ lsp_installer.settings({
         }
     }
 })
-
-lsp_installer.on_server_ready(function (server) server:setup {} end)
 ```
 
 ## Available LSPs
@@ -168,7 +165,6 @@ lsp_installer.on_server_ready(function (server) server:setup {} end)
 | Haskell                             | `hls`                    |
 | JSON                                | `jsonls`                 |
 | Java                                | `jdtls`                  |
-| Jedi                                | `jedi_language_server`   |
 | Jsonnet                             | `jsonnet_ls`             |
 | Kotlin                              | `kotlin_language_server` |
 | LaTeX                               | `ltex`                   |
@@ -181,6 +177,7 @@ lsp_installer.on_server_ready(function (server) server:setup {} end)
 | Prisma                              | `prismals`               |
 | Puppet                              | `puppet`                 |
 | PureScript                          | `purescriptls`           |
+| Python                              | `jedi_language_server`   |
 | Python                              | `pylsp`                  |
 | Python                              | `pyright`                |
 | ReScript                            | `rescriptls`             |
