@@ -58,4 +58,5 @@ lsp_installer.on_server_ready(function (server)
     server:setup(opts)
 end)
 ```
-*NOTE*: You will have to install `eslint` package locally to your `node_modules` or you will get `Unable to find ESLint library.`  
+
+*NOTE*: You will have to install the [`eslint` package](https://www.npmjs.com/package/eslint) either locally or globally for the server to run successfully.
