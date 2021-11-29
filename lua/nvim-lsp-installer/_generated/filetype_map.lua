@@ -11,7 +11,7 @@ return {
   clojure = { "clojure_lsp" },
   cmake = { "cmake" },
   cpp = { "clangd" },
-  cs = { "omnisharp" },
+  cs = { "omnisharp","csharp_ls" },
   css = { "cssls", "emmet_ls", "stylelint_lsp", "tailwindcss" },
   d = { "serve_d" },
   dart = { "dartls" },
