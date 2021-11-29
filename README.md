@@ -138,6 +138,7 @@ lsp_installer.settings({
 | Bash                                | `bashls`                 |
 | Bicep                               | `bicep`                  |
 | C#                                  | `omnisharp`              |
+| C#                                  | `csharpls`               |
 | C++                                 | `clangd`                 |
 | CMake                               | `cmake`                  |
 | CSS                                 | `cssls`                  |
