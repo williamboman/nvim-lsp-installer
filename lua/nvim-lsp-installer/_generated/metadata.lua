@@ -25,9 +25,9 @@ return {
   codeqlls = {
     filetypes = { "ql" }
   },
-	csharp_ls = {
-		filetypes = { "cs" }
-	},
+  csharp_ls = {
+    filetypes = { "cs" }
+  },
   cssls = {
     filetypes = { "css", "scss", "less" }
   },

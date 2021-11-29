@@ -24,7 +24,7 @@ return function(name, root_dir)
                     stdio_sink = ctx.stdio_sink,
                 }, function(success)
                     if not success then
-                        ctx.stdio_sink.stderr "Failed to install fsautocomplete.\n"
+                        ctx.stdio_sink.stderr "Failed to install csharp-ls.\n"
                         callback(false)
                     else
                         callback(true)
