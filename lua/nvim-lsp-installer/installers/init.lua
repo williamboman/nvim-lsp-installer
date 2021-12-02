@@ -1,6 +1,8 @@
 local platform = require "nvim-lsp-installer.platform"
 local log = require "nvim-lsp-installer.log"
 local Data = require "nvim-lsp-installer.data"
+local fs = require "nvim-lsp-installer.fs"
+local path = require "nvim-lsp-installer.path"
 
 local M = {}
 
@@ -50,6 +52,20 @@ end
 ---@param installers ServerInstallerFunction[]
 function M.compose(installers)
     return M.pipe(Data.list_reverse(installers))
+end
+
+---@param installer ServerInstallerFunction
+function M.unset_requested_version(installer)
+    ---@type ServerInstallerFunction
+    return function(server, callback, context)
+        local requested_server_version = context.requested_server_version
+        context.requested_server_version = nil
+        installer(server, function(...)
+            -- Restore version in context for any subsequent installers
+            context.requested_server_version = requested_server_version
+            callback(...)
+        end, context)
+    end
 end
 
 ---@param installers ServerInstallerFunction[]
@@ -151,6 +167,35 @@ function M.when(platform_table)
             callback(false)
         end
     end
+end
+
+---@param rel_path string @The relative path from the current install_dir.
+---@param installer ServerInstallerFunction @The installer function to execute in the new install dir context.
+function M.run_in_dir(rel_path, installer)
+    return M.pipe {
+        vim.schedule_wrap(function(_, callback, ctx)
+            local new_install_dir = path.concat { ctx.install_dir, rel_path }
+            log.fmt_debug("Changing install_dir from %q to %q.", ctx.install_dir, new_install_dir)
+            ctx.parent_install_dir = ctx.install_dir
+            ctx.install_dir = new_install_dir
+            if not fs.dir_exists(new_install_dir) then
+                local mkdir_ok = pcall(fs.mkdirp, new_install_dir)
+                if not mkdir_ok then
+                    ctx.stdio_sink.stderr(("Failed to create directory %q.\n"):format(new_install_dir))
+                    callback(false)
+                    return
+                end
+            end
+            callback(true)
+        end),
+        type(installer) == "table" and M.pipe(installer) or installer,
+        function(_, callback, ctx)
+            log.debug("Restoring install_dir from %q to %q.", ctx.install_dir, ctx.parent_install_dir)
+            ctx.install_dir = ctx.parent_install_dir
+            ctx.parent_install_dir = nil
+            callback(true)
+        end,
+    }
 end
 
 return M
