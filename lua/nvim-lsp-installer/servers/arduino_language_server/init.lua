@@ -3,7 +3,7 @@ local std = require "nvim-lsp-installer.installers.std"
 local installers = require "nvim-lsp-installer.installers"
 local server = require "nvim-lsp-installer.server"
 local go = require "nvim-lsp-installer.installers.go"
-local shell = require "nvim-lsp-installer.installers.shell"
+local process = require "nvim-lsp-installer.process"
 local platform = require "nvim-lsp-installer.platform"
 local context = require "nvim-lsp-installer.installers.context"
 local Data = require "nvim-lsp-installer.data"
@@ -52,15 +52,14 @@ return function(name, root_dir)
         languages = { "arduino" },
         installer = {
             arduino_cli_installer,
-            installers.on {
-                unix = shell.sh(
-                    path.concat { root_dir, "arduino-cli" } .. " config init --dest-file arduino-cli.yaml --overwrite"
-                ),
-                win = shell.cmd(
-                    path.concat { root_dir, "arduino-cli.exe" }
-                        .. " config init --dest-file arduino-cli.yaml --overwrite"
-                ),
-            },
+            ---@type ServerInstallerFunction
+            function(_, callback, ctx)
+                process.spawn(path.concat { root_dir, "arduino-cli" }, {
+                    args = { "config", "init", "--dest-file", "arduino-cli.yaml", "--overwrite" },
+                    cwd = ctx.install_dir,
+                    stdio_sink = ctx.stdio_sink,
+                }, callback)
+            end,
             go.packages { "github.com/arduino/arduino-language-server" },
         },
         default_options = {
