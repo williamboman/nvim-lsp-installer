@@ -13,7 +13,7 @@ local coalesce, when = Data.coalesce, Data.when
 return function(name, root_dir)
     local arduino_cli_installer = installers.pipe {
         context.use_github_release_file("arduino/arduino-cli", function(version)
-            return coalesce(
+            local target_file = coalesce(
                 when(platform.is_mac, coalesce(when(platform.arch == "x64", "arduino-cli_%s_macOS_64bit.tar.gz"))),
                 when(
                     platform.is_linux,
@@ -32,7 +32,8 @@ return function(name, root_dir)
                         when(platform.arch == "x86", "arduino-cli_%s_Windows_32bit.zip")
                     )
                 )
-            ):format(version)
+            )
+            return target_file and target_file:format(version)
         end),
         context.capture(function(ctx)
             if platform.is_win then
