@@ -6,6 +6,16 @@ local path = require "nvim-lsp-installer.path"
 
 local M = {}
 
+---@param installer ServerInstallerFunction[]|ServerInstallerFunction
+---@return ServerInstallerFunction
+local function normalize_installer(installer)
+    if type(installer) == "table" then
+        return M.pipe(installer)
+    else
+        return installer
+    end
+end
+
 ---@alias ServerInstallCallback fun(success: boolean)
 
 ---@class ServerInstallContext
@@ -136,11 +146,7 @@ function M.on(platform_table)
     return function(server, callback, context)
         local installer = get_by_platform(platform_table)
         if installer then
-            if type(installer) == "function" then
-                installer(server, callback, context)
-            else
-                M.pipe(installer)(server, callback, context)
-            end
+            normalize_installer(installer)(server, callback, context)
         else
             callback(true)
         end
@@ -155,11 +161,7 @@ function M.when(platform_table)
     return function(server, callback, context)
         local installer = get_by_platform(platform_table)
         if installer then
-            if type(installer) == "function" then
-                installer(server, callback, context)
-            else
-                M.pipe(installer)(server, callback, context)
-            end
+            normalize_installer(installer)(server, callback, context)
         else
             context.stdio_sink.stderr(
                 ("Current operating system is not yet supported for server %q.\n"):format(server.name)
@@ -169,33 +171,13 @@ function M.when(platform_table)
     end
 end
 
----@param rel_path string @The relative path from the current install_dir.
----@param installer ServerInstallerFunction @The installer function to execute in the new install dir context.
-function M.run_in_dir(rel_path, installer)
-    return M.pipe {
-        vim.schedule_wrap(function(_, callback, ctx)
-            local new_install_dir = path.concat { ctx.install_dir, rel_path }
-            log.fmt_debug("Changing install_dir from %q to %q.", ctx.install_dir, new_install_dir)
-            ctx.parent_install_dir = ctx.install_dir
-            ctx.install_dir = new_install_dir
-            if not fs.dir_exists(new_install_dir) then
-                local mkdir_ok = pcall(fs.mkdirp, new_install_dir)
-                if not mkdir_ok then
-                    ctx.stdio_sink.stderr(("Failed to create directory %q.\n"):format(new_install_dir))
-                    callback(false)
-                    return
-                end
-            end
-            callback(true)
-        end),
-        type(installer) == "table" and M.pipe(installer) or installer,
-        function(_, callback, ctx)
-            log.debug("Restoring install_dir from %q to %q.", ctx.install_dir, ctx.parent_install_dir)
-            ctx.install_dir = ctx.parent_install_dir
-            ctx.parent_install_dir = nil
-            callback(true)
-        end,
-    }
+---@param installer ServerInstallerFunction|ServerInstallerFunction[] @The installer to execute in a new installer context.
+function M.new_context(installer)
+    ---@type ServerInstallerFunction
+    return function(server, callback, context)
+        local new_context = vim.deepcopy(context)
+        normalize_installer(installer)(server, callback, new_context)
+    end
 end
 
 return M

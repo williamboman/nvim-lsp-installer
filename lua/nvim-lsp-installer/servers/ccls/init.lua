@@ -50,7 +50,7 @@ return function(name, root_dir)
         })
     end
 
-    local ccls_installer = installers.run_in_dir("ccls", {
+    local ccls_installer = installers.new_context {
         std.git_clone "https://github.com/MaskRay/ccls",
         std.git_update_submodules(),
         function(_, callback, ctx)
@@ -72,7 +72,7 @@ return function(name, root_dir)
                 stdio_sink = ctx.stdio_sink,
             }, callback)
         end,
-    })
+    }
 
     return server.Server:new {
         name = name,
