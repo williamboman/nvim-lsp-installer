@@ -1,5 +1,15 @@
 local server = require "nvim-lsp-installer.server"
 local npm = require "nvim-lsp-installer.installers.npm"
+local Data = require "nvim-lsp-installer.data"
+local path = require "nvim-lsp-installer.path"
+
+local map = Data.list_map
+
+local function append_node_modules(dirs)
+    return map(function(dir)
+        return path.concat { dir, "node_modules" }
+    end, dirs)
+end
 
 return function(name, root_dir)
     return server.Server:new {
@@ -14,9 +24,9 @@ return function(name, root_dir)
                     npm.executable(root_dir, "ngserver"),
                     "--stdio",
                     "--tsProbeLocations",
-                    table.concat({ root_dir, new_root_dir }, ","),
+                    table.concat(append_node_modules { root_dir, new_root_dir }, ","),
                     "--ngProbeLocations",
-                    table.concat({ root_dir, new_root_dir }, ","),
+                    table.concat(append_node_modules { root_dir, new_root_dir }, ","),
                 }
             end,
         },
