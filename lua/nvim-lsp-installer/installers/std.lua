@@ -248,7 +248,7 @@ function M.git_clone(repo_url)
     end
 end
 
-function M.git_update_submodules()
+function M.git_submodule_update()
     ---@type ServerInstallerFunction
     return function(_, callback, context)
         process.spawn("git", {

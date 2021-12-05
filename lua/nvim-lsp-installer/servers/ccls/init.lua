@@ -59,7 +59,7 @@ return function(name, root_dir)
         end),
         context.set_working_dir "ccls",
         std.git_clone "https://github.com/MaskRay/ccls",
-        std.git_update_submodules(),
+        std.git_submodule_update(),
         function(_, callback, ctx)
             local c = process.chain {
                 cwd = ctx.install_dir,
