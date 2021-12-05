@@ -192,6 +192,11 @@ function M.Server:install_attached(context, callback)
                     return
                 end
 
+                -- The tmp dir should in most cases have been "promoted" and already renamed to its final destination,
+                -- but we make sure to delete it should the installer modify the installation working directory during
+                -- installation.
+                pcall(fs.rmrf, self:get_tmp_install_dir())
+
                 -- Dispatch the server is ready
                 vim.schedule(function()
                     dispatcher.dispatch_server_ready(self)
