@@ -36,6 +36,7 @@ local CORE_SERVERS = Data.set_of {
     "arduino_language_server",
     "bashls",
     "bicep",
+    "ccls",
     "clangd",
     "clojure_lsp",
     "cmake",
