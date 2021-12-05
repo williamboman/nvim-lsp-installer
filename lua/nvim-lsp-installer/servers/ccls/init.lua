@@ -34,8 +34,11 @@ return function(name, root_dir)
             return version:gsub("^llvmorg%-", "")
         end
 
-        -- We unset the requested version for llvm because it's not the primary target - version should only apply to ccls.
-        llvm_installer = installers.unset_requested_version(installers.pipe {
+        llvm_installer = installers.branch_context {
+            context.set(function(ctx)
+                -- We unset the requested version for llvm because it's not the primary target - the user's requested version should only apply to ccls.
+                ctx.requested_server_version = nil
+            end),
             context.use_github_release_file("llvm/llvm-project", function(version)
                 -- Strip the "llvmorg-" prefix from tags (llvm releases tags like llvmorg-13.0.0)
                 local archive_name = get_archive_name(normalize_version(version))
@@ -47,30 +50,30 @@ return function(name, root_dir)
                     std.rename(get_archive_name(normalize_version(ctx.requested_server_version)), "llvm"),
                 }
             end),
-        })
+        }
     end
 
-    local ccls_installer = installers.new_context {
+    local ccls_installer = installers.branch_context {
+        context.set(function(ctx)
+            ctx.llvm_install_dir = path.concat { ctx.install_dir, "llvm" }
+        end),
+        context.set_working_dir "ccls",
         std.git_clone "https://github.com/MaskRay/ccls",
         std.git_update_submodules(),
         function(_, callback, ctx)
-            process.spawn("cmake", {
-                args = {
-                    "-H.",
-                    "-BRelease",
-                    "-DCMAKE_BUILD_TYPE=Release",
-                    ("-DCMAKE_PREFIX_PATH=%s"):format(path.concat { ctx.parent_install_dir, "llvm", "lib", "cmake" }),
-                },
+            local c = process.chain {
                 cwd = ctx.install_dir,
                 stdio_sink = ctx.stdio_sink,
-            }, callback)
-        end,
-        function(_, callback, ctx)
-            process.spawn("cmake", {
-                args = { "--build", "Release" },
-                cwd = ctx.install_dir,
-                stdio_sink = ctx.stdio_sink,
-            }, callback)
+            }
+
+            c.run("cmake", {
+                "-H.",
+                "-BRelease",
+                "-DCMAKE_BUILD_TYPE=Release",
+                ("-DCMAKE_PREFIX_PATH=%s"):format(path.concat { ctx.llvm_install_dir, "lib", "cmake" }),
+            })
+            c.run("cmake", { "--build", "Release" })
+            c.spawn(callback)
         end,
     }
 

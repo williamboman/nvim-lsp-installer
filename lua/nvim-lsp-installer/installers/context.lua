@@ -4,6 +4,7 @@ local process = require "nvim-lsp-installer.process"
 local installers = require "nvim-lsp-installer.installers"
 local platform = require "nvim-lsp-installer.platform"
 local fs = require "nvim-lsp-installer.fs"
+local path = require "nvim-lsp-installer.path"
 
 local M = {}
 
@@ -164,6 +165,23 @@ function M.set(fn)
         fn(context)
         callback(true)
     end
+end
+
+function M.set_working_dir(rel_path)
+    ---@type ServerInstallerFunction
+    return vim.schedule_wrap(function(server, callback, context)
+        log.fmt_debug("Changing installation working directory for %s", server.name)
+        local new_dir = path.concat { context.install_dir, rel_path }
+        if not fs.dir_exists(new_dir) then
+            local ok = pcall(fs.mkdirp, new_dir)
+            if not ok then
+                context.stdio_sink.stderr(("Failed to create directory %s.\n"):format(new_dir))
+                return callback(false)
+            end
+        end
+        context.install_dir = new_dir
+        callback(true)
+    end)
 end
 
 return M

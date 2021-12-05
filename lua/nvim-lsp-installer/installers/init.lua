@@ -172,7 +172,7 @@ function M.when(platform_table)
 end
 
 ---@param installer ServerInstallerFunction|ServerInstallerFunction[] @The installer to execute in a new installer context.
-function M.new_context(installer)
+function M.branch_context(installer)
     ---@type ServerInstallerFunction
     return function(server, callback, context)
         local new_context = vim.deepcopy(context)
