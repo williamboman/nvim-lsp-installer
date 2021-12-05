@@ -13,7 +13,7 @@ local coalesce, when = Data.coalesce, Data.when
 return function(name, root_dir)
     local arduino_cli_installer = installers.branch_context {
         context.set_working_dir "arduino-cli",
-        context.set(function (ctx)
+        context.set(function(ctx)
             -- The user's requested version should not apply to the CLI.
             ctx.requested_server_version = nil
         end),
