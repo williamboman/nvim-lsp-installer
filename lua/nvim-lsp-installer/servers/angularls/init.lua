@@ -1,15 +1,27 @@
 local server = require "nvim-lsp-installer.server"
 local npm = require "nvim-lsp-installer.installers.npm"
+local Data = require "nvim-lsp-installer.data"
+local path = require "nvim-lsp-installer.path"
+
+local map = Data.list_map
+
+local function append_node_modules(dirs)
+    return map(function(dir)
+        return path.concat { dir, "node_modules" }
+    end, dirs)
+end
 
 return function(name, root_dir)
-    local cmd = {
-        npm.executable(root_dir, "ngserver"),
-        "--stdio",
-        "--tsProbeLocations",
-        root_dir,
-        "--ngProbeLocations",
-        root_dir,
-    }
+    local function get_cmd(workspace_dir)
+        return {
+            npm.executable(root_dir, "ngserver"),
+            "--stdio",
+            "--tsProbeLocations",
+            table.concat(append_node_modules { root_dir, workspace_dir }, ","),
+            "--ngProbeLocations",
+            table.concat(append_node_modules { root_dir, workspace_dir }, ","),
+        }
+    end
 
     return server.Server:new {
         name = name,
@@ -18,9 +30,9 @@ return function(name, root_dir)
         languages = { "angular" },
         installer = npm.packages { "@angular/language-server", "typescript" },
         default_options = {
-            cmd = cmd,
-            on_new_config = function(new_config)
-                new_config.cmd = cmd
+            cmd = get_cmd(path.cwd()),
+            on_new_config = function(new_config, new_root_dir)
+                new_config.cmd = get_cmd(new_root_dir)
             end,
         },
     }
