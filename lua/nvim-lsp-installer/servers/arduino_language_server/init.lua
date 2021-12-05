@@ -11,10 +11,11 @@ local Data = require "nvim-lsp-installer.data"
 local coalesce, when = Data.coalesce, Data.when
 
 return function(name, root_dir)
-    local arduino_cli_installer = installers.pipe {
+    local arduino_cli_installer = installers.branch_context {
+        context.set_working_dir "arduino-cli",
         context.use_github_release_file("arduino/arduino-cli", function(version)
             local target_file = coalesce(
-                when(platform.is_mac, coalesce(when(platform.arch == "x64", "arduino-cli_%s_macOS_64bit.tar.gz"))),
+                when(platform.is_mac, "arduino-cli_%s_macOS_64bit.tar.gz"),
                 when(
                     platform.is_linux,
                     coalesce(
@@ -43,6 +44,19 @@ return function(name, root_dir)
             end
         end),
         std.chmod("+x", { "arduino-cli" }),
+        ---@type ServerInstallerFunction
+        function(_, callback, ctx)
+            process.spawn(path.concat { ctx.install_dir, "arduino-cli" }, {
+                args = { "config", "init", "--dest-file", "arduino-cli.yaml", "--overwrite" },
+                cwd = ctx.install_dir,
+                stdio_sink = ctx.stdio_sink,
+            }, callback)
+        end,
+    }
+
+    local arduino_language_server_installer = installers.branch_context {
+        context.set_working_dir "arduino-language-server",
+        go.packages { "github.com/arduino/arduino-language-server" },
     }
 
     return server.Server:new {
@@ -52,23 +66,15 @@ return function(name, root_dir)
         languages = { "arduino" },
         installer = {
             arduino_cli_installer,
-            ---@type ServerInstallerFunction
-            function(_, callback, ctx)
-                process.spawn(path.concat { root_dir, "arduino-cli" }, {
-                    args = { "config", "init", "--dest-file", "arduino-cli.yaml", "--overwrite" },
-                    cwd = ctx.install_dir,
-                    stdio_sink = ctx.stdio_sink,
-                }, callback)
-            end,
-            go.packages { "github.com/arduino/arduino-language-server" },
+            arduino_language_server_installer,
         },
         default_options = {
             cmd = {
-                go.executable(root_dir, "arduino-language-server"),
+                go.executable(path.concat { root_dir, "arduino-language-server" }, "arduino-language-server"),
                 "-cli",
-                path.concat { root_dir, platform.is_win and "arduino-cli.exe" or "arduino-cli" },
+                path.concat { root_dir, "arduino-cli", platform.is_win and "arduino-cli.exe" or "arduino-cli" },
                 "-cli-config",
-                path.concat { root_dir, "arduino-cli.yaml" },
+                path.concat { root_dir, "arduino-cli", "arduino-cli.yaml" },
             },
         },
     }
