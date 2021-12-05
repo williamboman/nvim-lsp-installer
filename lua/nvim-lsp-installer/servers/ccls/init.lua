@@ -82,10 +82,12 @@ return function(name, root_dir)
         root_dir = root_dir,
         homepage = "https://github.com/MaskRay/ccls",
         languages = { "c", "c++", "objective-c" },
-        installer = {
-            context.promote_install_dir(), -- ccls hardcodes the path to llvm at compile time, so we need to compile everything in the final directory
-            llvm_installer,
-            ccls_installer,
+        installer = installers.when {
+            unix = {
+                context.promote_install_dir(), -- ccls hardcodes the path to llvm at compile time, so we need to compile everything in the final directory
+                llvm_installer,
+                ccls_installer,
+            },
         },
         default_options = {
             cmd = { path.concat { root_dir, "ccls", "Release", "ccls" } },
