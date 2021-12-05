@@ -13,6 +13,10 @@ local coalesce, when = Data.coalesce, Data.when
 return function(name, root_dir)
     local arduino_cli_installer = installers.branch_context {
         context.set_working_dir "arduino-cli",
+        context.set(function (ctx)
+            -- The user's requested version should not apply to the CLI.
+            ctx.requested_server_version = nil
+        end),
         context.use_github_release_file("arduino/arduino-cli", function(version)
             local target_file = coalesce(
                 when(platform.is_mac, "arduino-cli_%s_macOS_64bit.tar.gz"),
