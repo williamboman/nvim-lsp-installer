@@ -187,6 +187,7 @@ function M.Server:install_attached(context, callback)
                         ("Failed to promote the temporary installation directory %q.\n"):format(context.install_dir)
                     )
                     pcall(fs.rmrf, self:get_tmp_install_dir())
+                    pcall(fs.rmrf, context.install_dir)
                     callback(false)
                     return
                 end
@@ -201,6 +202,7 @@ function M.Server:install_attached(context, callback)
                 callback(true)
             else
                 pcall(fs.rmrf, self:get_tmp_install_dir())
+                pcall(fs.rmrf, context.install_dir)
                 callback(false)
             end
         end),
