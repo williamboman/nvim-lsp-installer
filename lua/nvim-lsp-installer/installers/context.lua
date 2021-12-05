@@ -167,6 +167,7 @@ function M.set(fn)
     end
 end
 
+---@param rel_path string @The relative path from the current installation working directory.
 function M.set_working_dir(rel_path)
     ---@type ServerInstallerFunction
     return vim.schedule_wrap(function(server, callback, context)
