@@ -197,6 +197,7 @@ lsp_installer.settings({
 | Python                              | `jedi_language_server`   |
 | Python                              | `pylsp`                  |
 | Python                              | `pyright`                |
+| Quick Lint JS                       | `quick_lint_js`          |
 | ReScript                            | `rescriptls`             |
 | Rome                                | `rome`                   |
 | Ruby                                | `solargraph`             |

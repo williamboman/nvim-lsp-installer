@@ -145,6 +145,9 @@ return {
   pyright = {
     filetypes = { "python" }
   },
+  quick_lint_js = {
+    filetypes = { "javascript" }
+  },
   rescriptls = {
     filetypes = { "rescript" }
   },
