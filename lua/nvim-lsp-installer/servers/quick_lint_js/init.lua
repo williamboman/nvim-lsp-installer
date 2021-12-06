@@ -51,8 +51,8 @@ return function(name, root_dir)
                 end
             end),
             installers.on {
-                unix = context.set_working_dir("quick-lint-js"),
-            }
+                unix = context.set_working_dir "quick-lint-js",
+            },
         },
         default_options = {
             cmd = { path.concat { root_dir, "bin", "quick-lint-js" }, "--lsp-server" },
