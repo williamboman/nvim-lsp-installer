@@ -14,14 +14,11 @@ return function(name, root_dir)
             cmd = { pip3.executable(root_dir, "pylsp") },
             commands = {
                 PylspInstall = {
-                    function (...)
+                    function(...)
+                        -- `nargs+` requires at least one argument -> no empty table
                         local plugins = { ... }
-                        if not plugins or #plugins == 0 then
-                            notify "Usage: PylspInstall <list of plugins>"
-                            return
-                        end
                         local plugins_str = table.concat(plugins, ", ")
-                        notify(string.format("Installing %q ...", plugins_str))
+                        notify(string.format("Installing %q...", plugins_str))
                         process.spawn(
                             pip3.executable(root_dir, "pip"),
                             {
@@ -32,7 +29,7 @@ return function(name, root_dir)
                                 if success then
                                     notify(string.format("Successfully installed %q", plugins_str))
                                 else
-                                    notify "Failed to install requested plugins."
+                                    notify("Failed to install requested plugins.", vim.log.levels.ERROR)
                                 end
                             end)
                         )
