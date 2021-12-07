@@ -198,7 +198,7 @@ lsp_installer.settings({
 | Puppet                              | `puppet`                  |
 | PureScript                          | `purescriptls`            |
 | Python                              | `jedi_language_server`    |
-| Python                              | `pylsp`                   |
+| Python [(docs)][pylsp]              | `pylsp`                   |
 | Python                              | `pyright`                 |
 | ReScript                            | `rescriptls`              |
 | Rome                                | `rome`                    |
