@@ -226,6 +226,7 @@ lsp_installer.settings({
 [eslint]: ./lua/nvim-lsp-installer/servers/eslint/README.md
 [tflint]: ./lua/nvim-lsp-installer/servers/tflint/README.md
 [tsserver]: ./lua/nvim-lsp-installer/servers/tsserver/README.md
+[pylsp]: ./lua/nvim-lsp-installer/servers/pylsp/README.md
 
 ## Custom servers
 
