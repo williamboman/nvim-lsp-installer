@@ -18,7 +18,7 @@ return function(name, root_dir)
                         -- `nargs+` requires at least one argument -> no empty table
                         local plugins = { ... }
                         local plugins_str = table.concat(plugins, ", ")
-                        notify(string.format("Installing %q...", plugins_str))
+                        notify(("Installing %q..."):format(plugins_str))
                         process.spawn(
                             pip3.executable(root_dir, "pip"),
                             {
@@ -27,14 +27,14 @@ return function(name, root_dir)
                             },
                             vim.schedule_wrap(function(success)
                                 if success then
-                                    notify(string.format("Successfully installed %q", plugins_str))
+                                    notify(("Successfully installed %q"):format(plugins_str))
                                 else
                                     notify("Failed to install requested plugins.", vim.log.levels.ERROR)
                                 end
                             end)
                         )
                     end,
-                    description = "Install listed modules in the env of Pylsp.",
+                    description = "Installs the provided packages in the same venv as pylsp.",
                     ["nargs=+"] = true,
                 },
             },
