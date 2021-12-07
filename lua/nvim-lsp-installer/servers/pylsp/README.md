@@ -1,21 +1,12 @@
 # Pylsp
 
 ## Installing pylsp plugins
-pylsp is installed in a virtual environment. If you want to install additional
-python packages and make them available to pylsp, you have to install them in
-the virtual environment.
+Pylsp has [third party plugins](https://github.com/python-lsp/python-lsp-server#3rd-party-plugins) which are not installed by default.
 
-To find the installation of pylsp:
+If you want to install them using the same installation of pylsp as nvim-lsp-installer, you may run
 ```vim
-:lua print(vim.fn.stdpath('data') .. '/lsp_servers/pylsp')
-```
-cd into this directory and source the virtual env:
-```sh
-source venv/bin/activate
+:PylspInstall <list of python packages>
 ```
 
-then you can install plugins as you would globally.
-ex of `pylsp_mypy`:
-```sh
-pip install pylsp_mypy
-```
+PS:
+pylsp is installed in a python venv located in `stdpath('data')/lsp_servers/pylsp`
