@@ -84,7 +84,7 @@ local CORE_SERVERS = Data.set_of {
     "serve_d",
     "solang",
     "solargraph",
-    "solidity_vscode",
+    "solidity_ls",
     "sorbet",
     "sqlls",
     "sqls",

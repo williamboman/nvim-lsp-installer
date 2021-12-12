@@ -160,7 +160,7 @@ return {
   solargraph = {
     filetypes = { "ruby" }
   },
-  solidity_vscode = {
+  solidity_ls = {
     filetypes = { "solidity" }
   },
   sorbet = {
