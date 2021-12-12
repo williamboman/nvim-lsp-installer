@@ -7,11 +7,17 @@ return {
   ansiblels = {
     filetypes = { "yaml", "yaml.ansible" }
   },
+  arduino_language_server = {
+    filetypes = { "arduino" }
+  },
   bashls = {
     filetypes = { "sh" }
   },
   bicep = {
     filetypes = { "bicep" }
+  },
+  ccls = {
+    filetypes = { "c", "cpp", "objc", "objcpp" }
   },
   clangd = {
     filetypes = { "c", "cpp", "objc", "objcpp" }
@@ -80,7 +86,7 @@ return {
     filetypes = { "go", "gomod" }
   },
   graphql = {
-    filetypes = { "typescriptreact", "javascriptreact", "graphql" }
+    filetypes = { "graphql", "typescriptreact", "javascriptreact" }
   },
   groovyls = {
     filetypes = { "groovy" }
@@ -142,6 +148,9 @@ return {
   pyright = {
     filetypes = { "python" }
   },
+  quick_lint_js = {
+    filetypes = { "javascript" }
+  },
   rescriptls = {
     filetypes = { "rescript" }
   },
@@ -165,6 +174,9 @@ return {
   },
   sorbet = {
     filetypes = { "ruby" }
+  },
+  spectral = {
+    filetypes = { "yaml", "json", "yml" }
   },
   sqlls = {
     filetypes = { "sql", "mysql" }

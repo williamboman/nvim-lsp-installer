@@ -13,10 +13,15 @@ return function(name, root_dir)
             std.ensure_executables {
                 { "dotnet", "dotnet is required to run the bicep language server." },
             },
-            context.use_github_release_file("Azure/bicep", "bicep-langserver.zip"),
+            -- The bicep-langserver.zip is a bit broken on POSIX systems - so we download it via the VSCode distribution
+            -- instead. See https://github.com/Azure/bicep/issues/3704.
+            context.use_github_release_file("Azure/bicep", "vscode-bicep.vsix"),
             context.capture(function(ctx)
-                return std.unzip_remote(ctx.github_release_file)
+                return std.unzip_remote(ctx.github_release_file, "vscode")
             end),
+            std.rename(path.concat { "vscode", "extension", "bicepLanguageServer" }, "langserver"),
+            std.rmrf "vscode",
+            context.set_working_dir "langserver",
         },
         default_options = {
             cmd = { "dotnet", path.concat { root_dir, "Bicep.LangServer.dll" } },

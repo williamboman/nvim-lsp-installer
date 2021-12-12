@@ -35,7 +35,7 @@ function M.download_file(url, out_file)
 end
 
 ---@param file string @The relative path to the file to unzip.
----@param dest string|nil @The destination of the unzip (defaults to ".").
+---@param dest string|nil @The destination of the unzip.
 function M.unzip(file, dest)
     return installers.pipe {
         installers.when {
@@ -57,6 +57,7 @@ end
 
 ---@see unzip().
 ---@param url string @The url of the .zip file.
+---@param dest string|nil @The url of the .zip file. Defaults to ".".
 function M.unzip_remote(url, dest)
     return installers.pipe {
         M.download_file(url, "archive.zip"),
@@ -244,6 +245,17 @@ function M.git_clone(repo_url)
         end
 
         c.spawn(callback)
+    end
+end
+
+function M.git_submodule_update()
+    ---@type ServerInstallerFunction
+    return function(_, callback, context)
+        process.spawn("git", {
+            args = { "submodule", "update", "--init", "--recursive" },
+            cwd = context.install_dir,
+            stdio_sink = context.stdio_sink,
+        }, callback)
     end
 end
 
