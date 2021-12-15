@@ -90,6 +90,7 @@ local CORE_SERVERS = Data.set_of {
     "solargraph",
     "solidity_ls",
     "sorbet",
+    "sourcekit-lsp",
     "spectral",
     "sqlls",
     "sqls",
