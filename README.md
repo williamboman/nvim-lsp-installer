@@ -215,7 +215,7 @@ lsp_installer.settings({
 | Sphinx                              | `esbonio`                 |
 | Stylelint                           | `stylelint_lsp`           |
 | Svelte                              | `svelte`                  |
-| Swift                               | `sourcekit-lsp`           |
+| Swift                               | `sourcekit`               |
 | Tailwind CSS                        | `tailwindcss`             |
 | Terraform                           | `terraformls`             |
 | Terraform [(docs)][tflint]          | `tflint`                  |
