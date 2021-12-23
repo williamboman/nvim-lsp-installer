@@ -227,6 +227,7 @@ lsp_installer.settings({
 | XML                                 | `lemminx`                 |
 | YAML                                | `yamlls`                  |
 | Zig                                 | `zls`                     |
+| Zk                                  | `markdown`                |
 
 [eslint]: ./lua/nvim-lsp-installer/servers/eslint/README.md
 [tflint]: ./lua/nvim-lsp-installer/servers/tflint/README.md
