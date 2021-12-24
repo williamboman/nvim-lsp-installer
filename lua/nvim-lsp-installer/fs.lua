@@ -21,9 +21,11 @@ end
 function M.rmrf(path)
     log.debug("fs: rmrf", path)
     assert_ownership(path)
-    if vim.fn.delete(path, "rf") ~= 0 then
-        log.debug "fs: rmrf failed"
-        error(("rmrf: Could not remove directory %q."):format(path))
+    if vim.fn.exists(path) then
+        if vim.fn.delete(path, "rf") ~= 0 then
+            log.debug "fs: rmrf failed"
+            error(("rmrf: Could not remove directory %q."):format(path))
+        end
     end
 end
 
