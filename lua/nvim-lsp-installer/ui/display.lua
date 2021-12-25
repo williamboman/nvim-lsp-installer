@@ -43,7 +43,7 @@ end
 ---@param node INode
 ---@param _render_context RenderContext|nil
 ---@param _output RenderOutput|nil
-local function render_node(viewport_context, node, _render_context, _output)
+function M._render_node(viewport_context, node, _render_context, _output)
     ---@class RenderContext
     ---@field viewport_context ViewportContext
     ---@field applied_block_styles CascadingStyle[]
@@ -118,7 +118,7 @@ local function render_node(viewport_context, node, _render_context, _output)
             render_context.applied_block_styles[#render_context.applied_block_styles + 1] = node.styles
         end
         for i = 1, #node.children do
-            render_node(viewport_context, node.children[i], render_context, output)
+            M._render_node(viewport_context, node.children[i], render_context, output)
         end
         if node.type == "CASCADING_STYLE" then
             render_context.applied_block_styles[#render_context.applied_block_styles] = nil
@@ -309,7 +309,7 @@ function M.new_view_only_win(name)
         local viewport_context = {
             win_width = win_width,
         }
-        local output = render_node(viewport_context, view)
+        local output = M._render_node(viewport_context, view)
         local lines, virt_texts, highlights, keybinds =
             output.lines, output.virt_texts, output.highlights, output.keybinds
 
