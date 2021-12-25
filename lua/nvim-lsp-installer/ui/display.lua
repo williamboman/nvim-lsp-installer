@@ -43,7 +43,7 @@ end
 ---@param node INode
 ---@param _render_context RenderContext|nil
 ---@param _output RenderOutput|nil
-function M._render_node(viewport_context, node, _render_context, _output)
+local function render_node(viewport_context, node, _render_context, _output)
     ---@class RenderContext
     ---@field viewport_context ViewportContext
     ---@field applied_block_styles CascadingStyle[]
@@ -120,7 +120,7 @@ function M._render_node(viewport_context, node, _render_context, _output)
             render_context.applied_block_styles[#render_context.applied_block_styles + 1] = node.styles
         end
         for i = 1, #node.children do
-            M._render_node(viewport_context, node.children[i], render_context, output)
+            render_node(viewport_context, node.children[i], render_context, output)
         end
         if node.type == "CASCADING_STYLE" then
             render_context.applied_block_styles[#render_context.applied_block_styles] = nil
@@ -136,6 +136,9 @@ function M._render_node(viewport_context, node, _render_context, _output)
 
     return output
 end
+
+-- exported for tests
+M._render_node = render_node
 
 local function create_popup_window_opts()
     local win_height = vim.o.lines - vim.o.cmdheight - 2 -- Add margin for status and buffer line
@@ -311,7 +314,7 @@ function M.new_view_only_win(name)
         local viewport_context = {
             win_width = win_width,
         }
-        local output = M._render_node(viewport_context, view)
+        local output = render_node(viewport_context, view)
         local lines, virt_texts, highlights, keybinds =
             output.lines, output.virt_texts, output.highlights, output.keybinds
 
