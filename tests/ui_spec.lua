@@ -233,9 +233,11 @@ describe("integration test", function()
         mutate_state(function(state)
             state.text = "New state"
         end)
-        a.util.scheduler()
 
+        assert.spy(set_lines).was_called(1)
+        a.util.scheduler()
         assert.spy(set_lines).was_called(2)
+
         assert.spy(set_lines).was_called_with(
             match.is_number(),
             0,
