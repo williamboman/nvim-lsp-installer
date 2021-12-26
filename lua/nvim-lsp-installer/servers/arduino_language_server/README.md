@@ -1,6 +1,6 @@
 # arduino_language_server
 
-## Required extra configuration (FQBN)
+## Necessary extra configuration
 
 The Arduino Language Server does not come fully bootstrapped out of the box. In order for the language server to
 successfully start, you need to provide which [FQBN](#FQBN) (e.g. "arduino:avr:nano") it should start with.
