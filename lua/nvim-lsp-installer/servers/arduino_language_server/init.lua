@@ -69,10 +69,10 @@ return function(name, root_dir)
             ctx.requested_server_version = nil
         end),
         context.use_github_release_file("clangd/clangd", function(version)
-            local target_file = Data.coalesce(
-                Data.when(platform.is_mac, "clangd-mac-%s.zip"),
-                Data.when(platform.is_linux and platform.arch == "x64", "clangd-linux-%s.zip"),
-                Data.when(platform.is_win, "clangd-windows-%s.zip")
+            local target_file = coalesce(
+                when(platform.is_mac, "clangd-mac-%s.zip"),
+                when(platform.is_linux and platform.arch == "x64", "clangd-linux-%s.zip"),
+                when(platform.is_win, "clangd-windows-%s.zip")
             )
             return target_file and target_file:format(version)
         end),
