@@ -233,7 +233,7 @@ local function ServerMetadata(server)
                             "LspInstallerLabel",
                         },
                         {
-                            (" (hit enter to %s)"):format(server.has_expanded_schema and "collapse" or "expand"),
+                            (" (press enter to %s)"):format(server.has_expanded_schema and "collapse" or "expand"),
                             "Comment",
                         },
                     },
