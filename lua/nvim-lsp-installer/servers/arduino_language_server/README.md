@@ -3,7 +3,7 @@
 ## Required extra configuration (FQBN)
 
 The Arduino Language Server does not come fully bootstrapped out of the box. In order for the language server to
-successfully start, you need to provide which FQBN<sup>1</sup> (e.g. "arduino:avr:nano") it should start with.
+successfully start, you need to provide which [FQBN](#FQBN)<sup>1</sup> (e.g. "arduino:avr:nano") it should start with.
 
 This is done during server initialization, and can be done by utilizing lspconfig's `on_new_config` hook:
 
@@ -55,10 +55,10 @@ lsp_installer.on_server_ready(function (server)
 end)
 ```
 
-### <sup>1</sup> Locating a FQBN
+## FQBN<sup>1</sup>
 
 A FQBN, fully qualified board name, is used to distinguish between the various supported boards. Its format is defined
-as: `<package>:<architecture>:<board>`, where
+as `<package>:<architecture>:<board>`, where
 
 -   `<package>` - vendor identifier; typically just `arduino` for Arduino boards
 -   `<architecture>` - microcontroller architecture; e.g., `avr`, `megaavr`, `sam`, etc.
@@ -70,4 +70,5 @@ To identify the available FQBNs for boards you currently have connected, you may
 $ arduino-cli board list
 Port         Protocol Type              Board Name  FQBN            Core
 /dev/ttyACM0 serial   Serial Port (USB) Arduino Uno arduino:avr:uno arduino:avr
+                                                    ^^^^^^^^^^^^^^^
 ```
