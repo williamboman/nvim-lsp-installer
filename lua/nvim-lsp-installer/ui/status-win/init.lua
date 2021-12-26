@@ -240,7 +240,9 @@ local function ServerMetadata(server)
                 },
                 Ui.Keybind("<CR>", "TOGGLE_SERVER_SETTINGS_SCHEMA", { server.name }),
                 Ui.When(server.has_expanded_schema, function()
-                    return ServerSettingsSchema(server, server.schema)
+                    return Indent {
+                        ServerSettingsSchema(server, server.schema),
+                    }
                 end),
                 Ui.EmptyLine(),
             }

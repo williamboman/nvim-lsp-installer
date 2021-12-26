@@ -1,30 +1,8 @@
---  _________________
--- < Here be dragons >
---  -----------------
---           \           \  /
---            \           \/
---                (__)    /\
---                (--)   O  O
---                _\/_   //
---          *    (    ) //
---           \  (\\    //
---            \(  \\    )
---             (   \\   )   /\
---   ___[\______/^^^^^^^\__/) o-)__
---  |\__[=======______//________)__\
---  \|_______________//____________|
---      |||      || //||     |||
---      |||      || @.||     |||
---       ||      \/  .\/      ||
---                  . .
---                 '.'.`
---
---             COW-OPERATION
-
+-- Here be dragons
 local Ui = require "nvim-lsp-installer.ui"
 local Data = require "nvim-lsp-installer.data"
 
-local list_map, list_not_nil, when = Data.list_map, Data.list_not_nil, Data.when
+local list_map, list_not_nil, lazy = Data.list_map, Data.list_not_nil, Data.lazy
 
 local property_type_highlights = {
     ["string"] = "String",
@@ -35,7 +13,7 @@ local property_type_highlights = {
 }
 
 local function resolve_type(property_schema)
-    if type(property_schema.type) == "table" then
+    if vim.tbl_islist(property_schema.type) then
         return table.concat(property_schema.type, " | ")
     elseif property_schema.type == "array" then
         if property_schema.items then
@@ -48,15 +26,20 @@ local function resolve_type(property_schema)
     return property_schema.type or "N/A"
 end
 
-local function Indent(children)
-    return Ui.CascadingStyleNode({ "INDENT", "INDENT" }, children)
+local function Indent(indentation, children)
+    -- create a list table with as many "INDENT" entries as the numeric indentation variable
+    local indent = {}
+    for _ = 1, indentation do
+        table.insert(indent, "INDENT")
+    end
+    return Ui.CascadingStyleNode(indent, children)
 end
 
 ---@param server ServerState
 ---@param schema table
 ---@param key string|nil
 ---@param level number
----@param key_width number
+---@param key_width number @The width the key should occupate in the UI to produce an even column.
 ---@param compound_key string|nil
 local function ServerSettingsSchema(server, schema, key, level, key_width, compound_key)
     level = level or 0
@@ -93,7 +76,7 @@ local function ServerSettingsSchema(server, schema, key, level, key_width, compo
             -- TODO sort at moment of insert?
             table.sort(sorted_properties)
             for _, property in ipairs(sorted_properties) do
-                nodes[#nodes + 1] = Indent {
+                nodes[#nodes + 1] = Indent(level, {
                     ServerSettingsSchema(
                         server,
                         schema.properties[property],
@@ -102,7 +85,7 @@ local function ServerSettingsSchema(server, schema, key, level, key_width, compo
                         max_property_length,
                         compound_key
                     ),
-                }
+                })
             end
         end
         return Ui.Node(nodes)
@@ -123,7 +106,7 @@ local function ServerSettingsSchema(server, schema, key, level, key_width, compo
         -- Leaf node (aka any type that isn't an object)
         local type = resolve_type(schema)
         local heading
-        local label = (key_prefix .. key .. (" "):rep(key_width)):sub(1, key_width + 5) -- giggity
+        local label = (key_prefix .. key .. (" "):rep(key_width)):sub(1, key_width + 5) -- + 5 to account for key_prefix plus some extra whitespace
         if schema.default ~= nil then
             heading = Ui.HlTextNode {
                 {
@@ -155,15 +138,31 @@ local function ServerSettingsSchema(server, schema, key, level, key_width, compo
                 local description = list_map(function(line)
                     return { { line, "Comment" } }
                 end, vim.split(schema.description or "No description available.", "\n"))
-                return Indent {
-                    Ui.HlTextNode(description),
-                    Ui.Table {
-                        {
-                            { "type", "LspInstallerMuted" },
-                            { type or "-", property_type_highlights[type] or "Special" },
-                        },
-                    },
+
+                local type_highlight = property_type_highlights[type] or "LspInstallerMuted"
+
+                local table_rows = {
+                    { { "type", "LspInstallerMuted" }, { type, type_highlight } },
                 }
+
+                if vim.tbl_islist(schema.enum) then
+                    for idx, enum in ipairs(schema.enum) do
+                        local enum_description = ""
+                        if schema.enumDescriptions and schema.enumDescriptions[idx] then
+                            enum_description = "- " .. schema.enumDescriptions[idx]
+                        end
+                        table_rows[#table_rows + 1] = {
+                            { idx == 1 and "possible values" or "", "LspInstallerMuted" },
+                            { vim.json.encode(enum), type_highlight },
+                            { enum_description, "Comment" },
+                        }
+                    end
+                end
+
+                return Indent(level, {
+                    Ui.HlTextNode(description),
+                    Ui.Table(table_rows),
+                })
             end),
         }
     end
