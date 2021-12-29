@@ -86,7 +86,10 @@ return {
     filetypes = { "fsharp" }
   },
   gopls = {
-    filetypes = { "go", "gomod" }
+    filetypes = { "go", "gomod", "gotmpl" }
+  },
+  grammarly = {
+    filetypes = { "markdown" }
   },
   graphql = {
     filetypes = { "graphql", "typescriptreact", "javascriptreact" }

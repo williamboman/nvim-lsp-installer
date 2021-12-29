@@ -1,9 +1,6 @@
 local platform = require "nvim-lsp-installer.platform"
 local log = require "nvim-lsp-installer.log"
 local Data = require "nvim-lsp-installer.data"
-local process = require "nvim-lsp-installer.process"
-local fs = require "nvim-lsp-installer.fs"
-local path = require "nvim-lsp-installer.path"
 
 local M = {}
 
@@ -23,6 +20,8 @@ end
 ---@field requested_server_version string|nil @The version requested by the user.
 ---@field stdio_sink StdioSink
 ---@field github_release_file string|nil @Only available if context.use_github_release_file has been called.
+---@field os_distribution table<string, any> @Only available if context.use_os_distribution has been called.
+---@field homebrew_prefix string @Only available if context.use_homebrew_prefix has been called.
 ---@field install_dir string
 
 ---@alias ServerInstallerFunction fun(server: Server, callback: ServerInstallCallback, context: ServerInstallContext)
@@ -37,18 +36,23 @@ function M.pipe(installers)
 
     return function(server, callback, context)
         local function execute(idx)
-            local ok, err = pcall(installers[idx], server, function(success)
-                if not success then
-                    -- oh no, error. exit early
-                    callback(success)
-                elseif installers[idx + 1] then
-                    -- iterate
-                    execute(idx + 1)
-                else
-                    -- we done
-                    callback(success)
-                end
-            end, context)
+            local ok, err = pcall(
+                installers[idx],
+                server,
+                vim.schedule_wrap(function(success)
+                    if not success then
+                        -- oh no, error. exit early
+                        callback(success)
+                    elseif installers[idx + 1] then
+                        -- iterate
+                        execute(idx + 1)
+                    else
+                        -- we done
+                        callback(success)
+                    end
+                end),
+                context
+            )
             if not ok then
                 context.stdio_sink.stderr(tostring(err) .. "\n")
                 callback(false)
