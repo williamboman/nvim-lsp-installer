@@ -193,6 +193,7 @@ lsp_installer.settings({
 | LaTeX                               | `ltex`                    |
 | LaTeX                               | `texlab`                  |
 | Lua                                 | `sumneko_lua`             |
+| Markdown                            | `zk`                      |
 | OCaml                               | `ocamlls`                 |
 | Objective C                         | `ccls`                    |
 | OpenAPI                             | `spectral`                |
@@ -229,7 +230,6 @@ lsp_installer.settings({
 | XML                                 | `lemminx`                 |
 | YAML                                | `yamlls`                  |
 | Zig                                 | `zls`                     |
-| Zk                                  | `markdown`                |
 
 [arduino]: ./lua/nvim-lsp-installer/servers/arduino_language_server/README.md
 [eslint]: ./lua/nvim-lsp-installer/servers/eslint/README.md
