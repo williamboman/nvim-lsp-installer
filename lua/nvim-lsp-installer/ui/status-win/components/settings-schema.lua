@@ -59,13 +59,13 @@ local function ServerSettingsSchema(server, schema, key, level, key_width, compo
             -- It'll act as the anchor for its children.
             local heading = Ui.HlTextNode {
                 key_prefix .. key,
-                "LspInstallerLabel",
+                node_is_expanded and "LspInstallerLabel" or "",
             }
             nodes[#nodes + 1] = heading
             nodes[#nodes + 1] = toggle_expand_keybind
         end
 
-        -- All 0-level nodes are expanded by default - otherwise we'd not render anything at all
+        -- All level 0 nodes are expanded by default - otherwise we'd not render anything at all
         if level == 0 or node_is_expanded then
             local max_property_length = 0
             local sorted_properties = {}
@@ -95,7 +95,7 @@ local function ServerSettingsSchema(server, schema, key, level, key_width, compo
             nodes[#nodes + 1] = ServerSettingsSchema(
                 server,
                 alternative_schema,
-                ("%s [%d]"):format(key, i),
+                ("%s (alt. %d)"):format(key, i),
                 level,
                 key_width,
                 compound_key
@@ -112,7 +112,7 @@ local function ServerSettingsSchema(server, schema, key, level, key_width, compo
                 {
                     {
                         label,
-                        "LspInstallerLabel",
+                        node_is_expanded and "LspInstallerLabel" or "",
                     },
                     {
                         " default: ",
@@ -127,7 +127,7 @@ local function ServerSettingsSchema(server, schema, key, level, key_width, compo
         else
             heading = Ui.HlTextNode {
                 label,
-                "LspInstallerLabel",
+                node_is_expanded and "LspInstallerLabel" or "",
             }
         end
 
