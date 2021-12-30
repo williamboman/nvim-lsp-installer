@@ -15,21 +15,21 @@ return function(name, root_dir)
         homepage = "https://github.com/ethereum/solidity",
         languages = { "solidity" },
         installer = {
-            context.use_github_release_file(
-                "ethereum/solidity",
-                coalesce(
-                    when(platform.is_mac, "solc-macos"),
-                    when(platform.is_linux, "solc-static-linux"),
-                    when(platform.is_win, "solc-windows.exe")
-                )
-            ),
             context.capture(function(ctx)
-                return std.download_file(ctx.github_release_file, bin_name)
+                local file_template = coalesce(
+                    when(platform.is_mac, "macosx-amd64/solc-macosx-amd64-%s"),
+                    when(platform.is_linux and platform.arch == "x64", "linux-amd64/solc-linux-amd64-%s"),
+                    when(platform.is_win and platform.arch == "x64", "windows-amd64/solc-windows-amd64-%s.exe")
+                )
+                if file_template then
+                    file_template = file_template:format(coalesce(ctx.requested_server_version, "latest"))
+                end
+                return std.download_file(("https://binaries.soliditylang.org/%s"):format(file_template), bin_name)
             end),
             std.chmod("+x", { bin_name }),
         },
         default_options = {
-            cmd = { path.concat { root_dir, bin_name } },
+            cmd = { path.concat { root_dir, bin_name }, "--lsp" },
         },
     }
 end
