@@ -1,8 +1,5 @@
 local process = require "nvim-lsp-installer.process"
 local path = require "nvim-lsp-installer.path"
-local Data = require "nvim-lsp-installer.data"
-
-local list_copy = Data.list_copy
 
 local M = {}
 
