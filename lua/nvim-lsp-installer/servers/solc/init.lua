@@ -9,6 +9,7 @@ local coalesce, when = Data.coalesce, Data.when
 
 return function(name, root_dir)
     local bin_name = platform.is_win and "solc.exe" or "solc"
+
     return server.Server:new {
         name = name,
         root_dir = root_dir,
@@ -21,9 +22,12 @@ return function(name, root_dir)
                     when(platform.is_linux and platform.arch == "x64", "linux-amd64/solc-linux-amd64-%s"),
                     when(platform.is_win and platform.arch == "x64", "windows-amd64/solc-windows-amd64-%s.exe")
                 )
-                if file_template then
-                    file_template = file_template:format(coalesce(ctx.requested_server_version, "latest"))
+                if not file_template then
+                    error(
+                        ("Current operating system and/or arch (%q) is currently not supported."):format(platform.arch)
+                    )
                 end
+                file_template = file_template:format(coalesce(ctx.requested_server_version, "latest"))
                 return std.download_file(("https://binaries.soliditylang.org/%s"):format(file_template), bin_name)
             end),
             std.chmod("+x", { bin_name }),
