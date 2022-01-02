@@ -9,7 +9,7 @@ return function(name, root_dir)
         homepage = "https://taplo.tamasfe.dev/lsp/",
         installer = cargo.crates { "taplo-lsp" },
         default_options = {
-            cmd = cargo.executable(root_dir, "taplo-lsp"),
+            cmd = { cargo.executable(root_dir, "taplo-lsp"), "run" },
         },
     }
 end
