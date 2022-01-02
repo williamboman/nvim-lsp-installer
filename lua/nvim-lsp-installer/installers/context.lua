@@ -123,15 +123,14 @@ function M.use_github_release(repo, opts)
                     return callback(false)
                 end
 
-                local releases = vim.tbl_filter(function(release)
+                local latest_release = Data.list_find_first(Data.json_decode(response), function(release)
                     local is_stable_release = not release.prerelease and not release.draft
                     if opts.tag_name_pattern then
                         return is_stable_release and release.tag_name:match(opts.tag_name_pattern)
                     end
                     return is_stable_release
-                end, Data.json_decode(response))
+                end)
 
-                local latest_release = releases[1]
                 if not latest_release then
                     log.fmt_info("Failed to find latest release. repo=%s, opts=%s", repo, opts)
                     callback(false)
