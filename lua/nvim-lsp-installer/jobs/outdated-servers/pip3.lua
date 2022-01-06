@@ -1,6 +1,6 @@
 local process = require "nvim-lsp-installer.process"
 local pip3 = require "nvim-lsp-installer.installers.pip3"
-local CheckResult = require "nvim-lsp-installer.jobs.outdated-servers.check-result"
+local VersionCheckResult = require "nvim-lsp-installer.jobs.outdated-servers.version-check-result"
 local log = require "nvim-lsp-installer.log"
 
 ---@param package string
@@ -13,7 +13,7 @@ end
 
 ---@param server Server
 ---@param source InstallReceiptSource
----@param on_check_complete fun(result: CheckResult)
+---@param on_check_complete fun(result: VersionCheckResult)
 local function pip3_check(server, source, on_check_complete)
     local normalized_package = normalize_package(source.package)
     log.fmt_trace("Normalized package from %s to %s.", source.package, normalized_package)
@@ -28,7 +28,7 @@ local function pip3_check(server, source, on_check_complete)
         },
         vim.schedule_wrap(function(success)
             if not success then
-                return on_check_complete(CheckResult.fail(server))
+                return on_check_complete(VersionCheckResult.fail(server))
             end
             ---@alias PipOutdatedPackage {name: string, version: string, latest_version: string}
             ---@type PipOutdatedPackage[]
@@ -36,7 +36,7 @@ local function pip3_check(server, source, on_check_complete)
 
             if not ok then
                 log.fmt_error("Failed to parse pip3 output. %s", packages)
-                return on_check_complete(CheckResult.fail(server))
+                return on_check_complete(VersionCheckResult.fail(server))
             end
 
             log.trace("Outdated packages", packages)
@@ -57,7 +57,7 @@ local function pip3_check(server, source, on_check_complete)
                 end
             end
 
-            on_check_complete(CheckResult.success(server, outdated_packages))
+            on_check_complete(VersionCheckResult.success(server, outdated_packages))
         end)
     )
 end

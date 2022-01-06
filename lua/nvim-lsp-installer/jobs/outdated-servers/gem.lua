@@ -1,7 +1,7 @@
 local process = require "nvim-lsp-installer.process"
 local gem = require "nvim-lsp-installer.installers.gem"
 local log = require "nvim-lsp-installer.log"
-local CheckResult = require "nvim-lsp-installer.jobs.outdated-servers.check-result"
+local VersionCheckResult = require "nvim-lsp-installer.jobs.outdated-servers.version-check-result"
 
 local function not_empty(s)
     return s ~= nil and s ~= ""
@@ -29,7 +29,7 @@ end
 
 ---@param server Server
 ---@param source InstallReceiptSource
----@param on_check_complete fun(result: CheckResult)
+---@param on_check_complete fun(result: VersionCheckResult)
 local function gem_checker(server, source, on_check_complete)
     local stdio = process.in_memory_sink()
     process.spawn(
@@ -42,7 +42,7 @@ local function gem_checker(server, source, on_check_complete)
         },
         vim.schedule_wrap(function(success)
             if not success then
-                return on_check_complete(CheckResult.fail(server))
+                return on_check_complete(VersionCheckResult.fail(server))
             end
             ---@type string[]
             local lines = vim.split(table.concat(stdio.buffers.stdout, ""), "\n")
@@ -66,7 +66,7 @@ local function gem_checker(server, source, on_check_complete)
                 end
             end
 
-            on_check_complete(CheckResult.success(server, outdated_packages))
+            on_check_complete(VersionCheckResult.success(server, outdated_packages))
         end)
     )
 end

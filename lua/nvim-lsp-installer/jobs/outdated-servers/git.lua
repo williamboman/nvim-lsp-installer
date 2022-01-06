@@ -1,9 +1,9 @@
 local process = require "nvim-lsp-installer.process"
-local CheckResult = require "nvim-lsp-installer.jobs.outdated-servers.check-result"
+local VersionCheckResult = require "nvim-lsp-installer.jobs.outdated-servers.version-check-result"
 
 ---@param server Server
 ---@param source InstallReceiptSource
----@param on_check_complete fun(result: CheckResult)
+---@param on_check_complete fun(result: VersionCheckResult)
 return function(server, source, on_check_complete)
     process.spawn("git", {
         -- We assume git installation track the remote HEAD branch
@@ -13,7 +13,7 @@ return function(server, source, on_check_complete)
     }, function(fetch_success)
         local stdio = process.in_memory_sink()
         if not fetch_success then
-            return on_check_complete(CheckResult.fail(server))
+            return on_check_complete(VersionCheckResult.fail(server))
         end
         process.spawn("git", {
             args = { "rev-parse", "FETCH_HEAD", "HEAD" },
@@ -24,7 +24,7 @@ return function(server, source, on_check_complete)
                 local stdout = table.concat(stdio.buffers.stdout, "")
                 local remote_head, local_head = unpack(vim.split(stdout, "\n"))
                 if remote_head ~= local_head then
-                    on_check_complete(CheckResult.success(server, {
+                    on_check_complete(VersionCheckResult.success(server, {
                         {
                             name = source.remote,
                             latest_version = remote_head,
@@ -32,10 +32,10 @@ return function(server, source, on_check_complete)
                         },
                     }))
                 else
-                    on_check_complete(CheckResult.empty(server))
+                    on_check_complete(VersionCheckResult.empty(server))
                 end
             else
-                on_check_complete(CheckResult.fail(server))
+                on_check_complete(VersionCheckResult.fail(server))
             end
         end)
     end)

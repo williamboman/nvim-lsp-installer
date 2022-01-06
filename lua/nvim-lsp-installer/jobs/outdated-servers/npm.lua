@@ -1,10 +1,10 @@
 local process = require "nvim-lsp-installer.process"
 local log = require "nvim-lsp-installer.log"
-local CheckResult = require "nvim-lsp-installer.jobs.outdated-servers.check-result"
+local VersionCheckResult = require "nvim-lsp-installer.jobs.outdated-servers.version-check-result"
 
 ---@param server Server
 ---@param source InstallReceiptSource
----@param on_check_complete fun(result: CheckResult)
+---@param on_check_complete fun(result: VersionCheckResult)
 return function(server, source, on_check_complete)
     local stdio = process.in_memory_sink()
     process.spawn(
@@ -22,7 +22,7 @@ return function(server, source, on_check_complete)
 
             if not ok then
                 log.fmt_error("Failed to parse npm outdated --json output. %s", data)
-                return on_check_complete(CheckResult.fail(server))
+                return on_check_complete(VersionCheckResult.fail(server))
             end
 
             ---@type OutdatedPackage[]
@@ -38,7 +38,7 @@ return function(server, source, on_check_complete)
                 end
             end
 
-            on_check_complete(CheckResult.success(server, outdated_packages))
+            on_check_complete(VersionCheckResult.success(server, outdated_packages))
         end)
     )
 end

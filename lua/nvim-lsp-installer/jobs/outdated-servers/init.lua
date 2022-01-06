@@ -1,5 +1,5 @@
 local JobExecutionPool = require "nvim-lsp-installer.jobs.pool"
-local CheckResult = require "nvim-lsp-installer.jobs.outdated-servers.check-result"
+local VersionCheckResult = require "nvim-lsp-installer.jobs.outdated-servers.version-check-result"
 local log = require "nvim-lsp-installer.log"
 
 local npm_check = require "nvim-lsp-installer.jobs.outdated-servers.npm"
@@ -17,7 +17,7 @@ local jobpool = JobExecutionPool:new {
 }
 
 local function noop(server, _, on_result)
-    on_result(CheckResult.empty(server))
+    on_result(VersionCheckResult.empty(server))
 end
 
 local checkers = {
@@ -38,7 +38,7 @@ local pending_servers = {}
 
 ---@param servers Server[]
 ---@param on_check_start fun(server: Server)
----@param on_result fun(result: CheckResult)
+---@param on_result fun(result: VersionCheckResult)
 function M.identify_outdated_servers(servers, on_check_start, on_result)
     for _, server in ipairs(servers) do
         if not pending_servers[server.name] then
@@ -57,7 +57,7 @@ function M.identify_outdated_servers(servers, on_check_start, on_result)
                         and receipt.schema_version == "1.0"
                     then
                         -- Receipts of this version are in some cases incomplete.
-                        return complete(CheckResult.fail(server))
+                        return complete(VersionCheckResult.fail(server))
                     end
 
                     local checker = checkers[receipt.primary_source.type]
@@ -65,11 +65,11 @@ function M.identify_outdated_servers(servers, on_check_start, on_result)
                         on_check_start(server)
                         checker(server, receipt.primary_source, complete)
                     else
-                        complete(CheckResult.empty(server))
+                        complete(VersionCheckResult.empty(server))
                         log.fmt_error("Unable to find checker for source=%s", receipt.primary_source.type)
                     end
                 else
-                    complete(CheckResult.empty(server))
+                    complete(VersionCheckResult.empty(server))
                     log.fmt_trace("No receipt found for server=%s", server.name)
                 end
             end)
