@@ -8,6 +8,7 @@ local gem_check = require "nvim-lsp-installer.jobs.outdated-servers.gem"
 local git_check = require "nvim-lsp-installer.jobs.outdated-servers.git"
 local github_release_file_check = require "nvim-lsp-installer.jobs.outdated-servers.github_release_file"
 local github_tag_check = require "nvim-lsp-installer.jobs.outdated-servers.github_tag"
+local jdtls = require "nvim-lsp-installer.jobs.outdated-servers.jdtls"
 
 local M = {}
 
@@ -27,7 +28,7 @@ local checkers = {
     ["dotnet"] = noop, -- TODO
     ["unmanaged"] = noop,
     ["system"] = noop,
-    ["jdtls"] = noop, -- TODO
+    ["jdtls"] = jdtls,
     ["git"] = git_check,
     ["github_release_file"] = github_release_file_check,
     ["github_tag"] = github_tag_check,
