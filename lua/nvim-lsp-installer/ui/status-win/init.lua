@@ -828,6 +828,10 @@ local function init(all_servers)
     local has_opened = false
 
     local function identify_outdated_servers(servers)
+        -- Sort servers the same way as in the UI, gives a more structured impression
+        table.sort(servers, function(a, b)
+            return a.name < b.name
+        end)
         jobs.identify_outdated_servers(servers, function(server)
             mutate_state(function(state)
                 state.servers[server.name].is_checking_outdated_packages = true
@@ -862,9 +866,9 @@ local function init(all_servers)
 
         if not has_opened then
             -- Only do this automatically once - when opening the window the first time
-            vim.schedule(function()
+            vim.defer_fn(function()
                 identify_outdated_servers(lsp_servers.get_installed_servers())
-            end)
+            end, 100)
         end
 
         window.open {

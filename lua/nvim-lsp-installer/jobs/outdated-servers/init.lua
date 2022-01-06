@@ -34,40 +34,46 @@ local checkers = {
     ["github_tag"] = github_tag_check,
 }
 
+local pending_servers = {}
+
 ---@param servers Server[]
 ---@param on_check_start fun(server: Server)
 ---@param on_result fun(result: CheckResult)
 function M.identify_outdated_servers(servers, on_check_start, on_result)
     for _, server in ipairs(servers) do
-        jobpool:supply(function(_done)
-            local function complete(...)
-                on_result(...)
-                _done()
-            end
-
-            local receipt = server:get_receipt()
-            if receipt then
-                if
-                    vim.tbl_contains({ "github_release_file", "github_tag" }, receipt.primary_source.type)
-                    and receipt.schema_version == "1.0"
-                then
-                    -- Receipts of this version are in some cases incomplete.
-                    return complete(CheckResult.fail(server))
+        if not pending_servers[server.name] then
+            pending_servers[server.name] = true
+            jobpool:supply(function(_done)
+                local function complete(...)
+                    pending_servers[server.name] = nil
+                    on_result(...)
+                    _done()
                 end
 
-                local checker = checkers[receipt.primary_source.type]
-                if checker then
-                    on_check_start(server)
-                    checker(server, receipt.primary_source, complete)
+                local receipt = server:get_receipt()
+                if receipt then
+                    if
+                        vim.tbl_contains({ "github_release_file", "github_tag" }, receipt.primary_source.type)
+                        and receipt.schema_version == "1.0"
+                    then
+                        -- Receipts of this version are in some cases incomplete.
+                        return complete(CheckResult.fail(server))
+                    end
+
+                    local checker = checkers[receipt.primary_source.type]
+                    if checker then
+                        on_check_start(server)
+                        checker(server, receipt.primary_source, complete)
+                    else
+                        complete(CheckResult.empty(server))
+                        log.fmt_error("Unable to find checker for source=%s", receipt.primary_source.type)
+                    end
                 else
                     complete(CheckResult.empty(server))
-                    log.fmt_error("Unable to find checker for source=%s", receipt.primary_source.type)
+                    log.fmt_trace("No receipt found for server=%s", server.name)
                 end
-            else
-                complete(CheckResult.empty(server))
-                log.fmt_trace("No receipt found for server=%s", server.name)
-            end
-        end)
+            end)
+        end
     end
 end
 
