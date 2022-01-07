@@ -11,7 +11,7 @@ return function(name, root_dir)
         installer = npm.packages { "foam-language-server" },
         default_options = {
             --cmd_env = npm.env(root_dir),
-            cmd = { path.concat { root_dir, "bin", "foam-ls" }, "--node-ipc" }
+            cmd = { path.concat { root_dir, "node_modules", "foam-language-server", "bin", "foam-ls" }, "--stdio" }
         },
     }
 end
