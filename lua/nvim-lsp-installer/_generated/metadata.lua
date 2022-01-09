@@ -79,7 +79,7 @@ return {
   eslint = {
     filetypes = { "javascript", "javascriptreact", "javascript.jsx", "typescript", "typescriptreact", "typescript.tsx", "vue" }
   },
-  foam = {
+  foam_ls = {
     filetypes = { "foam", "OpenFOAM" }
   },
   fortls = {

@@ -1,7 +1,7 @@
 -- THIS FILE IS GENERATED. DO NOT EDIT MANUALLY.
 -- stylua: ignore start
 return {
-  OpenFOAM = { "foam" },
+  OpenFOAM = { "foam_ls" },
   asyncapi = { "spectral" },
   c = { "ccls", "clangd" },
   ["c#"] = { "csharp_ls", "omnisharp" },

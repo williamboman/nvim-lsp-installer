@@ -57,7 +57,7 @@ local CORE_SERVERS = Data.set_of {
     "erlangls",
     "esbonio",
     "eslint",
-    "foam",
+    "foam_ls",
     "fortls",
     "fsautocomplete",
     "gopls",
