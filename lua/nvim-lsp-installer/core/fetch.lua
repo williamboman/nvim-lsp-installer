@@ -7,7 +7,7 @@ local USER_AGENT = "nvim-lsp-installer (+https://github.com/williamboman/nvim-ls
 local HEADERS = {
     wget = { "--header", ("User-Agent: %s"):format(USER_AGENT) },
     curl = { "-H", ("User-Agent: %s"):format(USER_AGENT) },
-    iwr = "-Headers @{'User-Agent' = '%s'}",
+    iwr = ("-Headers @{'User-Agent' = '%s'}"):format(USER_AGENT),
 }
 
 local function with_headers(headers, args)
