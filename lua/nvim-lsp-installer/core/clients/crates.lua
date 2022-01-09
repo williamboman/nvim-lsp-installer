@@ -11,7 +11,12 @@ function M.fetch_crate(crate, callback)
             callback(err, nil)
             return
         end
-        callback(nil, vim.json.decode(data))
+        local ok, response = pcall(vim.json.decode, data)
+        if not ok then
+            callback("Failed to deserialize crates.io API response.", nil)
+            return
+        end
+        callback(nil, response)
     end)
 end
 
