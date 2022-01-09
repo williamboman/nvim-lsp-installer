@@ -4,20 +4,20 @@ local crates = require "nvim-lsp-installer.core.clients.crates"
 
 ---@param output string The `cargo install --list` output.
 local function parse_installed_crates(output)
-    local crates = {}
+    local installed_crates = {}
     for _, line in ipairs(vim.split(output, "\n")) do
-        local name, version = line:match "^(.+)%s+v(.+):"
+        local name, version = line:match "^(.+)%s+v([.%S]+)[%s:]"
         if name and version then
-            crates[name] = version
+            installed_crates[name] = version
         end
     end
-    return crates
+    return installed_crates
 end
 
 ---@param server Server
 ---@param source InstallReceiptSource
 ---@param on_result fun(result: VersionCheckResult)
-return function(server, source, on_result)
+local function cargo_check(server, source, on_result)
     local stdio = process.in_memory_sink()
     process.spawn("cargo", {
         args = { "install", "--list", "--root", "." },
@@ -49,3 +49,11 @@ return function(server, source, on_result)
         end)
     end)
 end
+
+return setmetatable({
+    parse_installed_crates = parse_installed_crates,
+}, {
+    __call = function(_, ...)
+        return cargo_check(...)
+    end,
+})
