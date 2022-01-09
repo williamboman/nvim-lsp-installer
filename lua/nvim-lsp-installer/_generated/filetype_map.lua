@@ -63,6 +63,7 @@ return {
   mustache = { "tailwindcss" },
   mysql = { "sqlls", "sqls" },
   nim = { "nimls" },
+  nix = { "rnix" },
   njk = { "tailwindcss" },
   nunjucks = { "tailwindcss" },
   objc = { "ccls", "clangd" },
