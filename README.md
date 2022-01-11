@@ -200,6 +200,7 @@ lsp_installer.settings({
 | OCaml                               | `ocamlls`                 |
 | Objective C                         | `ccls`                    |
 | OpenAPI                             | `spectral`                |
+| OpenCL                              | `opencl_ls`               |
 | PHP                                 | `intelephense`            |
 | PHP                                 | `phpactor`                |
 | Powershell                          | `powershell_es`           |
