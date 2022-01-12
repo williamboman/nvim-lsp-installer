@@ -34,6 +34,7 @@ local CORE_SERVERS = Data.set_of {
     "angularls",
     "ansiblels",
     "arduino_language_server",
+    "asm_lsp",
     "bashls",
     "bicep",
     "ccls",
