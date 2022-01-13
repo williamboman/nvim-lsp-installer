@@ -68,6 +68,32 @@ body:
       id: logs
       attributes:
           label: Log and support info
+          placeholder: :LspInstallInfo
+          render: shell
+
+    - type: textarea
+      id: logs
+      attributes:
+          label: Log and support info
+          description: Make sure you set DEBUG level before installing the server. Refer to `:help nvim-lsp-installer-debugging`.
+          placeholder: :LspInstallLog
+          render: shell
+      validations:
+          required: true
+
+    - type: textarea
+      id: logs
+      attributes:
+          label: Log and support info
+          placeholder: :checkhealth nvim-lsp-installer
+          render: shell
+      validations:
+          required: true
+
+    - type: textarea
+      id: logs
+      attributes:
+          label: Log and support info
           placeholder: |
               :LspInstallInfo
               :LspInstallLog
