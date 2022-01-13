@@ -2,9 +2,26 @@ local log = require "nvim-lsp-installer.log"
 local process = require "nvim-lsp-installer.process"
 local platform = require "nvim-lsp-installer.platform"
 
+local USER_AGENT = "nvim-lsp-installer (+https://github.com/williamboman/nvim-lsp-installer)"
+
+local HEADERS = {
+    wget = { "--header", ("User-Agent: %s"):format(USER_AGENT) },
+    curl = { "-H", ("User-Agent: %s"):format(USER_AGENT) },
+    iwr = ("-Headers @{'User-Agent' = '%s'}"):format(USER_AGENT),
+}
+
+local function with_headers(headers, args)
+    local result = {}
+    vim.list_extend(result, headers)
+    vim.list_extend(result, args)
+    return result
+end
+
 ---@param url string The url to fetch.
 ---@param callback fun(err: string|nil, raw_data: string)
-local function fetch(url, callback)
+---@param opts {custom_fetcher: { cmd: string, args: string[] }}
+local function fetch(url, callback, opts)
+    opts = opts or {}
     local stdio = process.in_memory_sink()
     log.fmt_debug("Fetching URL %s", url)
     local on_exit = function(success)
@@ -20,11 +37,11 @@ local function fetch(url, callback)
 
     local job_variants = {
         process.lazy_spawn("wget", {
-            args = { "-nv", "-O", "-", url },
+            args = with_headers(HEADERS.wget, { "-nv", "-O", "-", url }),
             stdio_sink = stdio.sink,
         }),
         process.lazy_spawn("curl", {
-            args = { "-fsSL", url },
+            args = with_headers(HEADERS.curl, { "-fsSL", url }),
             stdio_sink = stdio.sink,
         }),
     }
@@ -32,7 +49,7 @@ local function fetch(url, callback)
     if platform.is_win then
         local ps_script = {
             "$ProgressPreference = 'SilentlyContinue'",
-            ("Write-Output (iwr -UseBasicParsing -Uri %q).Content"):format(url),
+            ("Write-Output (iwr %s -UseBasicParsing -Uri %q).Content"):format(HEADERS.iwr, url),
         }
         table.insert(
             job_variants,
@@ -41,6 +58,17 @@ local function fetch(url, callback)
                 args = { "-NoProfile", "-Command", table.concat(ps_script, ";") },
                 stdio_sink = stdio.sink,
                 env = process.graft_env({}, { "PSMODULEPATH" }),
+            })
+        )
+    end
+
+    if opts.custom_fetcher then
+        table.insert(
+            job_variants,
+            1,
+            process.lazy_spawn(opts.custom_fetcher.cmd, {
+                args = opts.custom_fetcher.args,
+                stdio_sink = stdio.sink,
             })
         )
     end
@@ -56,4 +84,11 @@ local function fetch(url, callback)
     }
 end
 
-return fetch
+return setmetatable({
+    with_headers = with_headers,
+    HEADERS = HEADERS,
+}, {
+    __call = function(_, ...)
+        return fetch(...)
+    end,
+})

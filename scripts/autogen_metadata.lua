@@ -147,15 +147,20 @@ end)
 
 local create_setting_schema_files = a.void(function()
     local available_servers = servers.get_available_servers()
+    local gist_response =
+        a.wrap(curl.get, 1) "https://gist.githubusercontent.com/williamboman/a01c3ce1884d4b57cc93422e7eae7702/raw/lsp-packages.json"
+    local package_json_mappings = vim.json.decode(gist_response.body)
 
     for _, server in pairs(available_servers) do
-        local config = get_lspconfig(server.name)
-        if config.docs.package_json then
-            local package_json_url = config.docs.package_json
+        local package_json_url = package_json_mappings[server.name]
+        if package_json_url then
             print(("Fetching %q..."):format(package_json_url))
-            local response = a.wrap(curl.get, 2)(package_json_url, {})
+            local response = a.wrap(curl.get, 1)(package_json_url)
             assert(response.status == 200, "Failed to fetch package.json for " .. server.name)
-            local schema = vim.json.decode(response.body).contributes.configuration
+            local schema = vim.json.decode(response.body)
+            if schema.contributes and schema.contributes.configuration then
+                schema = schema.contributes.configuration
+            end
             if not schema.properties then
                 -- Some servers (like dartls) seem to provide an array of configurations (for more than just LSP stuff)
                 print(("Could not find appropriate schema structure for %s."):format(server.name))

@@ -1,6 +1,10 @@
 -- THIS FILE IS GENERATED. DO NOT EDIT MANUALLY.
 -- stylua: ignore start
 return {
+  OpenFOAM = { "foam_ls" },
+  ["assembly-gas"] = { "asm_lsp" },
+  ["assembly-go"] = { "asm_lsp" },
+  ["assembly-nasm"] = { "asm_lsp" },
   asyncapi = { "spectral" },
   c = { "ccls", "clangd" },
   ["c#"] = { "csharp_ls", "omnisharp" },
@@ -14,7 +18,8 @@ return {
   javascript = { "eslint", "quick_lint_js", "rome", "tsserver" },
   latex = { "ltex", "texlab" },
   lua = { "sumneko_lua" },
-  markdown = { "zk" },
+  markdown = { "remark_ls", "zk" },
+  nix = { "rnix" },
   ["objective-c"] = { "ccls" },
   openapi = { "spectral" },
   php = { "intelephense", "phpactor" },

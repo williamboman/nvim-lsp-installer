@@ -10,6 +10,9 @@ return {
   arduino_language_server = {
     filetypes = { "arduino" }
   },
+  asm_lsp = {
+    filetypes = { "asm", "vmasm" }
+  },
   bashls = {
     filetypes = { "sh" }
   },
@@ -79,6 +82,9 @@ return {
   eslint = {
     filetypes = { "javascript", "javascriptreact", "javascript.jsx", "typescript", "typescriptreact", "typescript.tsx", "vue" }
   },
+  foam_ls = {
+    filetypes = { "foam", "OpenFOAM" }
+  },
   fortls = {
     filetypes = { "fortran" }
   },
@@ -127,11 +133,17 @@ return {
   ltex = {
     filetypes = { "bib", "gitcommit", "markdown", "org", "plaintex", "rst", "rnoweb", "tex" }
   },
+  nimls = {
+    filetypes = { "nim" }
+  },
   ocamlls = {
     filetypes = { "ocaml", "reason" }
   },
   omnisharp = {
     filetypes = { "cs", "vb" }
+  },
+  opencl_ls = {
+    filetypes = { "opencl" }
   },
   phpactor = {
     filetypes = { "php" }
@@ -157,8 +169,14 @@ return {
   quick_lint_js = {
     filetypes = { "javascript" }
   },
+  remark_ls = {
+    filetypes = { "markdown" }
+  },
   rescriptls = {
     filetypes = { "rescript" }
+  },
+  rnix = {
+    filetypes = { "nix" }
   },
   rome = {
     filetypes = { "javascript", "javascriptreact", "json", "typescript", "typescript.tsx", "typescriptreact" }
