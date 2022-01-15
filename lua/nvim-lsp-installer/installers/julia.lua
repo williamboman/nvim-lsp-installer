@@ -14,10 +14,6 @@ function M.packages(packages)
         ---@type ServerInstallerFunction
         function(_, callback, ctx)
             local pkgs = Data.list_copy(packages or {})
-            local c = process.chain {
-                cwd = ctx.install_dir,
-                stdio_sink = ctx.stdio_sink,
-            }
 
             ctx.receipt:with_primary_source(ctx.receipt.julia(pkgs[1]))
             for i = 2, #pkgs do
@@ -36,11 +32,13 @@ function M.packages(packages)
                 end
             end
 
-            local opt = "-e \"import Pkg; Pkg.add(["..table.concat(pkgs, ",").."])\""
-
-            c.run("julia", { opt })
-
-            c.spawn(callback)
+            process.spawn("julia", {
+                args = {
+                    "-e \"import Pkg; Pkg.add(["..table.concat(pkgs, ",").."])\"",
+                },
+                cwd = ctx.install_dir,
+                stdio_sink = ctx.stdio_sink,
+            }, callback)
         end,
     }
 end
