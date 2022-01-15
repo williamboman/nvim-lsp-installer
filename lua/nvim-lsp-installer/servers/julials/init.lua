@@ -8,8 +8,6 @@ return function(name, root_dir)
         homepage = "https://github.com/julia-vscode/LanguageServer.jl",
         languages = { "julia" },
         installer = julia.packages { "LanguageServer" },
-        default_options = {
-            cmd_env = julia.env(root_dir),
-        },
+        default_options = {},
     }
 end

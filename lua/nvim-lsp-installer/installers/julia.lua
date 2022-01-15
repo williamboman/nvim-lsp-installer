@@ -45,10 +45,4 @@ function M.packages(packages)
     }
 end
 
-function M.env(root_dir)
-    return {
-        PATH = process.extend_path { root_dir },
-    }
-end
-
 return M
