@@ -148,7 +148,7 @@ end)
 local create_setting_schema_files = a.void(function()
     local available_servers = servers.get_available_servers()
     local gist_response =
-        a.wrap(curl.get, 1) "https://gist.githubusercontent.com/williamboman/a01c3ce1884d4b57cc93422e7eae7702/raw/0c6d1830e9776a60f5e2fb1ee8d5e63541ce7f71/lsp-packages.json"
+        a.wrap(curl.get, 1) "https://gist.githubusercontent.com/williamboman/a01c3ce1884d4b57cc93422e7eae7702/raw/lsp-packages.json"
     local package_json_mappings = vim.json.decode(gist_response.body)
 
     for _, server in pairs(available_servers) do
