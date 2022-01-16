@@ -1,6 +1,7 @@
 local log = require "nvim-lsp-installer.log"
 local process = require "nvim-lsp-installer.process"
 local state = require "nvim-lsp-installer.ui.state"
+local settings = require "nvim-lsp-installer.settings"
 
 local M = {}
 
@@ -223,6 +224,22 @@ function M.delete_win_buf(win_id, bufnr)
     end)
 end
 
+function M.on_cursor_moved(win_id, bufnr)
+    local get_anchor_col = function(line)
+        for _, icon in ipairs(vim.tbl_values(settings.current.ui.icons)) do
+            local pos = vim.fn.stridx(line, icon)
+            if pos ~= -1 then
+                return pos
+            end
+        end
+    end
+    local pos = vim.api.nvim_win_get_cursor(win_id)
+    local line = vim.api.nvim_buf_get_lines(bufnr, pos[1] - 1, pos[1], true)[1]
+    local anchor = get_anchor_col(line)
+    -- dump("win_id: ", win_id, "bufnr: ", bufnr, { pos[1], pos[2] }, anchor)
+    vim.api.nvim_win_set_cursor(win_id, { pos[1], anchor or pos[2] })
+end
+
 function M.new_view_only_win(name)
     local namespace = vim.api.nvim_create_namespace(("lsp_installer_%s"):format(name))
     local bufnr, renderer, mutate_state, get_state, unsubscribe, win_id
@@ -278,14 +295,18 @@ function M.new_view_only_win(name)
         local autoclose_autocmd = (
             "autocmd WinLeave,BufHidden,BufLeave <buffer> ++once lua require('nvim-lsp-installer.ui.display').delete_win_buf(%d, %d)"
         ):format(win_id, bufnr)
+        local cursormoved_autocmd = (
+            "autocmd CursorMoved <buffer> lua require('nvim-lsp-installer.ui.display').on_cursor_moved(%d, %d)"
+        ):format(win_id, bufnr)
 
         vim.cmd(([[
             augroup LspInstallerWindow
                 autocmd!
                 %s
                 %s
+                %s
             augroup END
-        ]]):format(resize_autocmd, autoclose_autocmd))
+        ]]):format(resize_autocmd, autoclose_autocmd, cursormoved_autocmd))
 
         if highlight_groups then
             for i = 1, #highlight_groups do
