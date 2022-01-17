@@ -5,23 +5,20 @@ local std = require "nvim-lsp-installer.installers.std"
 
 return function(name, root_dir)
     local server_script = [[
-using LanguageServer, SymbolServer;
-maybe_dirname = x -> x !== nothing ? dirname(x) : nothing;
+using LanguageServer, SymbolServer
 
-OLD_DEPOT_PATH = Base.ARGS[1];
-SYMBOLSTORE_PATH = Base.ARGS[2];
+maybe_dirname = x -> x !== nothing ? dirname(x) : nothing
 
-runserver(
-    stdin,
-    stdout,
-    something(
-          maybe_dirname(Base.current_project(pwd())),
-          maybe_dirname(Base.load_path_expand("@v#.#"))
-    ),
-    OLD_DEPOT_PATH,
-    nothing,
-    SYMBOLSTORE_PATH
-)
+OLD_DEPOT_PATH = ARGS[1]
+SYMBOLSTORE_PATH = ARGS[2]
+
+runserver(stdin,
+          stdout,
+          something(maybe_dirname(Base.current_project(pwd())),
+                    maybe_dirname(Base.load_path_expand("@v#.#"))),
+          OLD_DEPOT_PATH,
+          nothing,
+          SYMBOLSTORE_PATH)
 ]]
 
     return server.Server:new {
