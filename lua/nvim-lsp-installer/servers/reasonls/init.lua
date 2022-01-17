@@ -8,9 +8,9 @@ local coalesce, when = Data.coalesce, Data.when
 
 return function(name, root_dir)
     local archive_name = coalesce(
-        when(platform.is_mac, "rls-macos.zip"),
-        when(platform.is_linux, "rls-linux.zip"),
-        when(platform.is_win, "rls-windows.zip")
+        when(platform.is_mac, "rls-macos"),
+        when(platform.is_linux, "rls-linux"),
+        when(platform.is_win, "rls-windows")
     )
 
     return server.Server:new {
@@ -19,7 +19,7 @@ return function(name, root_dir)
         languages = { "reason" },
         homepage = "https://github.com/jaredly/reason-language-server",
         installer = {
-            context.use_github_release_file("jaredly/reason-language-server", archive_name),
+            context.use_github_release_file("jaredly/reason-language-server", archive_name..".zip"),
             context.capture(function(ctx)
                 return std.unzip_remote(ctx.github_release_file)
             end),
@@ -28,7 +28,7 @@ return function(name, root_dir)
             end),
         },
         default_options = {
-            cmd = { path.concat { root_dir, "reason-language-server" }},
+            cmd = { path.concat { root_dir, archive_name, "reason-language-server" }},
         },
     }
 end
