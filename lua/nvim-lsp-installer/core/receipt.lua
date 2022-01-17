@@ -14,7 +14,6 @@ local M = {}
 ---| '"unmanaged"'
 ---| '"system"'
 ---| '"jdtls"'
----| '"julia"'
 ---| '"git"'
 ---| '"github_tag"'
 ---| '"github_release_file"'
@@ -119,7 +118,6 @@ InstallReceiptBuilder.go = package_source "go"
 InstallReceiptBuilder.dotnet = package_source "dotnet"
 InstallReceiptBuilder.cargo = package_source "cargo"
 InstallReceiptBuilder.composer = package_source "composer"
-InstallReceiptBuilder.julia = package_source "julia"
 
 InstallReceiptBuilder.unmanaged = { type = "unmanaged" }
 
