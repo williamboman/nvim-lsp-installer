@@ -24,7 +24,7 @@ available installers that are available out of the box.
 
 -   ### Go
 
-    #### `go.packages(packages: table)`
+    #### `go.package(package: string)`
 
     Returns an installer that installs the provided list of `packages`.
 
