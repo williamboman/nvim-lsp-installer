@@ -34,7 +34,6 @@ function M.package(package)
             end
 
             c.run("go", { "install", "-v", pkg })
-            c.run("go", { "clean", "-modcache" })
 
             c.spawn(callback)
         end,
