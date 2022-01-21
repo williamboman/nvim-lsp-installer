@@ -22,16 +22,8 @@ function M.package(package)
 
             ctx.receipt:with_primary_source(ctx.receipt.go(package))
 
-            local pkg, version = unpack(vim.split(package, "@"))
-
-            if ctx.requested_server_version then
-                -- The "head" package is the recipient for the requested version. It's.. by design... don't ask.
-                pkg = ("%s@%s"):format(pkg, ctx.requested_server_version)
-              elseif version ~= nil then
-                pkg = package
-              else
-                pkg = ("%s@latest"):format(pkg)
-            end
+            local version = ctx.requested_server_version or "latest"
+            local pkg = ("%s@%s"):format(package, version)
 
             c.run("go", { "install", "-v", pkg })
 
