@@ -148,11 +148,17 @@ return {
   kotlin_language_server = {
     filetypes = { "kotlin" }
   },
+  lelwel_ls = {
+    filetypes = { "llw" }
+  },
   lemminx = {
     filetypes = { "xml", "xsd", "xsl", "xslt", "svg" }
   },
   ltex = {
     filetypes = { "bib", "gitcommit", "markdown", "org", "plaintex", "rst", "rnoweb", "tex" }
+  },
+  nickel_ls = {
+    filetypes = { "ncl", "nickel" }
   },
   nimls = {
     filetypes = { "nim" }
@@ -262,6 +268,9 @@ return {
   tflint = {
     filetypes = { "terraform" }
   },
+  theme_check = {
+    filetypes = { "liquid" }
+  },
   tsserver = {
     filetypes = { "javascript", "javascriptreact", "javascript.jsx", "typescript", "typescriptreact", "typescript.tsx" }
   },
@@ -282,6 +291,9 @@ return {
   },
   yamlls = {
     filetypes = { "yaml", "yaml.docker-compose" }
+  },
+  zeta_note = {
+    filetypes = { "markdown" }
   },
   zk = {
     filetypes = { "markdown" }
