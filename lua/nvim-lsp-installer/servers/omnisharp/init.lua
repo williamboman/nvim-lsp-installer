@@ -14,6 +14,12 @@ return function(name, root_dir)
         homepage = "https://github.com/OmniSharp/omnisharp-roslyn",
         languages = { "c#" },
         installer = {
+            std.ensure_executables {
+                {
+                    "dotnet",
+                    "dotnet was not found in path. Refer to https://dotnet.microsoft.com/download for installation instructions.",
+                },
+            },
             context.use_github_release_file(
                 "OmniSharp/omnisharp-roslyn",
                 coalesce(
