@@ -32,20 +32,12 @@ languageserver::run();
         installer = function(_, callback, ctx)
             process.spawn("R", {
                 cwd = ctx.install_dir,
-                args = {
-                    "-e",
-                    install_script,
-                },
+                args = { "-e", install_script },
                 stdio_sink = ctx.stdio_sink,
             }, callback)
         end,
         default_options = {
-            cmd = {
-                "R",
-                "--slave",
-                "-e",
-                server_script,
-            },
+            cmd = { "R", "--slave", "-e", server_script },
         },
     }
 end
