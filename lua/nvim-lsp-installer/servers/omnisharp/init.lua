@@ -51,7 +51,7 @@ return function(name, root_dir)
         default_options = {
             cmd = {
                 "dotnet",
-                path.concat { root_dir, "OmniSharp.dll" },
+                path.concat { root_dir, "omnisharp", "OmniSharp.dll" },
                 "--languageserver",
                 "--hostPID",
                 tostring(vim.fn.getpid()),
