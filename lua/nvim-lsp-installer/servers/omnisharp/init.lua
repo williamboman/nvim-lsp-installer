@@ -4,7 +4,6 @@ local path = require "nvim-lsp-installer.path"
 local Data = require "nvim-lsp-installer.data"
 local std = require "nvim-lsp-installer.installers.std"
 local context = require "nvim-lsp-installer.installers.context"
-local dotnet = require "nvim-lsp-installer.installers.dotnet"
 
 local coalesce, when = Data.coalesce, Data.when
 
