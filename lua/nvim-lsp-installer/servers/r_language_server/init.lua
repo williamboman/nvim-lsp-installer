@@ -27,6 +27,8 @@ languageserver::run();
     return server.Server:new {
         name = name,
         root_dir = root_dir,
+        homepage = "https://github.com/REditorSupport/languageserver",
+        languages = { "R" },
         installer = function(_, callback, ctx)
             process.spawn("R", {
                 cwd = ctx.install_dir,
