@@ -5,8 +5,8 @@ return function(name, root_dir)
     local function create_install_script(install_dir)
         return ([[
 options(langserver_library = %q);
-options(repos = list(CRAN="http://cran.rstudio.com/"));
-rlsLib = getOption("langserver_library");
+options(repos = list(CRAN = "http://cran.rstudio.com/"));
+rlsLib <- getOption("langserver_library");
 install.packages("languageserversetup", lib = rlsLib);
 loadNamespace("languageserversetup", lib.loc = rlsLib);
 
@@ -20,7 +20,7 @@ languageserversetup::languageserver_install(
 
     local server_script = ([[
 options("langserver_library" = %q);
-rlsLib = getOption("langserver_library");
+rlsLib <- getOption("langserver_library");
 .libPaths(new = rlsLib);
 loadNamespace("languageserver", lib.loc = rlsLib);
 languageserver::run();
