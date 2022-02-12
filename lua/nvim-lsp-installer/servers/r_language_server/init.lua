@@ -2,19 +2,21 @@ local server = require "nvim-lsp-installer.server"
 local process = require "nvim-lsp-installer.process"
 
 return function(name, root_dir)
-    local install_script = [[
-options(langserver_library = ".");
+    local function create_install_script(install_dir)
+        return ([[
+options(langserver_library = %q);
+options(repos = list(CRAN="http://cran.rstudio.com/"));
 rlsLib = getOption("langserver_library");
 install.packages("languageserversetup", lib = rlsLib);
 loadNamespace("languageserversetup", lib.loc = rlsLib);
 
 languageserversetup::languageserver_install(
-    fullReinstall = FALSE,
+    fullReinstall = TRUE,
     confirmBeforeInstall = FALSE,
-    strictLibrary = FALSE,
-    libs_only = TRUE
+    strictLibrary = TRUE
 );
-]]
+]]):format(install_dir, install_dir, install_dir)
+    end
 
     local server_script = ([[
 options("langserver_library" = %q);
@@ -32,7 +34,7 @@ languageserver::run();
         installer = function(_, callback, ctx)
             process.spawn("R", {
                 cwd = ctx.install_dir,
-                args = { "-e", install_script },
+                args = { "-e", create_install_script(ctx.install_dir) },
                 stdio_sink = ctx.stdio_sink,
             }, callback)
         end,
