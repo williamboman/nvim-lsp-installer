@@ -11,19 +11,27 @@ return function(name, root_dir)
           '-e',
           ('options(langserver_library = %q)'):format(root_dir)
             .. ';'
+          ('options(configure.vars = list(TMPDIR = %q))'):format(ctx.install_dir)
+            .. ';'
+            .. ('Sys.getenv(TMPDIR = %q)'):format(ctx.install_dir)
+            .. ';'
             .. 'rlsLib = getOption("langserver_library")'
+            .. ';'
+            .. 'if (!dir.exists(rlsLib)) {dir.create(rlsLib, recursive = TRUE)}'
             .. ';'
             .. 'install.packages("languageserversetup", lib = rlsLib)'
             .. ';'
             .. 'loadNamespace("languageserversetup", lib.loc = rlsLib)'
             .. ';'
             .. [[languageserversetup::languageserver_install(
-              fullReinstall = FALSE,
+              fullReinstall = TRUE,
               confirmBeforeInstall = FALSE,
-              strictLibrary = FALSE,
-              libs_only = TRUE
+              strictLibrary = TRUE
             )]],
         },
+        -- env = process.graft_env {
+        --   TMPDIR = install_dir
+        -- },
         --
         stdio_sink = context.stdio_sink,
       }, callback)
