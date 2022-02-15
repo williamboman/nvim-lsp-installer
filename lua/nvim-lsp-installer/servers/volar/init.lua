@@ -1,18 +1,19 @@
-local util = require "lspconfig.util"
+local path = require "nvim-lsp-installer.path"
+local fs = require "nvim-lsp-installer.fs"
 local server = require "nvim-lsp-installer.server"
 local npm = require "nvim-lsp-installer.installers.npm"
 
 return function(name, root_dir)
     ---@param dir string
     local function get_tsserverlib_path(dir)
-        return util.path.join(dir, "node_modules", "typescript", "lib", "tsserverlibrary.js")
+        return path.concat { dir, "node_modules", "typescript", "lib", "tsserverlibrary.js" }
     end
 
     ---@param workspace_dir string|nil
     local function get_typescript_server_path(workspace_dir)
         local local_tsserverlib = workspace_dir ~= nil and get_tsserverlib_path(workspace_dir)
         local vendored_tsserverlib = get_tsserverlib_path(root_dir)
-        if local_tsserverlib and util.path.exists(local_tsserverlib) then
+        if local_tsserverlib and fs.file_exists(local_tsserverlib) then
             return local_tsserverlib
         else
             return vendored_tsserverlib
