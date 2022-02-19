@@ -1,6 +1,7 @@
 local server = require "nvim-lsp-installer.server"
 local Data = require "nvim-lsp-installer.data"
 local std = require "nvim-lsp-installer.installers.std"
+local path = require "nvim-lsp-installer.path"
 local platform = require "nvim-lsp-installer.platform"
 local process = require "nvim-lsp-installer.process"
 local context = require "nvim-lsp-installer.installers.context"
@@ -29,7 +30,7 @@ return function(name, root_dir)
         },
         default_options = {
             cmd_env = {
-                PATH = process.extend_path { root_dir, "slint-lsp" },
+                 PATH = process.extend_path { path.concat { root_dir, "slint-lsp" } },
             },
         },
     }
