@@ -1,15 +1,13 @@
 local server = require "nvim-lsp-installer.server"
-local path = require "nvim-lsp-installer.path"
 local Data = require "nvim-lsp-installer.data"
 local std = require "nvim-lsp-installer.installers.std"
 local platform = require "nvim-lsp-installer.platform"
+local process = require "nvim-lsp-installer.process"
 local context = require "nvim-lsp-installer.installers.context"
 
 local coalesce, when = Data.coalesce, Data.when
 
 return function(name, root_dir)
-    local lsp_name = "slint-lsp/slint-lsp"
-
     local archive_name = coalesce(
         when(platform.is_linux and platform.arch == "x64", "slint-lsp-linux.tar.gz"),
         when(platform.is_win and platform.arch == "x64", "slint-lsp-windows.zip")
@@ -28,10 +26,11 @@ return function(name, root_dir)
                     return std.untargz_remote(ctx.github_release_file)
                 end
             end),
-            std.chmod("+x", { lsp_name }),
         },
         default_options = {
-            cmd = { path.concat { root_dir, lsp_name } },
+            cmd_env = {
+                PATH = process.extend_path { root_dir, "slint-lsp" },
+            },
         },
     }
 end
