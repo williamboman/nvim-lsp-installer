@@ -120,6 +120,7 @@ InstallReceiptBuilder.dotnet = package_source "dotnet"
 InstallReceiptBuilder.cargo = package_source "cargo"
 InstallReceiptBuilder.composer = package_source "composer"
 InstallReceiptBuilder.r_package = package_source "r_package"
+InstallReceiptBuilder.opam = package_source "opam"
 
 InstallReceiptBuilder.unmanaged = { type = "unmanaged" }
 

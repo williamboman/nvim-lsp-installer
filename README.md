@@ -214,7 +214,7 @@ lsp_installer.settings({
 | Markdown                            | `zk`                       |
 | Nickel                              | `nickel_ls`                |
 | Nim                                 | `nimls`                    |
-| OCaml                               | `ocamlls`                  |
+| OCaml                               | `ocamllsp`                 |
 | Objective C                         | `ccls`                     |
 | OneScript, 1C:Enterprise            | `bsl_ls`                   |
 | OpenAPI                             | `spectral`                 |
