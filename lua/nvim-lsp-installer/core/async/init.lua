@@ -91,12 +91,6 @@ exports.run_blocking = function(suspend_fn)
     end
 end
 
-exports.will_block = function(suspend_fn)
-    return function()
-        return exports.run_blocking(suspend_fn)
-    end
-end
-
 exports.wait = await
 exports.promisify = promisify
 
@@ -107,9 +101,7 @@ exports.sleep = function(ms)
 end
 
 exports.scheduler = function()
-    await(function(resolve)
-        vim.schedule(resolve)
-    end)
+    await(vim.schedule)
 end
 
 return exports
