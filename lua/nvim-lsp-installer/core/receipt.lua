@@ -10,6 +10,7 @@ local M = {}
 ---| '"gem"'
 ---| '"go"'
 ---| '"cargo"'
+---| '"opam"'
 ---| '"dotnet"'
 ---| '"r_package"'
 ---| '"unmanaged"'
