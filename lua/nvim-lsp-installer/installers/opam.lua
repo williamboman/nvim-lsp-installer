@@ -12,7 +12,7 @@ local M = {}
 function M.packages(packages)
     return installers.pipe {
         std.ensure_executables {
-            { "opam", "opam was not found in path, refer to https://opam.ocaml.org/doc/1.1/Quick_Install.html." },
+            { "opam", "opam was not found in path, refer to https://opam.ocaml.org/doc/Install.html" },
         },
         ---@type ServerInstallerFunction
         function(_, callback, ctx)
