@@ -17,10 +17,6 @@ function M.packages(packages)
         ---@type ServerInstallerFunction
         function(_, callback, ctx)
             local pkgs = list_copy(packages)
-            local c = process.chain {
-                cwd = ctx.install_dir,
-                stdio_sink = ctx.stdio_sink,
-            }
 
             ctx.receipt:with_primary_source(ctx.receipt.opam(pkgs[1]))
             for i = 2, #pkgs do
@@ -38,9 +34,12 @@ function M.packages(packages)
                 "--verbose",
             }
             vim.list_extend(install_args, pkgs)
-            c.run("opam", install_args)
 
-            c.spawn(callback)
+             process.spawn("opam", {
+                args = install_args,
+                cwd = ctx.install_dir,
+                stdio_sink = ctx.stdio_sink,
+            }, callback)
         end,
     }
 end
