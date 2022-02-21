@@ -169,6 +169,9 @@ return {
   nimls = {
     filetypes = { "nim" }
   },
+  ocamlls = {
+    filetypes = { "ocaml", "reason" }
+  },
   ocamllsp = {
     filetypes = { "ocaml", "ocaml.menhir", "ocaml.interface", "ocaml.ocamllex", "reason" }
   },
