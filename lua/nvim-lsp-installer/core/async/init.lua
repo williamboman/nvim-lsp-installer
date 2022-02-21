@@ -43,16 +43,16 @@ local function new_execution_context(suspend_fn, callback, ...)
         if cancelled then
             return
         end
-        local ok, maybe_promise = co.resume(thread, ...)
+        local ok, promise_or_result = co.resume(thread, ...)
         if ok then
-            if getmetatable(maybe_promise) == Promise then
-                maybe_promise(step)
+            if getmetatable(promise_or_result) == Promise then
+                promise_or_result(step)
             else
-                callback(true, maybe_promise)
+                callback(true, promise_or_result)
                 thread = nil
             end
         else
-            callback(false, maybe_promise)
+            callback(false, promise_or_result)
             thread = nil
         end
     end
