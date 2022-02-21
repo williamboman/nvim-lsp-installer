@@ -35,7 +35,7 @@ function M.packages(packages)
             }
             vim.list_extend(install_args, pkgs)
 
-             process.spawn("opam", {
+            process.spawn("opam", {
                 args = install_args,
                 cwd = ctx.install_dir,
                 stdio_sink = ctx.stdio_sink,
