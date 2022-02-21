@@ -19,7 +19,6 @@ function M.packages(packages)
             do
                 local head_package = packages[1]
                 ctx.receipt:with_primary_source(ctx.receipt.opam(head_package))
-                -- c.run("opam", { "pin", "add", "ocaml-lsp-server",("%s"):format(head_package) })
                 c.run("opam", { "install", ("%s"):format(head_package) })
             end
 
