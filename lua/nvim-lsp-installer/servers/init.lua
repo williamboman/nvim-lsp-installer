@@ -87,6 +87,7 @@ local CORE_SERVERS = Data.set_of {
     "ltex",
     "nickel_ls",
     "nimls",
+    "ocamlls",
     "ocamllsp",
     "omnisharp",
     "opencl_ls",
