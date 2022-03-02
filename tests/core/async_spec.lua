@@ -1,5 +1,6 @@
 local assert = require "luassert"
 local spy = require "luassert.spy"
+local match = require "luassert.match"
 local a = require "nvim-lsp-installer.core.async"
 local process = require "nvim-lsp-installer.process"
 
@@ -45,6 +46,17 @@ describe("async", function()
             poutine()
             a.sleep(200)
             assert.spy(james_bond).was_not.called()
+        end)
+    )
+
+    it(
+        "should reject if async function raises error",
+        async_test(function()
+            local ok, err = a.promisify(function()
+                error "something went wrong"
+            end)()
+            assert.is_false(ok)
+            assert.is_true(match.has_match "something went wrong$"(err))
         end)
     )
 end)
