@@ -1,3 +1,4 @@
+
 local M = {}
 
 local uname = vim.loop.os_uname()
@@ -24,6 +25,14 @@ M.is_win = vim.fn.has "win32" == 1
 M.is_unix = vim.fn.has "unix" == 1
 M.is_mac = vim.fn.has "mac" == 1
 M.is_linux = not M.is_mac and M.is_unix
+M.libc = "glibc"
+
+if (M.is_linux) then
+    local found_musl = os.execute("ldd --version | grep -q musl")
+    if (found_musl) then
+        M.libc = "musl"
+    end
+end
 
 -- PATH separator
 M.path_sep = M.is_win and ";" or ":"
