@@ -18,8 +18,17 @@ local target = coalesce(
     when(
         platform.is_linux,
         coalesce(
-            when(platform.arch == "arm64", "rust-analyzer-aarch64-unknown-linux-gnu.gz"),
-            when(platform.arch == "x64", "rust-analyzer-x86_64-unknown-linux-gnu.gz")
+            when(
+                platform.libc == "glibc",
+                coalesce(
+                    when(platform.arch == "arm64", "rust-analyzer-aarch64-unknown-linux-gnu.gz"),
+                    when(platform.arch == "x64", "rust-analyzer-x86_64-unknown-linux-gnu.gz")
+                )
+            ),
+            when(
+                platform.libc == "musl",
+                coalesce(when(platform.arch == "x64", "rust-analyzer-x86_64-unknown-linux-musl"))
+            )
         )
     ),
     when(
