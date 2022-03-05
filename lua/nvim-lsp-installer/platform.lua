@@ -28,7 +28,7 @@ M.is_linux = not M.is_mac and M.is_unix
 M.libc = "glibc"
 
 if (M.is_linux) then
-    local found_musl = os.execute("ldd --version | grep -q musl")
+    local found_musl = os.execute("ldd --version 2>&1 | grep -q musl")
     if (found_musl) then
         M.libc = "musl"
     end
