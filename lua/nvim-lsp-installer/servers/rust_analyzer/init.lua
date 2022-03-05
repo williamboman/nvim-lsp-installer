@@ -27,7 +27,7 @@ local target = coalesce(
             ),
             when(
                 platform.libc == "musl",
-                coalesce(when(platform.arch == "x64", "rust-analyzer-x86_64-unknown-linux-musl"))
+                coalesce(when(platform.arch == "x64", "rust-analyzer-x86_64-unknown-linux-musl.gz"))
             )
         )
     ),
