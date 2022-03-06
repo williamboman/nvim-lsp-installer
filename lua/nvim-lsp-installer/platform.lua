@@ -25,13 +25,17 @@ M.is_win = vim.fn.has "win32" == 1
 M.is_unix = vim.fn.has "unix" == 1
 M.is_mac = vim.fn.has "mac" == 1
 M.is_linux = not M.is_mac and M.is_unix
-M.libc = "glibc"
 
-if (M.is_linux) then
-    local found_musl = os.execute("ldd --version 2>&1 | grep -q musl")
-    if (found_musl) then
-        M.libc = "musl"
+-- @return string @The libc found on the system, musl or glibc (glibc if ldd is not found)
+function M.get_libc()
+    local libc
+    local _, _, libc_exit_code = os.execute("ldd --version 2>&1 | grep -q musl")
+    if (libc_exit_code == 0) then
+        libc = "musl"
+    else
+        libc = "glibc"
     end
+    return libc
 end
 
 -- PATH separator
