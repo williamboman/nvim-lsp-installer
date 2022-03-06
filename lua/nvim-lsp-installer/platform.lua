@@ -27,8 +27,8 @@ M.is_linux = not M.is_mac and M.is_unix
 
 -- @return string @The libc found on the system, musl or glibc (glibc if ldd is not found)
 function M.get_libc()
-    local _, _, libc_exit_code = os.execute("ldd --version 2>&1 | grep -q musl")
-    if (libc_exit_code == 0) then
+    local _, _, libc_exit_code = os.execute "ldd --version 2>&1 | grep -q musl"
+    if libc_exit_code == 0 then
         return "musl"
     else
         return "glibc"
