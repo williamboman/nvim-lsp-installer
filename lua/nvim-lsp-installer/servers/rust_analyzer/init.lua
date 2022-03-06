@@ -7,6 +7,8 @@ local Data = require "nvim-lsp-installer.data"
 
 local coalesce, when = Data.coalesce, Data.when
 
+local libc = platform.get_libc()
+
 local target = coalesce(
     when(
         platform.is_mac,
@@ -19,14 +21,14 @@ local target = coalesce(
         platform.is_linux,
         coalesce(
             when(
-                platform.libc == "glibc",
+                platform.get_libc() == "glibc",
                 coalesce(
                     when(platform.arch == "arm64", "rust-analyzer-aarch64-unknown-linux-gnu.gz"),
                     when(platform.arch == "x64", "rust-analyzer-x86_64-unknown-linux-gnu.gz")
                 )
             ),
             when(
-                platform.libc == "musl",
+                platform.get_libc() == "musl",
                 coalesce(when(platform.arch == "x64", "rust-analyzer-x86_64-unknown-linux-musl.gz"))
             )
         )
