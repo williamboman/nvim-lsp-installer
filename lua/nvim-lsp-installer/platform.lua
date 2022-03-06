@@ -1,4 +1,3 @@
-
 local M = {}
 
 local uname = vim.loop.os_uname()
