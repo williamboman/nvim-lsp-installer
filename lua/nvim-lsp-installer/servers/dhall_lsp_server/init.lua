@@ -42,7 +42,7 @@ return function(name, root_dir)
         },
         default_options = {
             cmd_env = {
-                PATH = process.extend_path { path.concat { root_dir, "bin", "dhall-lsp-server" } },
+                PATH = process.extend_path { path.concat { root_dir, "bin" } },
             },
         },
     }
