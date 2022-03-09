@@ -21,6 +21,12 @@ return function(name, root_dir)
         homepage = "https://dhall-lang.org/",
         languages = { "dhall" },
         installer = {
+            context.capture(function(ctx)
+                ctx.requested_server_version = Data.coalesce(
+                    ctx.requested_server_version,
+                    "1.41.1" -- https://github.com/williamboman/nvim-lsp-installer/pull/512#discussion_r817062340
+                )
+            end),
             context.use_github_release_file("dhall-lang/dhall-haskell", target),
             context.capture(function(ctx)
                 if platform.is_win then
