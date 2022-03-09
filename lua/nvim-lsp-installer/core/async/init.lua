@@ -6,19 +6,31 @@ local Promise = {}
 Promise.__index = Promise
 
 function Promise.new(resolver)
-    return setmetatable({ resolver = resolver }, Promise)
+    return setmetatable({ resolver = resolver, has_resolved = false }, Promise)
+end
+
+---@param success boolean
+---@param cb fun()
+function Promise:_wrap_resolver_cb(success, cb)
+    return function(...)
+        if self.has_resolved then
+            return
+        end
+        self.has_resolved = true
+        cb(success, { ... })
+    end
 end
 
 function Promise:__call(callback)
-    self.resolver(function(...)
-        callback(true, ...)
-    end, function(...)
-        callback(false, ...)
-    end)
+    self.resolver(self:_wrap_resolver_cb(true, callback), self:_wrap_resolver_cb(false, callback))
 end
 
 local function await(resolver)
-    return co.yield(Promise.new(resolver))
+    local ok, value = co.yield(Promise.new(resolver))
+    if not ok then
+        error(value[1], 2)
+    end
+    return unpack(value)
 end
 
 local function table_pack(...)
@@ -28,9 +40,12 @@ end
 local function promisify(async_fn)
     return function(...)
         local args = table_pack(...)
-        return await(function(resolve)
+        return await(function(resolve, reject)
             args[args.n + 1] = resolve
-            async_fn(unpack(args, 1, args.n + 1))
+            local ok, err = pcall(async_fn, unpack(args, 1, args.n + 1))
+            if not ok then
+                reject(err)
+            end
         end)
     end
 end
@@ -64,6 +79,10 @@ local function new_execution_context(suspend_fn, callback, ...)
     end
 end
 
+exports.run = function(suspend_fn, callback)
+    return new_execution_context(suspend_fn, callback)
+end
+
 exports.scope = function(suspend_fn)
     return function(...)
         return new_execution_context(suspend_fn, function() end, ...)
@@ -82,12 +101,12 @@ exports.run_blocking = function(suspend_fn)
         return resolved == true
     end, 50) then
         if not ok then
-            error(result)
+            error(result, 2)
         end
         return result
     else
         cancel_coroutine()
-        error "async function failed to resolve in time."
+        error("async function failed to resolve in time.", 2)
     end
 end
 

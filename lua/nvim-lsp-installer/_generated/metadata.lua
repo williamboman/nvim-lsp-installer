@@ -184,6 +184,9 @@ return {
   opencl_ls = {
     filetypes = { "opencl" }
   },
+  perlnavigator = {
+    filetypes = { "perl" }
+  },
   phpactor = {
     filetypes = { "php" }
   },
