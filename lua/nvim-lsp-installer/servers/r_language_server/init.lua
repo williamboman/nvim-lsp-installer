@@ -8,7 +8,8 @@ return function(name, root_dir)
 options(langserver_library = %q);
 options(repos = list(CRAN = "http://cran.rstudio.com/"));
 rlsLib <- getOption("langserver_library");
-install.packages("languageserversetup", lib = rlsLib);
+install.packages("remotes", lib = rlsLib);
+remotes::install_github("jozefhajnala/languageserversetup", lib = rlsLib)
 loadNamespace("languageserversetup", lib.loc = rlsLib);
 
 languageserversetup::languageserver_install(
