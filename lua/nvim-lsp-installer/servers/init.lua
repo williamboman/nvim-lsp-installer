@@ -121,6 +121,7 @@ local CORE_SERVERS = Data.set_of {
     "solidity_ls",
     "sorbet",
     "sourcekit",
+    "sourcery",
     "spectral",
     "sqlls",
     "sqls",
