@@ -1,10 +1,6 @@
 local server = require "nvim-lsp-installer.server"
 
 return function(name, root_dir)
-    local function windows_path_unescape(str)
-        return str:gsub("\\", "/")
-    end
-
     local function create_install_script(install_dir)
         return ([[
 options(langserver_library = %q);
@@ -18,7 +14,7 @@ languageserversetup::languageserver_install(
     confirmBeforeInstall = FALSE,
     strictLibrary = TRUE
 );
-]]):format(windows_path_unescape(install_dir), windows_path_unescape(install_dir), windows_path_unescape(install_dir))
+]]):format(install_dir, install_dir, install_dir)
     end
 
     local server_script = ([[
@@ -27,7 +23,7 @@ rlsLib <- getOption("langserver_library");
 .libPaths(new = rlsLib);
 loadNamespace("languageserver", lib.loc = rlsLib);
 languageserver::run();
-  ]]):format(windows_path_unescape(root_dir))
+  ]]):format(root_dir)
 
     return server.Server:new {
         name = name,
@@ -38,11 +34,11 @@ languageserver::run();
         installer = function(ctx)
             ctx.spawn.R {
                 "--no-save",
-                on_spawn = function (_, stdio)
+                on_spawn = function(_, stdio)
                     local stdin = stdio[1]
                     stdin:write(create_install_script(ctx.cwd:get()))
                     stdin:close()
-                end
+                end,
             }
             ctx.receipt:with_primary_source(ctx.receipt.r_package "languageserver")
         end,
