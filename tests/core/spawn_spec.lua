@@ -1,4 +1,5 @@
 local spy = require "luassert.spy"
+local match = require "luassert.match"
 local spawn = require "nvim-lsp-installer.core.spawn"
 local process = require "nvim-lsp-installer.process"
 
@@ -93,6 +94,7 @@ describe("async spawn", function()
             }
 
             assert.spy(on_spawn).was_called(1)
+            assert.spy(on_spawn).was_called_with(match.is_not.is_nil(), match.is_not.is_nil())
             assert.is_true(result:is_success())
             assert.equals("im so piped rn", result:get_or_nil().stdout)
         end)
