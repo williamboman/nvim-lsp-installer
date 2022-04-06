@@ -56,7 +56,7 @@ setmetatable(spawn, {
             end
 
             local cmd = self._aliases[k] or k
-            local _, exit_code = a.wait(function (resolve)
+            local _, exit_code = a.wait(function(resolve)
                 local handle, stdio = process.spawn(cmd, spawn_args, resolve)
                 if args.on_spawn and handle and stdio then
                     args.on_spawn(handle, stdio)
