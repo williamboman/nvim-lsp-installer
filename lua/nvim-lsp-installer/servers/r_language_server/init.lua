@@ -30,7 +30,8 @@ languageserversetup::languageserver_install(
     confirmBeforeInstall = FALSE,
     strictLibrary = TRUE
 );
-]]):format(install_dir, install_dir, install_dir)
+library("languageserver", lib.loc = rlsLib);
+]]):format(install_dir)
     end
 
     local server_script = ([[
