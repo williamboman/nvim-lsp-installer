@@ -8,10 +8,21 @@ options(langserver_library = %q);
 options(repos = list(CRAN = "http://cran.rstudio.com/"));
 rlsLib <- getOption("langserver_library");
 
-install.packages("remotes", lib = rlsLib);
-loadNamespace("remotes", lib.loc = rlsLib);
+didInstallRemotes <- FALSE;
+tryCatch(
+  expr = { library("remotes") },
+  error = function (e) {
+    install.packages("remotes", lib = rlsLib);
+    loadNamespace("remotes", lib.loc = rlsLib);
+    didInstallRemotes <- TRUE;
+  }
+);
+
 remotes::install_github("jozefhajnala/languageserversetup", lib = rlsLib);
-remove.packages("remotes", lib = rlsLib);
+
+if (didInstallRemotes) {
+    remove.packages("remotes", lib = rlsLib);
+}
 
 loadNamespace("languageserversetup", lib.loc = rlsLib);
 languageserversetup::languageserver_install(
