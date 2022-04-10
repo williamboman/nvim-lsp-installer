@@ -1,44 +1,68 @@
-![repo size](https://img.shields.io/github/repo-size/williamboman/nvim-lsp-installer?style=flat-square)
-![checks status](https://img.shields.io/github/checks-status/williamboman/nvim-lsp-installer/main?style=flat-square)
-
 <p align="center">
-  <img src="https://user-images.githubusercontent.com/6705160/118490159-f064bb00-b71d-11eb-883e-4affbd020074.png" alt="nvim-lsp-installer" width="60%" />
+  <img src="https://user-images.githubusercontent.com/6705160/118490159-f064bb00-b71d-11eb-883e-4affbd020074.png" alt="nvim-lsp-installer" width="50%" />
 </p>
 
-<img src="https://user-images.githubusercontent.com/6705160/138860384-ec041595-2c23-43b7-a5a7-979b0efb3daf.gif" />
+-   [About](#about)
+-   [Screenshots](#screenshots)
+-   [Installation](#installation)
+    -   [Packer](#packer)
+    -   [vim-plug](#vim-plug)
+-   [Usage](#usage)
+    -   [Commands](#commands)
+    -   [Setup](#setup)
+    -   [Configuration](#configuration)
+-   [Available LSPs](#available-lsps)
+-   [Custom servers](#custom-servers)
+-   [Logo](#logo)
+-   [Roadmap](#roadmap)
+-   [Default configuration](#default-configuration)
 
 ## About
 
-Companion plugin for [nvim-lspconfig](https://github.com/neovim/nvim-lspconfig) that allows you to seamlessly install
-LSP servers locally (inside `:echo stdpath("data")`).
+Neovim plugin that allows you to seamlessly install LSP servers locally (inside `:echo stdpath("data")`).
 
 On top of just providing commands for installing & uninstalling LSP servers, it:
 
 -   provides a graphical UI
--   optimized for blazing fast startup times
+-   is optimized for blazing fast startup times
+-   provides the ability to check for new server versions
 -   supports installing custom versions of LSP servers (for example `:LspInstall rust_analyzer@nightly`)
--   common install tasks are abstracted behind composable Lua APIs (has direct integration with libuv via vim.loop)
--   minimum requirements are relaxed by attempting multiple different utilities (for example, only one of `wget`, `curl`, or `Invoke-WebRequest` is required for HTTP requests)
+-   relaxes the minimum requirements by attempting multiple different utilities (for example, only one of `wget`, `curl`, or `Invoke-WebRequest` is required for HTTP requests)
+-   allows you to install and setup servers without having to restart neovim
 -   hosts [a suite of system tests](https://github.com/williamboman/nvim-lspconfig-test) for all supported servers
--   <img src="https://user-images.githubusercontent.com/6705160/131256603-cacf7f66-dfa9-4515-8ae4-0e42d08cfc6a.png" height="20"> full support for Windows
+-   has full support for Windows <img src="https://user-images.githubusercontent.com/6705160/131256603-cacf7f66-dfa9-4515-8ae4-0e42d08cfc6a.png" height="20">
+
+## Screenshots
+
+|                                                                                                                    |                                                                                                                    |                                                                                                                    |
+| :----------------------------------------------------------------------------------------------------------------: | :----------------------------------------------------------------------------------------------------------------: | :----------------------------------------------------------------------------------------------------------------: |
+| <img src="https://user-images.githubusercontent.com/6705160/150685720-782e33ba-172c-44b6-8558-fb4e98495294.png" /> | <img src="https://user-images.githubusercontent.com/6705160/150685404-2cd34b25-166e-4c84-b9dd-1d5580dc2bdd.png" /> | <img src="https://user-images.githubusercontent.com/6705160/150685322-a537f021-5850-4bbc-8be2-1ece5678d205.png" /> |
+| <img src="https://user-images.githubusercontent.com/6705160/150685324-1310ae7d-67bf-4053-872c-d27e8a4c4b80.png" /> | <img src="https://user-images.githubusercontent.com/6705160/150686052-fd5c4d54-b4da-4cb3-bb82-a094526ee5b5.png" /> | <img src="https://user-images.githubusercontent.com/6705160/150686059-f1be8131-1274-4f62-9aa8-345599cbd8bc.png" /> |
 
 ## Installation
 
-Requires neovim `>= 0.6.0` and [nvim-lspconfig](https://github.com/neovim/nvim-lspconfig). The full requirements to
-install all servers are:
+Requires neovim `>= 0.6.0` and [nvim-lspconfig](https://github.com/neovim/nvim-lspconfig). The _full requirements_ to
+install _all_ servers are:
 
--   For Unix systems: bash(1), git(1), curl(1) or wget(1), unzip(1), tar(1), gzip(1)
--   For Windows systems: powershell, git, tar, and [7zip][7zip] or [peazip][peazip] or [archiver][archiver] or [winzip][winzip]
+-   For Unix systems: git(1), curl(1) or wget(1), unzip(1), tar(1), gzip(1)
+-   For Windows systems: powershell, git, tar, and [7zip][7zip] or [peazip][peazip] or [archiver][archiver] or [winzip][winzip] or [WinRAR][winrar]
 -   Node.js (LTS) & npm
 -   Python3 & pip3
--   go
--   javac
+-   go >= 1.17
+-   JDK
 -   Ruby & gem
+-   PHP & Composer
+-   dotnet
+-   pwsh
+-   Julia
+-   valac (and meson & ninja)
+-   rebar3
 
 [7zip]: https://www.7-zip.org/
 [archiver]: https://github.com/mholt/archiver
 [peazip]: https://peazip.github.io/
 [winzip]: https://www.winzip.com/
+[winrar]: https://www.win-rar.com/
 
 ### [Packer](https://github.com/wbthomason/packer.nvim)
 
@@ -69,23 +93,21 @@ Plug 'williamboman/nvim-lsp-installer'
 
 ### Setup
 
-nvim-lsp-installer installs server executables in a local directory that doesn't exist on PATH. In order for the neovim
-LSP client to be able to locate these executables, the full path to the executable needs to be provided when setting up
-a server. In lspconfig, this is provided via the `cmd` property in the table provided to the `.setup()` function, for
-example (`lspconfig.sumneko_lua.setup { cmd = { "/path/to/lua-server" } }`).
+The recommended way of setting up your installed servers is to do it through nvim-lsp-installer.
+By doing so, nvim-lsp-installer will make sure to inject any necessary properties before calling lspconfig's setup
+function for you. You may find a minimal example below. To see how you can override the default settings for a server,
+refer to the [Wiki][overriding-default-settings].
 
-The recommended way of setting up your installed servers is to do it directly through nvim-lsp-installer. By doing so,
-nvim-lsp-installer will make sure to inject any necessary properties before calling lspconfig's setup function for you.
-You may find a minimal example below. To see how you can override the default settings for a server, refer to the
-[Wiki][overriding-default-settings].
+Make sure you don't also set up your servers directly via lspconfig (e.g. `require("lspconfig").clangd.setup {}`), as
+this will cause servers to be set up twice!
 
 [overriding-default-settings]: https://github.com/williamboman/nvim-lsp-installer/wiki/Advanced-Configuration#overriding-the-default-lsp-server-options
 
 ```lua
 local lsp_installer = require("nvim-lsp-installer")
 
--- Register a handler that will be called for all installed servers.
--- Alternatively, you may also register handlers on specific server instances instead (see example below).
+-- Register a handler that will be called for each installed server when it's ready (i.e. when installation is finished
+-- or if the server is already installed).
 lsp_installer.on_server_ready(function(server)
     local opts = {}
 
@@ -94,29 +116,14 @@ lsp_installer.on_server_ready(function(server)
     --     opts.root_dir = function() ... end
     -- end
 
-    -- This setup() function is exactly the same as lspconfig's setup function.
+    -- This setup() function will take the provided server configuration and decorate it with the necessary properties
+    -- before passing it onwards to lspconfig.
     -- Refer to https://github.com/neovim/nvim-lspconfig/blob/master/doc/server_configurations.md
     server:setup(opts)
 end)
 ```
 
-For more advanced use cases you may also interact with more APIs nvim-lsp-installer has to offer, for example the following (refer to `:help nvim-lsp-installer` for more docs).
-
-```lua
-local lsp_installer_servers = require'nvim-lsp-installer.servers'
-
-local server_available, requested_server = lsp_installer_servers.get_server("rust_analyzer")
-if server_available then
-    requested_server:on_ready(function ()
-        local opts = {}
-        requested_server:setup(opts)
-    end)
-    if not requested_server:is_installed() then
-        -- Queue the server to be installed
-        requested_server:install()
-    end
-end
-```
+For more advanced use cases you may also interact with more APIs nvim-lsp-installer has to offer, refer to `:help nvim-lsp-installer` for more docs.
 
 ### Configuration
 
@@ -144,94 +151,126 @@ lsp_installer.settings({
 
 ## Available LSPs
 
-| Language                            | Server name               |
-| ----------------------------------- | ------------------------- |
-| Angular                             | `angularls`               |
-| Ansible                             | `ansiblels`               |
-| Arduino [(docs!!!)][arduino]        | `arduino_language_server` |
-| AsyncAPI                            | `spectral`                |
-| Bash                                | `bashls`                  |
-| Bicep                               | `bicep`                   |
-| C                                   | `ccls`                    |
-| C                                   | `clangd`                  |
-| C#                                  | `csharpls`                |
-| C#                                  | `omnisharp`               |
-| C++                                 | `ccls`                    |
-| C++                                 | `clangd`                  |
-| CMake                               | `cmake`                   |
-| CSS                                 | `cssls`                   |
-| CSS                                 | `cssmodules_ls`           |
-| Clojure                             | `clojure_lsp`             |
-| CodeQL                              | `codeqlls`                |
-| Dart                                | `dartls`                  |
-| Deno                                | `denols`                  |
-| Diagnostic (general purpose server) | `diagnosticls`            |
-| Dlang                               | `serve_d`                 |
-| Docker                              | `dockerls`                |
-| Dot                                 | `dotls`                   |
-| EFM (general purpose server)        | `efm`                     |
-| ESLint [(docs)][eslint]             | `eslint`                  |
-| Elixir                              | `elixirls`                |
-| Elm                                 | `elmls`                   |
-| Ember                               | `ember`                   |
-| Emmet                               | `emmet_ls`                |
-| Erlang                              | `erlangls`                |
-| F#                                  | `fsautocomplete`          |
-| Fortran                             | `fortls`                  |
-| Go                                  | `gopls`                   |
-| Grammarly                           | `grammarly`               |
-| GraphQL                             | `graphql`                 |
-| Groovy                              | `groovyls`                |
-| HTML                                | `html`                    |
-| Haskell                             | `hls`                     |
-| JSON                                | `jsonls`                  |
-| Java                                | `jdtls`                   |
-| JavaScript                          | `quick_lint_js`           |
-| JavaScript                          | `tsserver`                |
-| Jsonnet                             | `jsonnet_ls`              |
-| Kotlin                              | `kotlin_language_server`  |
-| LaTeX                               | `ltex`                    |
-| LaTeX                               | `texlab`                  |
-| Lua                                 | `sumneko_lua`             |
-| Markdown                            | `zk`                      |
-| OCaml                               | `ocamlls`                 |
-| Objective C                         | `ccls`                    |
-| OpenAPI                             | `spectral`                |
-| PHP                                 | `intelephense`            |
-| PHP                                 | `phpactor`                |
-| Powershell                          | `powershell_es`           |
-| Prisma                              | `prismals`                |
-| Puppet                              | `puppet`                  |
-| PureScript                          | `purescriptls`            |
-| Python                              | `jedi_language_server`    |
-| Python                              | `pyright`                 |
-| Python [(docs)][pylsp]              | `pylsp`                   |
-| ReScript                            | `rescriptls`              |
-| Rome                                | `rome`                    |
-| Ruby                                | `solargraph`              |
-| Rust [(wiki)][rust_analyzer]        | `rust_analyzer`           |
-| SQL                                 | `sqlls`                   |
-| SQL                                 | `sqls`                    |
-| Solidity                            | `solang`                  |
-| Solidity                            | `solc`                    |
-| Solidity (VSCode)                   | `solidity_ls`             |
-| Sorbet                              | `sorbet`                  |
-| Sphinx                              | `esbonio`                 |
-| Stylelint                           | `stylelint_lsp`           |
-| Svelte                              | `svelte`                  |
-| Swift                               | `sourcekit`               |
-| TOML                                | `taplo`                   |
-| Tailwind CSS                        | `tailwindcss`             |
-| Terraform                           | `terraformls`             |
-| Terraform [(docs)][tflint]          | `tflint`                  |
-| TypeScript [(docs)][tsserver]       | `tsserver`                |
-| Vala                                | `vala_ls`                 |
-| VimL                                | `vimls`                   |
-| Vue                                 | `volar`                   |
-| Vue                                 | `vuels`                   |
-| XML                                 | `lemminx`                 |
-| YAML                                | `yamlls`                  |
-| Zig                                 | `zls`                     |
+| Language                            | Server name                |
+| ----------------------------------- | -------------------------- |
+| AWK                                 | `awk_ls`                   |
+| Angular                             | `angularls`                |
+| Ansible                             | `ansiblels`                |
+| Arduino [(docs!!!)][arduino]        | `arduino_language_server`  |
+| Assembly (GAS/NASM, GO)             | `asm_lsp`                  |
+| AsyncAPI                            | `spectral`                 |
+| Bash                                | `bashls`                   |
+| Beancount                           | `beancount`                |
+| Bicep                               | `bicep`                    |
+| C                                   | `ccls`                     |
+| C                                   | `clangd`                   |
+| C#                                  | `csharp_ls`                |
+| C#                                  | `omnisharp`                |
+| C++                                 | `ccls`                     |
+| C++                                 | `clangd`                   |
+| CMake                               | `cmake`                    |
+| CSS                                 | `cssls`                    |
+| CSS                                 | `cssmodules_ls`            |
+| Clojure                             | `clojure_lsp`              |
+| CodeQL                              | `codeqlls`                 |
+| Crystal                             | `crystalline`              |
+| Crystal                             | `scry`                     |
+| Cucumber                            | `cucumber_language_server` |
+| Dart                                | `dartls`                   |
+| Deno                                | `denols`                   |
+| Dhall                               | `dhall_lsp_server`         |
+| Diagnostic (general purpose server) | `diagnosticls`             |
+| Dlang                               | `serve_d`                  |
+| Docker                              | `dockerls`                 |
+| Dot                                 | `dotls`                    |
+| EFM (general purpose server)        | `efm`                      |
+| ESLint [(docs)][eslint]             | `eslint`                   |
+| Elixir                              | `elixirls`                 |
+| Elm                                 | `elmls`                    |
+| Ember                               | `ember`                    |
+| Emmet                               | `emmet_ls`                 |
+| Erlang                              | `erlangls`                 |
+| F#                                  | `fsautocomplete`           |
+| Flux                                | `flux_lsp`                 |
+| Foam (OpenFOAM)                     | `foam_ls`                  |
+| Fortran                             | `fortls`                   |
+| Go                                  | `golangci_lint_ls`         |
+| Go                                  | `gopls`                    |
+| Grammarly                           | `grammarly`                |
+| GraphQL                             | `graphql`                  |
+| Groovy                              | `groovyls`                 |
+| HTML                                | `html`                     |
+| Haskell                             | `hls`                      |
+| Haxe                                | `haxe_language_server`     |
+| JSON                                | `jsonls`                   |
+| Java                                | `jdtls`                    |
+| JavaScript                          | `quick_lint_js`            |
+| JavaScript                          | `tsserver`                 |
+| Jsonnet                             | `jsonnet_ls`               |
+| Julia                               | `julials`                  |
+| Kotlin                              | `kotlin_language_server`   |
+| LaTeX                               | `ltex`                     |
+| LaTeX                               | `texlab`                   |
+| Lelwel                              | `lelwel_ls`                |
+| Lua                                 | `sumneko_lua`              |
+| Markdown                            | `prosemd_lsp`              |
+| Markdown                            | `remark_ls`                |
+| Markdown                            | `zeta_note`                |
+| Markdown                            | `zk`                       |
+| Metamath Zero                       | `mm0_ls`                   |
+| Nickel                              | `nickel_ls`                |
+| Nim                                 | `nimls`                    |
+| OCaml                               | `ocamlls`                  |
+| OCaml                               | `ocamllsp`                 |
+| Objective C                         | `ccls`                     |
+| OneScript, 1C:Enterprise            | `bsl_ls`                   |
+| OpenAPI                             | `spectral`                 |
+| OpenCL                              | `opencl_ls`                |
+| PHP                                 | `intelephense`             |
+| PHP                                 | `phpactor`                 |
+| PHP                                 | `psalm`                    |
+| Perl                                | `perlnavigator`            |
+| Powershell                          | `powershell_es`            |
+| Prisma                              | `prismals`                 |
+| Puppet                              | `puppet`                   |
+| PureScript                          | `purescriptls`             |
+| Python                              | `jedi_language_server`     |
+| Python                              | `pyright`                  |
+| Python                              | `sourcery`                 |
+| Python [(docs)][pylsp]              | `pylsp`                    |
+| R                                   | `r_language_server`        |
+| ReScript                            | `rescriptls`               |
+| Reason                              | `reason_ls`                |
+| Rome                                | `rome`                     |
+| Ruby                                | `solargraph`               |
+| Rust [(wiki)][rust_analyzer]        | `rust_analyzer`            |
+| SQL                                 | `sqlls`                    |
+| SQL                                 | `sqls`                     |
+| Salt                                | `salt_ls`                  |
+| Shopify Theme Check                 | `theme_check`              |
+| Slint                               | `slint_lsp`                |
+| Solidity                            | `solang`                   |
+| Solidity                            | `solc`                     |
+| Solidity (VSCode)                   | `solidity_ls`              |
+| Sorbet                              | `sorbet`                   |
+| Sphinx                              | `esbonio`                  |
+| Stylelint                           | `stylelint_lsp`            |
+| Svelte                              | `svelte`                   |
+| Swift                               | `sourcekit`                |
+| SystemVerilog                       | `svls`                     |
+| SystemVerilog                       | `verible`                  |
+| TOML                                | `taplo`                    |
+| Tailwind CSS                        | `tailwindcss`              |
+| Terraform                           | `terraformls`              |
+| Terraform [(docs)][tflint]          | `tflint`                   |
+| TypeScript [(docs)][tsserver]       | `tsserver`                 |
+| Vala                                | `vala_ls`                  |
+| VimL                                | `vimls`                    |
+| Vue                                 | `volar`                    |
+| Vue                                 | `vuels`                    |
+| XML                                 | `lemminx`                  |
+| YAML                                | `yamlls`                   |
+| Zig                                 | `zls`                      |
 
 [arduino]: ./lua/nvim-lsp-installer/servers/arduino_language_server/README.md
 [eslint]: ./lua/nvim-lsp-installer/servers/eslint/README.md

@@ -1,3 +1,4 @@
+---@deprecated Will be replaced by core.managers.pip3
 local path = require "nvim-lsp-installer.path"
 local Data = require "nvim-lsp-installer.data"
 local installers = require "nvim-lsp-installer.installers"
@@ -73,10 +74,12 @@ end
 ---@param root_dir string @The directory to resolve the executable from.
 function M.env(root_dir)
     return {
-        PATH = process.extend_path {
-            path.concat { root_dir, REL_INSTALL_DIR, platform.is_win and "Scripts" or "bin" },
-        },
+        PATH = process.extend_path { M.path(root_dir) },
     }
+end
+
+function M.path(root_dir)
+    return path.concat { root_dir, REL_INSTALL_DIR, platform.is_win and "Scripts" or "bin" }
 end
 
 return M

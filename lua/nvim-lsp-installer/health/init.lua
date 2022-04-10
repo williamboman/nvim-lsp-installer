@@ -1,18 +1,20 @@
 local health = require "health"
 local process = require "nvim-lsp-installer.process"
-local gem = require "nvim-lsp-installer.installers.gem"
-local composer = require "nvim-lsp-installer.installers.composer"
-local npm = require "nvim-lsp-installer.installers.npm"
 local platform = require "nvim-lsp-installer.platform"
 local Data = require "nvim-lsp-installer.data"
 
 local when = Data.when
+
+local gem_cmd = platform.is_win and "gem.cmd" or "gem"
+local composer_cmd = platform.is_win and "composer.bat" or "composer"
+local npm_cmd = platform.is_win and "npm.cmd" or "npm"
 
 local M = {}
 
 ---@alias HealthCheckResult
 ---| '"success"'
 ---| '"version-mismatch"'
+---| '"parse-error"'
 ---| '"not-available"'
 
 ---@class HealthCheck
@@ -40,7 +42,8 @@ end
 function HealthCheck:get_health_report_level()
     return ({
         ["success"] = "report_ok",
-        ["version-mismatch"] = "report_warn",
+        ["parse-error"] = "report_warn",
+        ["version-mismatch"] = "report_error",
         ["not-available"] = self.relaxed and "report_warn" or "report_error",
     })[self.result]
 end
@@ -50,6 +53,8 @@ function HealthCheck:__tostring()
         return ("**%s**: `%s`"):format(self.name, self:get_version())
     elseif self.result == "version-mismatch" then
         return ("**%s**: unsupported version `%s`. %s"):format(self.name, self:get_version(), self.reason)
+    elseif self.result == "parse-error" then
+        return ("**%s**: failed to parse version"):format(self.name)
     elseif self.result == "not-available" then
         return ("**%s**: not available"):format(self.name)
     end
@@ -61,7 +66,7 @@ local function mk_healthcheck(callback)
     return function(opts)
         return function()
             local stdio = process.in_memory_sink()
-            local _, stdio = process.spawn(opts.cmd, {
+            local _, stdio_pipes = process.spawn(opts.cmd, {
                 args = opts.args,
                 stdio_sink = stdio.sink,
             }, function(success)
@@ -72,12 +77,20 @@ local function mk_healthcheck(callback)
                     )[1]
 
                     if opts.version_check then
-                        local version_check = opts.version_check(version)
-                        if version_check then
+                        local ok, version_check = pcall(opts.version_check, version)
+                        if ok and version_check then
                             callback(HealthCheck.new {
                                 result = "version-mismatch",
                                 reason = version_check,
                                 version = version,
+                                name = opts.name,
+                                relaxed = opts.relaxed,
+                            })
+                            return
+                        elseif not ok then
+                            callback(HealthCheck.new {
+                                result = "parse-error",
+                                version = "N/A",
                                 name = opts.name,
                                 relaxed = opts.relaxed,
                             })
@@ -101,9 +114,9 @@ local function mk_healthcheck(callback)
                 end
             end)
 
-            if stdio then
+            if stdio_pipes then
                 -- Immediately close stdin to avoid leaving the process waiting for input.
-                local stdin = stdio[1]
+                local stdin = stdio_pipes[1]
                 stdin:close()
             end
         end
@@ -144,11 +157,11 @@ function M.check()
             end,
         },
         check { cmd = "ruby", args = { "--version" }, name = "Ruby", relaxed = true },
-        check { cmd = gem.gem_cmd, args = { "--version" }, name = "RubyGem", relaxed = true },
-        check { cmd = composer.composer_cmd, args = { "--version" }, name = "Composer", relaxed = true },
+        check { cmd = gem_cmd, args = { "--version" }, name = "RubyGem", relaxed = true },
+        check { cmd = composer_cmd, args = { "--version" }, name = "Composer", relaxed = true },
         check { cmd = "php", args = { "--version" }, name = "PHP", relaxed = true },
         check {
-            cmd = npm.npm_command,
+            cmd = npm_cmd,
             args = { "--version" },
             name = "npm",
             version_check = function(version)
@@ -184,6 +197,7 @@ function M.check()
         check { cmd = "python3", args = { "-m", "pip", "--version" }, name = "pip3", relaxed = true },
         check { cmd = "javac", args = { "-version" }, name = "javac", relaxed = true },
         check { cmd = "java", args = { "-version" }, name = "java", relaxed = true },
+        check { cmd = "julia", args = { "--version" }, name = "julia", relaxed = true },
         check { cmd = "wget", args = { "--version" }, name = "wget" },
         -- wget is used interchangeably with curl, but with higher priority, so we mark curl as relaxed
         check { cmd = "curl", args = { "--version" }, name = "curl", relaxed = true },

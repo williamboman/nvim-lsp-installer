@@ -1,5 +1,6 @@
 local server = require "nvim-lsp-installer.server"
-local npm = require "nvim-lsp-installer.installers.npm"
+local platform = require "nvim-lsp-installer.platform"
+local npm = require "nvim-lsp-installer.core.managers.npm"
 local Data = require "nvim-lsp-installer.data"
 local path = require "nvim-lsp-installer.path"
 
@@ -13,7 +14,7 @@ end
 
 return function(name, root_dir)
     local function get_cmd(workspace_dir)
-        return {
+        local cmd = {
             "ngserver",
             "--stdio",
             "--tsProbeLocations",
@@ -27,6 +28,12 @@ return function(name, root_dir)
                 ","
             ),
         }
+        if platform.is_win then
+            table.insert(cmd, 1, "cmd.exe")
+            table.insert(cmd, 2, "/C")
+        end
+
+        return cmd
     end
 
     return server.Server:new {
@@ -35,6 +42,7 @@ return function(name, root_dir)
         homepage = "https://angular.io/guide/language-service",
         languages = { "angular" },
         installer = npm.packages { "@angular/language-server", "typescript" },
+        async = true,
         default_options = {
             cmd = get_cmd(path.cwd()),
             cmd_env = npm.env(root_dir),
