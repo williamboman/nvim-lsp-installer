@@ -1,5 +1,5 @@
 local server = require "nvim-lsp-installer.server"
-local npm = require "nvim-lsp-installer.installers.npm"
+local npm = require "nvim-lsp-installer.core.managers.npm"
 
 return function(name, root_dir)
     return server.Server:new {
@@ -8,8 +8,9 @@ return function(name, root_dir)
         homepage = "https://github.com/bmatcuk/stylelint-lsp",
         languages = { "stylelint" },
         installer = npm.packages { "stylelint-lsp" },
+        async = true,
         default_options = {
-            cmd = { npm.executable(root_dir, "stylelint-lsp"), "--stdio" },
+            cmd_env = npm.env(root_dir),
         },
     }
 end

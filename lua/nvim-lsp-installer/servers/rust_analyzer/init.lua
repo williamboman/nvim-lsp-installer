@@ -1,11 +1,13 @@
 local server = require "nvim-lsp-installer.server"
-local path = require "nvim-lsp-installer.path"
+local process = require "nvim-lsp-installer.process"
 local platform = require "nvim-lsp-installer.platform"
 local std = require "nvim-lsp-installer.installers.std"
 local context = require "nvim-lsp-installer.installers.context"
 local Data = require "nvim-lsp-installer.data"
 
 local coalesce, when = Data.coalesce, Data.when
+
+local libc = platform.get_libc()
 
 local target = coalesce(
     when(
@@ -18,8 +20,14 @@ local target = coalesce(
     when(
         platform.is_linux,
         coalesce(
-            when(platform.arch == "arm64", "rust-analyzer-aarch64-unknown-linux-gnu.gz"),
-            when(platform.arch == "x64", "rust-analyzer-x86_64-unknown-linux-gnu.gz")
+            when(
+                libc == "glibc",
+                coalesce(
+                    when(platform.arch == "arm64", "rust-analyzer-aarch64-unknown-linux-gnu.gz"),
+                    when(platform.arch == "x64", "rust-analyzer-x86_64-unknown-linux-gnu.gz")
+                )
+            ),
+            when(libc == "musl", coalesce(when(platform.arch == "x64", "rust-analyzer-x86_64-unknown-linux-musl.gz")))
         )
     ),
     when(
@@ -38,7 +46,7 @@ return function(name, root_dir)
         homepage = "https://rust-analyzer.github.io",
         languages = { "rust" },
         installer = {
-            context.use_github_release_file("rust-analyzer/rust-analyzer", target),
+            context.use_github_release_file("rust-lang/rust-analyzer", target),
             context.capture(function(ctx)
                 return std.gunzip_remote(
                     ctx.github_release_file,
@@ -46,9 +54,14 @@ return function(name, root_dir)
                 )
             end),
             std.chmod("+x", { "rust-analyzer" }),
+            context.receipt(function(receipt, ctx)
+                receipt:with_primary_source(receipt.github_release_file(ctx))
+            end),
         },
         default_options = {
-            cmd = { path.concat { root_dir, "rust-analyzer" } },
+            cmd_env = {
+                PATH = process.extend_path { root_dir },
+            },
         },
     }
 end

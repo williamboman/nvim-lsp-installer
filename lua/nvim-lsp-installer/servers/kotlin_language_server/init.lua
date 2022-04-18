@@ -1,5 +1,5 @@
 local server = require "nvim-lsp-installer.server"
-local platform = require "nvim-lsp-installer.platform"
+local process = require "nvim-lsp-installer.process"
 local path = require "nvim-lsp-installer.path"
 local std = require "nvim-lsp-installer.installers.std"
 local context = require "nvim-lsp-installer.installers.context"
@@ -15,14 +15,18 @@ return function(name, root_dir)
             context.capture(function(ctx)
                 return std.unzip_remote(ctx.github_release_file)
             end),
+            context.receipt(function(receipt, ctx)
+                receipt:with_primary_source(receipt.github_release_file(ctx))
+            end),
         },
         default_options = {
-            cmd = {
-                path.concat {
-                    root_dir,
-                    "server",
-                    "bin",
-                    platform.is_win and "kotlin-language-server.bat" or "kotlin-language-server",
+            cmd_env = {
+                PATH = process.extend_path {
+                    path.concat {
+                        root_dir,
+                        "server",
+                        "bin",
+                    },
                 },
             },
         },

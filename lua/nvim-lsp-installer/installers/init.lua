@@ -4,12 +4,26 @@ local Data = require "nvim-lsp-installer.data"
 
 local M = {}
 
+---@param installer ServerInstallerFunction[]|ServerInstallerFunction
+---@return ServerInstallerFunction
+local function normalize_installer(installer)
+    if type(installer) == "table" then
+        return M.pipe(installer)
+    else
+        return installer
+    end
+end
+
 ---@alias ServerInstallCallback fun(success: boolean)
 
 ---@class ServerInstallContext
+---@field receipt InstallReceiptBuilder
 ---@field requested_server_version string|nil @The version requested by the user.
 ---@field stdio_sink StdioSink
 ---@field github_release_file string|nil @Only available if context.use_github_release_file has been called.
+---@field github_repo string|nil @Only available if context.use_github_release_file has been called.
+---@field os_distribution table<string, any> @Only available if context.use_os_distribution has been called.
+---@field homebrew_prefix string @Only available if context.use_homebrew_prefix has been called.
 ---@field install_dir string
 
 ---@alias ServerInstallerFunction fun(server: Server, callback: ServerInstallCallback, context: ServerInstallContext)
@@ -24,18 +38,23 @@ function M.pipe(installers)
 
     return function(server, callback, context)
         local function execute(idx)
-            local ok, err = pcall(installers[idx], server, function(success)
-                if not success then
-                    -- oh no, error. exit early
-                    callback(success)
-                elseif installers[idx + 1] then
-                    -- iterate
-                    execute(idx + 1)
-                else
-                    -- we done
-                    callback(success)
-                end
-            end, context)
+            local ok, err = pcall(
+                installers[idx],
+                server,
+                vim.schedule_wrap(function(success)
+                    if not success then
+                        -- oh no, error. exit early
+                        callback(success)
+                    elseif installers[idx + 1] then
+                        -- iterate
+                        execute(idx + 1)
+                    else
+                        -- we done
+                        callback(success)
+                    end
+                end),
+                context
+            )
             if not ok then
                 context.stdio_sink.stderr(tostring(err) .. "\n")
                 callback(false)
@@ -120,11 +139,7 @@ function M.on(platform_table)
     return function(server, callback, context)
         local installer = get_by_platform(platform_table)
         if installer then
-            if type(installer) == "function" then
-                installer(server, callback, context)
-            else
-                M.pipe(installer)(server, callback, context)
-            end
+            normalize_installer(installer)(server, callback, context)
         else
             callback(true)
         end
@@ -139,11 +154,7 @@ function M.when(platform_table)
     return function(server, callback, context)
         local installer = get_by_platform(platform_table)
         if installer then
-            if type(installer) == "function" then
-                installer(server, callback, context)
-            else
-                M.pipe(installer)(server, callback, context)
-            end
+            normalize_installer(installer)(server, callback, context)
         else
             context.stdio_sink.stderr(
                 ("Current operating system is not yet supported for server %q.\n"):format(server.name)
@@ -151,6 +162,25 @@ function M.when(platform_table)
             callback(false)
         end
     end
+end
+
+---@param installer ServerInstallerFunction|ServerInstallerFunction[] @The installer to execute in a new installer context.
+function M.branch_context(installer)
+    ---@type ServerInstallerFunction
+    return function(server, callback, ctx)
+        local receipt = ctx.receipt
+        -- This temporary nil assignment is done to avoid deepcopy traversing the receipt builder unnecessarily
+        ctx.receipt = nil
+        local new_context = vim.deepcopy(ctx)
+        ctx.receipt = receipt
+        new_context.receipt = receipt
+        normalize_installer(installer)(server, callback, new_context)
+    end
+end
+
+---@type ServerInstallerFunction
+function M.noop(_, callback)
+    callback(true)
 end
 
 return M

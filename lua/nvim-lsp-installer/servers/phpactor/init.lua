@@ -1,8 +1,9 @@
-local installers = require "nvim-lsp-installer.installers"
 local path = require "nvim-lsp-installer.path"
 local server = require "nvim-lsp-installer.server"
-local composer = require "nvim-lsp-installer.installers.composer"
-local std = require "nvim-lsp-installer.installers.std"
+local composer = require "nvim-lsp-installer.core.managers.composer"
+local git = require "nvim-lsp-installer.core.managers.git"
+local process = require "nvim-lsp-installer.process"
+local platform = require "nvim-lsp-installer.platform"
 
 return function(name, root_dir)
     return server.Server:new {
@@ -10,14 +11,16 @@ return function(name, root_dir)
         root_dir = root_dir,
         homepage = "https://phpactor.readthedocs.io/en/master/",
         languages = { "php" },
-        installer = installers.when {
-            unix = {
-                std.git_clone "https://github.com/phpactor/phpactor.git",
-                composer.install(),
-            },
-        },
+        async = true,
+        installer = function()
+            assert(platform.is_unix, "Phpactor only supports UNIX environments.")
+            git.clone({ "https://github.com/phpactor/phpactor.git" }).with_receipt()
+            composer.install()
+        end,
         default_options = {
-            cmd = { path.concat { root_dir, "bin", "phpactor" }, "language-server" },
+            cmd_env = {
+                PATH = process.extend_path { path.concat { root_dir, "bin" } },
+            },
         },
     }
 end

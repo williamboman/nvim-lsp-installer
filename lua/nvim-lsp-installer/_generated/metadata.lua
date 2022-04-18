@@ -5,16 +5,37 @@ return {
     filetypes = { "typescript", "html", "typescriptreact", "typescript.tsx" }
   },
   ansiblels = {
-    filetypes = { "yaml", "yaml.ansible" }
+    filetypes = { "yaml.ansible" }
+  },
+  arduino_language_server = {
+    filetypes = { "arduino" }
+  },
+  asm_lsp = {
+    filetypes = { "asm", "vmasm" }
+  },
+  awk_ls = {
+    filetypes = { "awk" }
   },
   bashls = {
     filetypes = { "sh" }
   },
+  beancount = {
+    filetypes = { "beancount" }
+  },
   bicep = {
     filetypes = { "bicep" }
   },
+  bsl_ls = {
+    filetypes = { "bsl", "os" }
+  },
+  ccls = {
+    filetypes = { "c", "cpp", "objc", "objcpp" }
+  },
   clangd = {
     filetypes = { "c", "cpp", "objc", "objcpp" }
+  },
+  clarity_lsp = {
+    filetypes = { "clar", "clarity" }
   },
   clojure_lsp = {
     filetypes = { "clojure", "edn" }
@@ -25,17 +46,29 @@ return {
   codeqlls = {
     filetypes = { "ql" }
   },
+  crystalline = {
+    filetypes = { "crystal" }
+  },
   csharp_ls = {
     filetypes = { "cs" }
   },
   cssls = {
     filetypes = { "css", "scss", "less" }
   },
+  cssmodules_ls = {
+    filetypes = { "javascript", "javascriptreact", "typescript", "typescriptreact" }
+  },
+  cucumber_language_server = {
+    filetypes = { "cucumber" }
+  },
   dartls = {
     filetypes = { "dart" }
   },
   denols = {
     filetypes = { "javascript", "javascriptreact", "javascript.jsx", "typescript", "typescriptreact", "typescript.tsx" }
+  },
+  dhall_lsp_server = {
+    filetypes = { "dhall" }
   },
   diagnosticls = {
     filetypes = {}
@@ -70,20 +103,35 @@ return {
   eslint = {
     filetypes = { "javascript", "javascriptreact", "javascript.jsx", "typescript", "typescriptreact", "typescript.tsx", "vue" }
   },
+  flux_lsp = {
+    filetypes = { "flux" }
+  },
+  foam_ls = {
+    filetypes = { "foam", "OpenFOAM" }
+  },
   fortls = {
     filetypes = { "fortran" }
   },
   fsautocomplete = {
     filetypes = { "fsharp" }
   },
-  gopls = {
+  golangci_lint_ls = {
     filetypes = { "go", "gomod" }
   },
+  gopls = {
+    filetypes = { "go", "gomod", "gotmpl" }
+  },
+  grammarly = {
+    filetypes = { "markdown" }
+  },
   graphql = {
-    filetypes = { "typescriptreact", "javascriptreact", "graphql" }
+    filetypes = { "graphql", "typescriptreact", "javascriptreact" }
   },
   groovyls = {
     filetypes = { "groovy" }
+  },
+  haxe_language_server = {
+    filetypes = { "haxe" }
   },
   hls = {
     filetypes = { "haskell", "lhaskell" }
@@ -101,25 +149,49 @@ return {
     filetypes = { "python" }
   },
   jsonls = {
-    filetypes = { "json" }
+    filetypes = { "json", "jsonc" }
   },
   jsonnet_ls = {
     filetypes = { "jsonnet", "libsonnet" }
   },
+  julials = {
+    filetypes = { "julia" }
+  },
   kotlin_language_server = {
     filetypes = { "kotlin" }
   },
+  lelwel_ls = {
+    filetypes = { "llw" }
+  },
   lemminx = {
-    filetypes = { "xml", "xsd", "svg" }
+    filetypes = { "xml", "xsd", "xsl", "xslt", "svg" }
   },
   ltex = {
-    filetypes = { "bib", "markdown", "org", "plaintex", "rst", "rnoweb", "tex" }
+    filetypes = { "bib", "gitcommit", "markdown", "org", "plaintex", "rst", "rnoweb", "tex" }
+  },
+  mm0_ls = {
+    filetypes = { "metamath-zero" }
+  },
+  nickel_ls = {
+    filetypes = { "ncl", "nickel" }
+  },
+  nimls = {
+    filetypes = { "nim" }
   },
   ocamlls = {
     filetypes = { "ocaml", "reason" }
   },
+  ocamllsp = {
+    filetypes = { "ocaml", "ocaml.menhir", "ocaml.interface", "ocaml.ocamllex", "reason" }
+  },
   omnisharp = {
     filetypes = { "cs", "vb" }
+  },
+  opencl_ls = {
+    filetypes = { "opencl" }
+  },
+  perlnavigator = {
+    filetypes = { "perl" }
   },
   phpactor = {
     filetypes = { "php" }
@@ -129,6 +201,12 @@ return {
   },
   prismals = {
     filetypes = { "prisma" }
+  },
+  prosemd_lsp = {
+    filetypes = { "markdown" }
+  },
+  psalm = {
+    filetypes = { "php" }
   },
   puppet = {
     filetypes = { "puppet" }
@@ -142,8 +220,23 @@ return {
   pyright = {
     filetypes = { "python" }
   },
+  quick_lint_js = {
+    filetypes = { "javascript" }
+  },
+  r_language_server = {
+    filetypes = { "r", "rmd" }
+  },
+  reason_ls = {
+    filetypes = { "reason" }
+  },
+  remark_ls = {
+    filetypes = { "markdown" }
+  },
   rescriptls = {
     filetypes = { "rescript" }
+  },
+  rnix = {
+    filetypes = { "nix" }
   },
   rome = {
     filetypes = { "javascript", "javascriptreact", "json", "typescript", "typescript.tsx", "typescriptreact" }
@@ -151,8 +244,17 @@ return {
   rust_analyzer = {
     filetypes = { "rust" }
   },
+  salt_ls = {
+    filetypes = { "sls" }
+  },
+  scry = {
+    filetypes = { "crystal" }
+  },
   serve_d = {
     filetypes = { "d" }
+  },
+  slint_lsp = {
+    filetypes = { "slint" }
   },
   solang = {
     filetypes = { "solidity" }
@@ -160,8 +262,23 @@ return {
   solargraph = {
     filetypes = { "ruby" }
   },
+  solc = {
+    filetypes = { "solidity" }
+  },
+  solidity_ls = {
+    filetypes = { "solidity" }
+  },
   sorbet = {
     filetypes = { "ruby" }
+  },
+  sourcekit = {
+    filetypes = { "swift", "c", "cpp", "objective-c", "objective-cpp" }
+  },
+  sourcery = {
+    filetypes = { "python" }
+  },
+  spectral = {
+    filetypes = { "yaml", "json", "yml" }
   },
   sqlls = {
     filetypes = { "sql", "mysql" }
@@ -178,8 +295,14 @@ return {
   svelte = {
     filetypes = { "svelte" }
   },
+  svls = {
+    filetypes = { "verilog", "systemverilog" }
+  },
   tailwindcss = {
-    filetypes = { "aspnetcorerazor", "astro", "astro-markdown", "blade", "django-html", "edge", "eelixir", "ejs", "erb", "eruby", "gohtml", "haml", "handlebars", "hbs", "html", "html-eex", "jade", "leaf", "liquid", "markdown", "mdx", "mustache", "njk", "nunjucks", "php", "razor", "slim", "twig", "css", "less", "postcss", "sass", "scss", "stylus", "sugarss", "javascript", "javascriptreact", "reason", "rescript", "typescript", "typescriptreact", "vue", "svelte" }
+    filetypes = { "aspnetcorerazor", "astro", "astro-markdown", "blade", "django-html", "htmldjango", "edge", "eelixir", "ejs", "erb", "eruby", "gohtml", "haml", "handlebars", "hbs", "html", "html-eex", "heex", "jade", "leaf", "liquid", "markdown", "mdx", "mustache", "njk", "nunjucks", "php", "razor", "slim", "twig", "css", "less", "postcss", "sass", "scss", "stylus", "sugarss", "javascript", "javascriptreact", "reason", "rescript", "typescript", "typescriptreact", "vue", "svelte" }
+  },
+  taplo = {
+    filetypes = { "toml" }
   },
   terraformls = {
     filetypes = { "terraform" }
@@ -190,11 +313,17 @@ return {
   tflint = {
     filetypes = { "terraform" }
   },
+  theme_check = {
+    filetypes = { "liquid" }
+  },
   tsserver = {
     filetypes = { "javascript", "javascriptreact", "javascript.jsx", "typescript", "typescriptreact", "typescript.tsx" }
   },
   vala_ls = {
     filetypes = { "vala", "genie" }
+  },
+  verible = {
+    filetypes = { "systemverilog", "verilog" }
   },
   vimls = {
     filetypes = { "vim" }
@@ -207,6 +336,12 @@ return {
   },
   yamlls = {
     filetypes = { "yaml", "yaml.docker-compose" }
+  },
+  zeta_note = {
+    filetypes = { "markdown" }
+  },
+  zk = {
+    filetypes = { "markdown" }
   },
   zls = {
     filetypes = { "zig", "zir" }

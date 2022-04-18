@@ -1,9 +1,9 @@
 local server = require "nvim-lsp-installer.server"
-local path = require "nvim-lsp-installer.path"
 local std = require "nvim-lsp-installer.installers.std"
 local Data = require "nvim-lsp-installer.data"
 local context = require "nvim-lsp-installer.installers.context"
 local platform = require "nvim-lsp-installer.platform"
+local process = require "nvim-lsp-installer.process"
 
 local coalesce, when = Data.coalesce, Data.when
 
@@ -31,7 +31,7 @@ return function(name, root_dir)
                 end
             end,
             context.set(function(ctx)
-                ctx.requested_server_version = coalesce(ctx.requested_server_version, "LATEST")
+                ctx.requested_server_version = coalesce(ctx.requested_server_version, "0.19.2-655")
             end),
             context.capture(function(ctx)
                 return std.unzip_remote(
@@ -45,9 +45,14 @@ return function(name, root_dir)
                 platform.is_win and ("%s.exe"):format(unzipped_file) or unzipped_file,
                 platform.is_win and "lemminx.exe" or "lemminx"
             ),
+            context.receipt(function(receipt)
+                receipt:with_primary_source(receipt.unmanaged)
+            end),
         },
         default_options = {
-            cmd = { path.concat { root_dir, "lemminx" } },
+            cmd_env = {
+                PATH = process.extend_path { root_dir },
+            },
         },
     }
 end

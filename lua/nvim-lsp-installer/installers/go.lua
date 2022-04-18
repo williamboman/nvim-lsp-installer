@@ -1,45 +1,47 @@
-local path = require "nvim-lsp-installer.path"
 local std = require "nvim-lsp-installer.installers.std"
 local installers = require "nvim-lsp-installer.installers"
-local Data = require "nvim-lsp-installer.data"
 local process = require "nvim-lsp-installer.process"
 
 local M = {}
 
----@param packages string[] @The Go packages to install. The first item in this list will be the recipient of the server version, should the user request a specific one.
+---@param packages string[] The Go packages to install. The first item in this list will be the recipient of the server version, should the user request a specific one.
 function M.packages(packages)
     return installers.pipe {
         std.ensure_executables { { "go", "go was not found in path, refer to https://golang.org/doc/install." } },
         ---@type ServerInstallerFunction
-        function(_, callback, context)
-            local pkgs = Data.list_copy(packages or {})
+        function(_, callback, ctx)
             local c = process.chain {
                 env = process.graft_env {
-                    GO111MODULE = "on",
-                    GOBIN = context.install_dir,
-                    GOPATH = context.install_dir,
+                    GOBIN = ctx.install_dir,
                 },
-                cwd = context.install_dir,
-                stdio_sink = context.stdio_sink,
+                cwd = ctx.install_dir,
+                stdio_sink = ctx.stdio_sink,
             }
 
-            if context.requested_server_version then
-                -- The "head" package is the recipient for the requested version. It's.. by design... don't ask.
-                pkgs[1] = ("%s@%s"):format(pkgs[1], context.requested_server_version)
+            -- Install the head package
+            do
+                local head_package = packages[1]
+                ctx.receipt:with_primary_source(ctx.receipt.go(head_package))
+                local version = ctx.requested_server_version or "latest"
+                c.run("go", { "install", "-v", ("%s@%s"):format(head_package, version) })
             end
 
-            c.run("go", vim.list_extend({ "get", "-v" }, pkgs))
-            c.run("go", { "clean", "-modcache" })
+            -- Install secondary packages
+            for i = 2, #packages do
+                local package = packages[i]
+                ctx.receipt:with_secondary_source(ctx.receipt.go(package))
+                c.run("go", { "install", "-v", ("%s@latest"):format(package) })
+            end
 
             c.spawn(callback)
         end,
     }
 end
 
----@param root_dir string @The directory to resolve the executable from.
----@param executable string
-function M.executable(root_dir, executable)
-    return path.concat { root_dir, executable }
+function M.env(root_dir)
+    return {
+        PATH = process.extend_path { root_dir },
+    }
 end
 
 return M

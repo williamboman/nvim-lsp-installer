@@ -4,14 +4,11 @@ local platform = require "nvim-lsp-installer.platform"
 local Data = require "nvim-lsp-installer.data"
 local std = require "nvim-lsp-installer.installers.std"
 local context = require "nvim-lsp-installer.installers.context"
+local process = require "nvim-lsp-installer.process"
+
+local coalesce, when = Data.coalesce, Data.when
 
 return function(name, root_dir)
-    local bin_dir = Data.coalesce(
-        Data.when(platform.is_mac, "macOS"),
-        Data.when(platform.is_linux, "Linux"),
-        Data.when(platform.is_win, "Windows")
-    )
-
     return server.Server:new {
         name = name,
         root_dir = root_dir,
@@ -19,23 +16,44 @@ return function(name, root_dir)
         homepage = "https://github.com/sumneko/lua-language-server",
         installer = {
             context.use_github_release_file("sumneko/vscode-lua", function(version)
-                return ("lua-%s.vsix"):format(version:gsub("^v", ""))
+                local target = coalesce(
+                    when(
+                        platform.is_mac,
+                        coalesce(
+                            when(platform.arch == "x64", "vscode-lua-%s-darwin-x64.vsix"),
+                            when(platform.arch == "arm64", "vscode-lua-%s-darwin-arm64.vsix")
+                        )
+                    ),
+                    when(
+                        platform.is_linux,
+                        coalesce(
+                            when(platform.arch == "x64", "vscode-lua-%s-linux-x64.vsix"),
+                            when(platform.arch == "arm64", "vscode-lua-%s-linux-arm64.vsix")
+                        )
+                    ),
+                    when(
+                        platform.is_win,
+                        coalesce(
+                            when(platform.arch == "x64", "vscode-lua-%s-win32-x64.vsix"),
+                            when(platform.arch == "x86", "vscode-lua-%s-win32-ia32.vsix")
+                        )
+                    )
+                )
+
+                return target and target:format(version)
             end),
             context.capture(function(ctx)
                 return std.unzip_remote(ctx.github_release_file)
             end),
-            -- see https://github.com/sumneko/vscode-lua/pull/43
-            std.chmod(
-                "+x",
-                { "extension/server/bin/macOS/lua-language-server", "extension/server/bin/Linux/lua-language-server" }
-            ),
+            context.receipt(function(receipt, ctx)
+                receipt:with_primary_source(receipt.github_release_file(ctx))
+            end),
         },
         default_options = {
-            cmd = {
-                -- We need to provide a _full path_ to the executable (sumneko_lua uses it to determine... things)
-                path.concat { root_dir, "extension", "server", "bin", bin_dir, "lua-language-server" },
-                "-E",
-                path.concat { root_dir, "extension", "server", "main.lua" },
+            cmd_env = {
+                PATH = process.extend_path {
+                    path.concat { root_dir, "extension", "server", "bin" },
+                },
             },
         },
     }

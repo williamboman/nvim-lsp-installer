@@ -39,10 +39,7 @@ local initial_environ = vim.fn.environ()
 ---@param new_paths string[] @A list of paths to prepend the existing PATH with.
 function M.extend_path(new_paths)
     local new_path_str = table.concat(new_paths, platform.path_sep)
-    if initial_environ["PATH"] then
-        return new_path_str .. platform.path_sep .. initial_environ["PATH"]
-    end
-    return new_path_str
+    return ("%s%s%s"):format(new_path_str, platform.path_sep, initial_environ.PATH or "")
 end
 
 ---Merges the provided env param with the user's full environent. Provided env has precedence.
@@ -89,7 +86,7 @@ local function sanitize_env_list(env_list)
     return sanitized_list
 end
 
----@alias JobSpawnCallback fun(success: boolean)
+---@alias JobSpawnCallback fun(success: boolean, exit_code: integer)
 
 ---@class JobSpawnOpts
 ---@field env string[] @List of "key=value" string.
@@ -146,7 +143,7 @@ function M.spawn(cmd, opts, callback)
                 end
             end
             check:stop()
-            callback(successful)
+            callback(successful, exit_code)
         end)
 
         log.fmt_debug("Job pid=%s exited with exit_code=%s, signal=%s", pid_or_err, exit_code, signal)

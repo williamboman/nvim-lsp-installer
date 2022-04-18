@@ -41,9 +41,14 @@ return function(name, root_dir)
                 c.spawn(callback)
             end,
             std.rmrf "vala-language-server",
+            context.receipt(function(receipt, ctx)
+                receipt:with_primary_source(receipt.github_release_file(ctx))
+            end),
         },
         default_options = {
-            cmd = { path.concat { root_dir, "bin", "vala-language-server" } },
+            cmd_env = {
+                PATH = process.extend_path { path.concat { root_dir, "bin" } },
+            },
         },
     }
 end

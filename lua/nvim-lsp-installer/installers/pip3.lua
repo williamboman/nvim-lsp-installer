@@ -1,3 +1,4 @@
+---@deprecated Will be replaced by core.managers.pip3
 local path = require "nvim-lsp-installer.path"
 local Data = require "nvim-lsp-installer.data"
 local installers = require "nvim-lsp-installer.installers"
@@ -23,22 +24,28 @@ local function create_installer(python_executable, packages)
             },
         },
         ---@type ServerInstallerFunction
-        function(_, callback, context)
+        function(_, callback, ctx)
             local pkgs = Data.list_copy(packages or {})
             local c = process.chain {
-                cwd = context.install_dir,
-                stdio_sink = context.stdio_sink,
+                cwd = ctx.install_dir,
+                stdio_sink = ctx.stdio_sink,
+                env = process.graft_env(M.env(ctx.install_dir)),
             }
 
+            ctx.receipt:with_primary_source(ctx.receipt.pip3(pkgs[1]))
+            for i = 2, #pkgs do
+                ctx.receipt:with_secondary_source(ctx.receipt.pip3(pkgs[i]))
+            end
+
             c.run(python_executable, { "-m", "venv", REL_INSTALL_DIR })
-            if context.requested_server_version then
+            if ctx.requested_server_version then
                 -- The "head" package is the recipient for the requested version. It's.. by design... don't ask.
-                pkgs[1] = ("%s==%s"):format(pkgs[1], context.requested_server_version)
+                pkgs[1] = ("%s==%s"):format(pkgs[1], ctx.requested_server_version)
             end
 
             local install_command = { "-m", "pip", "install", "-U" }
             vim.list_extend(install_command, settings.current.pip.install_args)
-            c.run(M.executable(context.install_dir, "python"), vim.list_extend(install_command, pkgs))
+            c.run("python", vim.list_extend(install_command, pkgs))
 
             c.spawn(callback)
         end,
@@ -54,7 +61,7 @@ function M.packages(packages)
 
     local py3_host_prog = vim.g.python3_host_prog
     if py3_host_prog then
-        log.fmt_debug("Found python3_host_prog (%s)", py3_host_prog)
+        log.fmt_trace("Found python3_host_prog (%s)", py3_host_prog)
         table.insert(installer_variants, 1, create_installer(py3_host_prog, packages))
     end
 
@@ -65,9 +72,14 @@ function M.packages(packages)
 end
 
 ---@param root_dir string @The directory to resolve the executable from.
----@param executable string
-function M.executable(root_dir, executable)
-    return path.concat { root_dir, REL_INSTALL_DIR, platform.is_win and "Scripts" or "bin", executable }
+function M.env(root_dir)
+    return {
+        PATH = process.extend_path { M.path(root_dir) },
+    }
+end
+
+function M.path(root_dir)
+    return path.concat { root_dir, REL_INSTALL_DIR, platform.is_win and "Scripts" or "bin" }
 end
 
 return M

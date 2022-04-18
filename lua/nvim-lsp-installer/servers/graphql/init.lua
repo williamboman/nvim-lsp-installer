@@ -1,5 +1,5 @@
 local server = require "nvim-lsp-installer.server"
-local npm = require "nvim-lsp-installer.installers.npm"
+local npm = require "nvim-lsp-installer.core.managers.npm"
 
 return function(name, root_dir)
     return server.Server:new {
@@ -8,9 +8,9 @@ return function(name, root_dir)
         homepage = "https://www.npmjs.com/package/graphql-language-service-cli",
         languages = { "graphql" },
         installer = npm.packages { "graphql-language-service-cli", "graphql" },
+        async = true,
         default_options = {
-            cmd = { npm.executable(root_dir, "graphql-lsp"), "server", "-m", "stream" },
-            filetypes = { "typescriptreact", "javascriptreact", "graphql" },
+            cmd_env = npm.env(root_dir),
         },
     }
 end

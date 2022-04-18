@@ -6,7 +6,8 @@ local context = require "nvim-lsp-installer.installers.context"
 local platform = require "nvim-lsp-installer.platform"
 
 return function(name, root_dir)
-    local erlang_ls_file_ext = platform.is_win and ".cmd" or ""
+    local rebar3 = platform.is_win and "rebar3.cmd" or "rebar3"
+
     return server.Server:new {
         name = name,
         root_dir = root_dir,
@@ -14,24 +15,26 @@ return function(name, root_dir)
         homepage = "https://erlang-ls.github.io/",
         installer = {
             std.ensure_executables {
-                { "rebar3", "rebar3 was not found in path. Refer to http://rebar3.org/docs/." },
+                { rebar3, ("%s was not found in path. Refer to http://rebar3.org/docs/."):format(rebar3) },
             },
-            context.use_github_release "erlang-ls/erlang_ls",
+            context.use_github_latest_tag "erlang-ls/erlang_ls",
             std.git_clone "https://github.com/erlang-ls/erlang_ls.git",
             function(_, callback, ctx)
                 local c = process.chain {
                     cwd = ctx.install_dir,
                     stdio_sink = ctx.stdio_sink,
                 }
-                local rebar3 = platform.is_win and "rebar3.cmd" or "rebar3"
                 c.run(rebar3, { "escriptize" })
                 c.run(rebar3, { "as", "dap", "escriptize" })
                 c.spawn(callback)
             end,
+            context.receipt(function(receipt, ctx)
+                receipt:with_primary_source(receipt.github_tag(ctx))
+            end),
         },
         default_options = {
-            cmd = {
-                path.concat { root_dir, "_build", "default", "bin", ("erlang_ls%s"):format(erlang_ls_file_ext) },
+            cmd_env = {
+                PATH = process.extend_path { path.concat { root_dir, "_build", "default", "bin" } },
             },
         },
     }

@@ -24,7 +24,7 @@ available installers that are available out of the box.
 
 -   ### Go
 
-    #### `go.packages(packages: table)`
+    #### `go.packages(packages: string[])`
 
     Returns an installer that installs the provided list of `packages`.
 
@@ -35,11 +35,6 @@ available installers that are available out of the box.
 
     local installer = go.packages { "golang.org/x/tools/gopls@latest" }
     ```
-
-    #### `go.executable(root_dir: string, executable: string)`
-
-    Returns the absolute path to an `executable` that was installed via `go.packages()`. `root_dir` should be the same as
-    the root_dir provided to the relevant server instance.
 
 -   ### npm
 
@@ -55,11 +50,6 @@ available installers that are available out of the box.
     local installer = npm.packages { "graphql-language-service-cli", "graphql" }
     ```
 
-    #### `npm.executable(root_dir: string, executable: string)`
-
-    Returns the absolute path to an `executable` that was installed via `npm.packages()`. `root_dir` should be the same as
-    the root_dir provided to the relevant server instance.
-
 -   ### pip3
 
     #### `pip3.packages(packages: table)`
@@ -73,11 +63,6 @@ available installers that are available out of the box.
 
     local installer = pip3.packages { "python-lsp-server[all]" }
     ```
-
-    #### `pip3.executable(root_dir: string, executable: string)`
-
-    Returns the absolute path to an `executable` that was installed via `pip3.packages()`. `root_dir` should be the same as
-    the root_dir provided to the relevant server instance.
 
 -   ### Shell
 
@@ -100,28 +85,6 @@ available installers that are available out of the box.
     unzip server.zip;
     rm server.zip;
     ]]
-    ```
-
-    #### `shell.remote_bash(url: string, opts?: table)`
-
-    Returns an installer that downloads the content at `url` and executes its content by passing it to the
-    `shell.bash()` installer.
-
-    `opts` is an optional table, with the following defaults:
-
-    -   `prefix: string` (default `"set -euo pipefail;"`) - Prefix added to the beginning of the script.
-    -   `env = table?` (default `nil`) - A table (dict) with environment variables to be set in the shell.
-
-    Example:
-
-    ```lua
-    local shell = require "nvim-lsp-installer.installers.shell"
-
-    shell.remote_bash("https://raw.githubusercontent.com/my_server/my_server_lsp/install.sh", {
-        env = {
-            MY_ENV = "true"
-        }
-    })
     ```
 
     #### `shell.cmd(raw_script: string, opts?: table)`
@@ -192,7 +155,7 @@ The following is a full example of setting up a completely custom server install
 
 ```lua
 local lspconfig = require "lspconfig"
-local configs = require "lspconfig/configs"
+local configs = require "lspconfig.configs"
 local servers = require "nvim-lsp-installer.servers"
 local server = require "nvim-lsp-installer.server"
 local path = require "nvim-lsp-installer.path"

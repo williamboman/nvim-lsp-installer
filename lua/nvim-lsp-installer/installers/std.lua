@@ -4,6 +4,11 @@ local process = require "nvim-lsp-installer.process"
 local platform = require "nvim-lsp-installer.platform"
 local installers = require "nvim-lsp-installer.installers"
 local shell = require "nvim-lsp-installer.installers.shell"
+local Data = require "nvim-lsp-installer.data"
+
+local list_not_nil, when = Data.list_not_nil, Data.when
+
+local USER_AGENT = "nvim-lsp-installer (+https://github.com/williamboman/nvim-lsp-installer)"
 
 local M = {}
 
@@ -17,12 +22,12 @@ function M.download_file(url, out_file)
             process.attempt {
                 jobs = {
                     process.lazy_spawn("wget", {
-                        args = { "-nv", "-O", out_file, url },
+                        args = { "--header", ("User-Agent: %s"):format(USER_AGENT), "-nv", "-O", out_file, url },
                         cwd = context.install_dir,
                         stdio_sink = context.stdio_sink,
                     }),
                     process.lazy_spawn("curl", {
-                        args = { "-fsSL", "-o", out_file, url },
+                        args = { "-H", ("User-Agent: %s"):format(USER_AGENT), "-fsSL", "-o", out_file, url },
                         cwd = context.install_dir,
                         stdio_sink = context.stdio_sink,
                     }),
@@ -30,12 +35,18 @@ function M.download_file(url, out_file)
                 on_finish = callback,
             }
         end,
-        win = shell.powershell(("iwr -UseBasicParsing -Uri %q -OutFile %q"):format(url, out_file)),
+        win = shell.powershell(
+            ("iwr -Headers @{'User-Agent' = '%s'} -UseBasicParsing -Uri %q -OutFile %q"):format(
+                USER_AGENT,
+                url,
+                out_file
+            )
+        ),
     }
 end
 
 ---@param file string @The relative path to the file to unzip.
----@param dest string|nil @The destination of the unzip (defaults to ".").
+---@param dest string|nil @The destination of the unzip.
 function M.unzip(file, dest)
     return installers.pipe {
         installers.when {
@@ -57,6 +68,7 @@ end
 
 ---@see unzip().
 ---@param url string @The url of the .zip file.
+---@param dest string|nil @The url of the .zip file. Defaults to ".".
 function M.unzip_remote(url, dest)
     return installers.pipe {
         M.download_file(url, "archive.zip"),
@@ -100,8 +112,13 @@ local function win_extract(file)
                 cwd = context.install_dir,
                 stdio_sink = context.stdio_sink,
             })
+            local winrar = process.lazy_spawn("winrar", {
+                args = { "e", file },
+                cwd = context.install_dir,
+                stdio_sink = context.stdio_sink,
+            })
             process.attempt {
-                jobs = { sevenzip, peazip, winzip },
+                jobs = { sevenzip, peazip, winzip, winrar },
                 on_finish = callback,
             }
         end,
@@ -213,34 +230,38 @@ function M.write_file(rel_path, contents)
     end
 end
 
----@param script_rel_path string @The relative path to the script file to write.
----@param abs_target_executable_path string @The absolute path to the executable that is being aliased.
-function M.executable_alias(script_rel_path, abs_target_executable_path)
-    local windows_script = "@call %q %%"
-    local unix_script = [[#!/usr/bin/env sh
-exec %q
-]]
-    return installers.when {
-        unix = M.write_file(script_rel_path, unix_script:format(abs_target_executable_path)),
-        win = M.write_file(script_rel_path, windows_script:format(abs_target_executable_path)),
-    }
-end
-
 ---Shallow git clone.
 ---@param repo_url string
-function M.git_clone(repo_url)
+---@param opts {directory: string, recursive: boolean}
+function M.git_clone(repo_url, opts)
     ---@type ServerInstallerFunction
     return function(_, callback, context)
+        opts = vim.tbl_deep_extend("force", {
+            directory = ".",
+            recursive = false,
+        }, opts or {})
+
         local c = process.chain {
             cwd = context.install_dir,
             stdio_sink = context.stdio_sink,
         }
 
-        c.run("git", { "clone", "--depth", "1", repo_url, "." })
+        c.run(
+            "git",
+            list_not_nil(
+                "clone",
+                "--depth",
+                "1",
+                when(opts.recursive, "--recursive"),
+                when(opts.recursive, "--shallow-submodules"),
+                repo_url,
+                opts.directory
+            )
+        )
 
         if context.requested_server_version then
-            c.run("git", { "fetch", "--depth", "1", "origin", context.requested_server_version })
-            c.run("git", { "checkout", "FETCH_HEAD" })
+            c.run("git", { "-C", opts.directory, "fetch", "--depth", "1", "origin", context.requested_server_version })
+            c.run("git", { "-C", opts.directory, "checkout", "FETCH_HEAD" })
         end
 
         c.spawn(callback)

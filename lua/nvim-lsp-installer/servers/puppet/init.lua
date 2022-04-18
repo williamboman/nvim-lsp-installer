@@ -1,7 +1,7 @@
-local path = require "nvim-lsp-installer.path"
 local server = require "nvim-lsp-installer.server"
 local context = require "nvim-lsp-installer.installers.context"
 local std = require "nvim-lsp-installer.installers.std"
+local process = require "nvim-lsp-installer.process"
 
 return function(name, root_dir)
     return server.Server:new {
@@ -16,9 +16,14 @@ return function(name, root_dir)
             context.capture(function(ctx)
                 return std.unzip_remote(ctx.github_release_file)
             end),
+            context.receipt(function(receipt, ctx)
+                receipt:with_primary_source(receipt.github_release_file(ctx))
+            end),
         },
         default_options = {
-            cmd = { path.concat { root_dir, "puppet-languageserver" }, "--stdio" },
+            cmd_env = {
+                PATH = process.extend_path { root_dir },
+            },
         },
     }
 end

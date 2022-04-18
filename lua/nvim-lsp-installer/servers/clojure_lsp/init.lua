@@ -1,5 +1,5 @@
 local server = require "nvim-lsp-installer.server"
-local path = require "nvim-lsp-installer.path"
+local process = require "nvim-lsp-installer.process"
 local std = require "nvim-lsp-installer.installers.std"
 local context = require "nvim-lsp-installer.installers.context"
 local Data = require "nvim-lsp-installer.data"
@@ -24,9 +24,14 @@ return function(name, root_dir)
                 return std.unzip_remote(ctx.github_release_file)
             end),
             std.chmod("+x", { "clojure-lsp" }),
+            context.receipt(function(receipt, ctx)
+                receipt:with_primary_source(receipt.github_release_file(ctx))
+            end),
         },
         default_options = {
-            cmd = { path.concat { root_dir, "clojure-lsp" } },
+            cmd_env = {
+                PATH = process.extend_path { root_dir },
+            },
         },
     }
 end

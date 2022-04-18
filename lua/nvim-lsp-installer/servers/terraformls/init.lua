@@ -1,4 +1,5 @@
 local server = require "nvim-lsp-installer.server"
+local process = require "nvim-lsp-installer.process"
 local path = require "nvim-lsp-installer.path"
 local platform = require "nvim-lsp-installer.platform"
 local std = require "nvim-lsp-installer.installers.std"
@@ -37,9 +38,14 @@ return function(name, root_dir)
             context.capture(function(ctx)
                 return std.unzip_remote(ctx.github_release_file, "terraform-ls")
             end),
+            context.receipt(function(receipt, ctx)
+                receipt:with_primary_source(receipt.github_release_file(ctx))
+            end),
         },
         default_options = {
-            cmd = { path.concat { root_dir, "terraform-ls", "terraform-ls" }, "serve" },
+            cmd_env = {
+                PATH = process.extend_path { path.concat { root_dir, "terraform-ls" } },
+            },
         },
     }
 end

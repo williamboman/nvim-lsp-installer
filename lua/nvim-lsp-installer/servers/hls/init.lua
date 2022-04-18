@@ -1,6 +1,6 @@
 local server = require "nvim-lsp-installer.server"
 local platform = require "nvim-lsp-installer.platform"
-local path = require "nvim-lsp-installer.path"
+local process = require "nvim-lsp-installer.process"
 local installers = require "nvim-lsp-installer.installers"
 local std = require "nvim-lsp-installer.installers.std"
 local context = require "nvim-lsp-installer.installers.context"
@@ -26,13 +26,15 @@ return function(name, root_dir)
             end),
             installers.on {
                 -- we can't use std.chmod because of shell wildcard expansion
-                unix = shell.sh [[ chmod +x haskell*]],
+                unix = shell.sh [[ chmod +x haskell* ]],
             },
+            context.receipt(function(receipt, ctx)
+                receipt:with_primary_source(receipt.github_release_file(ctx))
+            end),
         },
         default_options = {
-            cmd = { path.concat { root_dir, "haskell-language-server-wrapper" }, "--lsp" },
             cmd_env = {
-                PATH = table.concat({ root_dir, vim.env.PATH }, platform.path_sep),
+                PATH = process.extend_path { root_dir },
             },
         },
     }
