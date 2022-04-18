@@ -27,6 +27,9 @@ M.get_server_root_path = servers.get_server_install_path
 ---@field public  homepage string|nil @The homepage where users can find more information. This is shown to users in the UI.
 ---@field public  deprecated ServerDeprecation|nil @The existence (not nil) of this field indicates this server is depracted.
 ---@field public  languages string[]
+---@field public setup(table) @The setup messages
+---@field public get_default_options(table) @The message to get the default messages
+---@field public attach_buffers(table)
 ---@field private _installer ServerInstallerFunction
 ---@field private _async boolean
 ---@field private _on_ready_handlers fun(server: Server)[]
