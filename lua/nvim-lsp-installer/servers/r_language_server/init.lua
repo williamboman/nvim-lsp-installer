@@ -18,7 +18,9 @@ tryCatch(
   }
 );
 
-remotes::install_github("jozefhajnala/languageserversetup", lib = rlsLib);
+# We set force = TRUE because this command will error if languageserversetup is already installed (even if it's at a
+# different library location).
+remotes::install_github("jozefhajnala/languageserversetup", lib = rlsLib, force = TRUE);
 
 if (didInstallRemotes) {
     remove.packages("remotes", lib = rlsLib);
