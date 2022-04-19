@@ -5,6 +5,7 @@ return function(name, root_dir)
     local function create_install_script(install_dir)
         return ([[
 options(langserver_library = %q);
+options(langserver_quiet = FALSE);
 options(repos = list(CRAN = "http://cran.rstudio.com/"));
 rlsLib <- getOption("langserver_library");
 
@@ -29,7 +30,8 @@ if (didInstallRemotes) {
 loadNamespace("languageserversetup", lib.loc = rlsLib);
 languageserversetup::languageserver_install(
     confirmBeforeInstall = FALSE,
-    strictLibrary = TRUE
+    strictLibrary = TRUE,
+    fromGitHub = TRUE
 );
 library("languageserver", lib.loc = rlsLib);
 ]]):format(install_dir)
