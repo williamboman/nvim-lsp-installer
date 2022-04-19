@@ -29,9 +29,9 @@ if (didInstallRemotes) {
 
 loadNamespace("languageserversetup", lib.loc = rlsLib);
 languageserversetup::languageserver_install(
+    fullReinstall = FALSE,
     confirmBeforeInstall = FALSE,
-    strictLibrary = TRUE,
-    fromGitHub = TRUE
+    strictLibrary = TRUE
 );
 library("languageserver", lib.loc = rlsLib);
 ]]):format(install_dir)
