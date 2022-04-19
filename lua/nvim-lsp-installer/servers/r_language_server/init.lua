@@ -28,7 +28,6 @@ if (didInstallRemotes) {
 
 loadNamespace("languageserversetup", lib.loc = rlsLib);
 languageserversetup::languageserver_install(
-    fullReinstall = TRUE,
     confirmBeforeInstall = FALSE,
     strictLibrary = TRUE
 );
