@@ -47,7 +47,7 @@ local function llvm_installer()
 
     local source = github.untarxz_release_file {
         repo = "llvm/llvm-project",
-        version = Optional.empty(),
+        version = Optional.of "llvmorg-13.0.1",
         asset_file = function(release)
             local normalized_release = normalize_llvm_release(release)
             return asset_name and ("%s.tar.xz"):format(asset_name):format(normalized_release)
