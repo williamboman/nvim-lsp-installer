@@ -50,11 +50,20 @@ setmetatable(spawn, {
         return function(args)
             local cmd_args = {}
             parse_args(args, cmd_args)
+
+            ---@type table<string, string>
+            local env = args.env
+
+            if args.with_paths then
+                env = env or {}
+                env.PATH = process.extend_path(args.with_paths)
+            end
+
             ---@type JobSpawnOpts
             local spawn_args = {
                 stdio_sink = args.stdio_sink,
                 cwd = args.cwd,
-                env = args.env,
+                env = env and process.graft_env(env) or args.env_raw,
                 args = cmd_args,
             }
 

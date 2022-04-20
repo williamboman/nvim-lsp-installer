@@ -25,7 +25,7 @@ function M.script(script, opts, custom_spawn)
             stdin:write(script)
             stdin:close()
         end,
-        env = process.graft_env(opts.env or {}, { "PSMODULEPATH" }),
+        env_raw = process.graft_env(opts.env or {}, { "PSMODULEPATH" }),
     }, opts))
 end
 
@@ -41,7 +41,7 @@ function M.command(command, opts, custom_spawn)
         "-NoProfile",
         "-Command",
         PWSHOPT.progress_preference .. PWSHOPT.security_protocol .. command,
-        env = process.graft_env(opts.env or {}, { "PSMODULEPATH" }),
+        env_raw = process.graft_env(opts.env or {}, { "PSMODULEPATH" }),
     }, opts))
 end
 
