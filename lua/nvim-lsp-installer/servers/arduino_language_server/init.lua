@@ -4,9 +4,9 @@ local platform = require "nvim-lsp-installer.platform"
 local Data = require "nvim-lsp-installer.data"
 local installer = require "nvim-lsp-installer.core.installer"
 local github = require "nvim-lsp-installer.core.managers.github"
-local go = require "nvim-lsp-installer.core.managers.go"
 local std = require "nvim-lsp-installer.core.managers.std"
 local Optional = require "nvim-lsp-installer.core.optional"
+local process = require "nvim-lsp-installer.process"
 
 local coalesce, when = Data.coalesce, Data.when
 
@@ -69,7 +69,46 @@ return function(name, root_dir)
     local function arduino_language_server_installer()
         local ctx = installer.context()
         ctx.fs:mkdir "arduino-language-server"
-        ctx:chdir("arduino-language-server", go.packages { "github.com/arduino/arduino-language-server" })
+        ctx:chdir("arduino-language-server", function()
+            local opts = {
+                repo = "arduino/arduino-language-server",
+                asset_file = function(release)
+                    local target = coalesce(
+                        when(platform.is_mac, "arduino-language-server_%s_macOS_64bit.tar.gz"),
+                        when(
+                            platform.is_linux and platform.arch == "x64",
+                            "arduino-language-server_%s_Linux_64bit.tar.gz"
+                        ),
+                        when(
+                            platform.is_linux and platform.arch == "x86",
+                            "arduino-language-server_%s_Linux_32bit.tar.gz"
+                        ),
+                        when(
+                            platform.is_linux and platform.arch == "arm64",
+                            "arduino-language-server_%s_Linux_ARM64.tar.gz"
+                        ),
+                        when(
+                            platform.is_win and platform.arch == "x64",
+                            "arduino-language-server_0.6.0_Windows_64bit.zip"
+                        ),
+                        when(
+                            platform.is_win and platform.arch == "x86",
+                            "arduino-language-server_0.6.0_Windows_32bit.zip"
+                        )
+                    )
+
+                    return target and target:format(release)
+                end,
+            }
+            platform.when {
+                unix = function()
+                    github.untargz_release_file(opts)
+                end,
+                win = function()
+                    github.unzip_release_file(opts)
+                end,
+            }
+        end)
     end
 
     local function clangd_installer()
@@ -107,13 +146,23 @@ return function(name, root_dir)
                 -- This cmd is incomplete. Users need to manually append their FQBN (e.g., -fqbn arduino:avr:nano)
                 "arduino-language-server",
                 "-cli",
-                path.concat { root_dir, "arduino-cli", platform.is_win and "arduino-cli.exe" or "arduino-cli" },
+                "arduino-cli",
+                "-clangd",
+                "clangd",
                 "-cli-config",
                 path.concat { root_dir, "arduino-cli", "arduino-cli.yaml" },
-                "-clangd",
-                path.concat { root_dir, "clangd", "bin", platform.is_win and "clangd.bat" or "clangd" },
+                "-fqbn",
+                "arduino:avr:uno",
+                "-log",
+                "true",
             },
-            cmd_env = go.env(path.concat { root_dir, "arduino-language-server" }),
+            cmd_env = {
+                PATH = process.extend_path {
+                    path.concat { root_dir, "arduino-language-server" },
+                    path.concat { root_dir, "arduino-cli" },
+                    path.concat { root_dir, "clangd", "bin" },
+                },
+            },
         },
     }
 end
