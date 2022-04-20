@@ -19,9 +19,12 @@ return function(name, root_dir)
             github.unzip_release_file({
                 repo = "terraform-linters/tflint",
                 asset_file = coalesce(
-                    when(platform.is_mac, "tflint_amd64_darwin.zip"),
-                    when(platform.is_linux and platform.arch == "x64", "tflint_amd64_linux.zip"),
-                    when(platform.is_win and platform.arch == "x64", "tflint_amd64_windows.zip")
+                    when(platform.is_mac and platform.arch == "x64", "tflint_darwin_amd64.zip"),
+                    when(platform.is_mac and platform.arch == "arm64", "tflint_darwin_arm64.zip"),
+                    when(platform.is_linux and platform.arch == "x64", "tflint_linux_amd64.zip"),
+                    when(platform.is_linux and platform.arch == "arm64", "tflint_linux_arm64.zip"),
+                    when(platform.is_linux and platform.arch == "x86", "tflint_linux_386.zip"),
+                    when(platform.is_win and platform.arch == "x64", "tflint_windows_amd64.zip")
                 ),
             }).with_receipt()
         end,
