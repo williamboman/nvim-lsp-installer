@@ -15,7 +15,10 @@ describe("fs", function()
                 fs.rmrf "/thisisa/path"
             end)
 
-            assert.equal([[Refusing to rmrf "/thisisa/path" which is outside of the allowed boundary "/foo". Please report this error at https://github.com/williamboman/nvim-lsp-installer/issues/new]], e)
+            assert.equal(
+                [[Refusing to rmrf "/thisisa/path" which is outside of the allowed boundary "/foo". Please report this error at https://github.com/williamboman/nvim-lsp-installer/issues/new]],
+                e
+            )
         end)
     )
 end)

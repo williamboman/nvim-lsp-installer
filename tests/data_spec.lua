@@ -134,8 +134,8 @@ describe("data", function()
         assert.spy(expensive_function).was_called(2)
     end)
 
-    it("should evaluate functions lazily", function ()
-        local impl = spy.new(function ()
+    it("should evaluate functions lazily", function()
+        local impl = spy.new(function()
             return {}, {}
         end)
         local lazy_fn = Data.lazy(impl)
