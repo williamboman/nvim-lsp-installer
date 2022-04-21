@@ -55,6 +55,7 @@ describe("async spawn", function()
             local result = spawn.bash {
                 vim.NIL,
                 vim.NIL,
+                "-c",
                 { vim.NIL, vim.NIL },
                 'echo "Hello $VAR"',
                 env = { VAR = "world" },
@@ -64,7 +65,6 @@ describe("async spawn", function()
             assert.equals("Hello world\n", result:get_or_nil().stdout)
             assert.equals("", result:get_or_nil().stderr)
             assert.spy(process.spawn).was_called(1)
-            print(vim.inspect(process.spawn))
             assert.spy(process.spawn).was_called_with(
                 "bash",
                 match.tbl_containing {

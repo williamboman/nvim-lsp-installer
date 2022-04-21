@@ -150,7 +150,7 @@ return function(name, root_dir)
                 "-clangd",
                 "clangd",
                 "-cli-config",
-                path.concat { root_dir, "arduino-cli", "arduino-cli.yaml" }
+                path.concat { root_dir, "arduino-cli", "arduino-cli.yaml" },
             },
             cmd_env = {
                 PATH = process.extend_path {

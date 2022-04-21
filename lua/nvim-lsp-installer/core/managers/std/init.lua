@@ -87,8 +87,8 @@ end
 ---@param file string
 local function win_extract(file)
     local ctx = installer.context()
-    Result.run_catching(function ()
-        ctx.spawn["7z"]({ "x", "-y", "-r", file })
+    Result.run_catching(function()
+        ctx.spawn["7z"] { "x", "-y", "-r", file }
     end)
         :recover_catching(function()
             ctx.spawn.peazip { "-ext2here", path.concat { ctx.cwd:get(), file } } -- peazip requires absolute paths
@@ -131,8 +131,7 @@ function M.untarxz(file)
                 win_extract(file) -- unpack .tar.xz to .tar
                 local uncompressed_tar = file:gsub(".xz$", "")
                 M.untar(uncompressed_tar)
-            end):recover(function(err)
-                print(vim.inspect(err))
+            end):recover(function()
                 ctx.spawn.arc { "unarchive", file }
                 pcall(function()
                     ctx.fs:unlink(file)
