@@ -47,14 +47,14 @@ local function llvm_installer()
 
     local source = github.untarxz_release_file {
         repo = "llvm/llvm-project",
-        version = Optional.of "llvmorg-13.0.1",
+        version = Optional.of "llvmorg-13.0.0",
         asset_file = function(release)
             local normalized_release = normalize_llvm_release(release)
             return asset_name and ("%s.tar.xz"):format(asset_name):format(normalized_release)
         end,
     }
 
-    ctx.fs:rename(asset_name:format(source.release), "llvm")
+    ctx.fs:rename(asset_name:format(normalize_llvm_release(source.release)), "llvm")
     -- We move the clang headers out, because they need to be persisted
     ctx.fs:rename(path.concat { "llvm", "lib", "clang", normalize_llvm_release(source.release) }, "clang-resource")
 
@@ -65,8 +65,8 @@ end
 return function()
     local ctx = installer.context()
     Result.run_catching(llvm_installer)
-        :map(function(result)
-            ccls_installer { llvm_dir = result.llvm_dir }
+        :map(function(llvm_dir)
+            ccls_installer { llvm_dir = llvm_dir }
         end)
         :recover(function()
             ccls_installer {}
