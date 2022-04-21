@@ -10,15 +10,8 @@ local spawn = {
         npm = platform.is_win and "npm.cmd" or "npm",
         gem = platform.is_win and "gem.cmd" or "gem",
         composer = platform.is_win and "composer.bat" or "composer",
+        gradlew = platform.is_win and "gradlew.bat" or "gradlew",
     },
-    -- Utility function for optionally including arguments.
-    ---@generic T
-    ---@param condition boolean
-    ---@param value T
-    ---@return T
-    _when = function(condition, value)
-        return condition and value or vim.NIL
-    end,
 }
 
 local function Failure(err, cmd)

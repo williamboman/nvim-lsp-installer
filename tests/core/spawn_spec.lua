@@ -54,8 +54,6 @@ describe("async spawn", function()
             spy.on(process, "spawn")
             local result = spawn.bash {
                 vim.NIL,
-                spawn._when(true, "-c"),
-                spawn._when(false, "shouldnotbeincluded"),
                 vim.NIL,
                 { vim.NIL, vim.NIL },
                 'echo "Hello $VAR"',

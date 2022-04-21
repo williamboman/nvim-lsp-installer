@@ -26,7 +26,9 @@ return function(name, root_dir)
                     return target and target:format(version)
                 end,
             }).with_receipt()
-            ctx.spawn.sh { "-c", [[ chmod +x haskell* ]] }
+            if platform.is_unix then
+                ctx.spawn.sh { "-c", [[ chmod +x haskell* ]] }
+            end
         end,
         default_options = {
             cmd_env = {

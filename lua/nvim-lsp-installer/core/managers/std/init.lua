@@ -75,7 +75,7 @@ function M.unzip(file, dest)
                 ("Microsoft.PowerShell.Archive\\Expand-Archive -Path %q -DestinationPath %q"):format(file, dest),
                 {},
                 ctx.spawn
-            ):get_or_throw()
+            )
         end,
     }
     pcall(function()
@@ -87,7 +87,9 @@ end
 ---@param file string
 local function win_extract(file)
     local ctx = installer.context()
-    ctx.spawn["7z"]({ "x", "-y", "-r", file })
+    Result.run_catching(function ()
+        ctx.spawn["7z"]({ "x", "-y", "-r", file })
+    end)
         :recover_catching(function()
             ctx.spawn.peazip { "-ext2here", path.concat { ctx.cwd:get(), file } } -- peazip requires absolute paths
         end)
@@ -127,8 +129,10 @@ function M.untarxz(file)
         win = function()
             Result.run_catching(function()
                 win_extract(file) -- unpack .tar.xz to .tar
-                M.untar(file:gsub(".xz$", ""))
-            end):recover(function()
+                local uncompressed_tar = file:gsub(".xz$", "")
+                M.untar(uncompressed_tar)
+            end):recover(function(err)
+                print(vim.inspect(err))
                 ctx.spawn.arc { "unarchive", file }
                 pcall(function()
                     ctx.fs:unlink(file)

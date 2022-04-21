@@ -190,7 +190,7 @@ function InstallContext:chdir(rel_path, fn)
         local ok, result = pcall(fn)
         self.cwd:set(old_cwd)
         if not ok then
-            error(result, 2)
+            error(result, 0)
         end
         return result
     end
