@@ -9,6 +9,7 @@ local Optional = require "nvim-lsp-installer.core.optional"
 return function(opts)
     local ctx = installer.context()
     local clang_resource_dir = path.concat { ctx.destination_dir, "clang-resource" }
+    local install_prefix = ctx.cwd:get()
 
     ctx.fs:mkdir "ccls-git"
     ctx:chdir("ccls-git", function()
@@ -18,7 +19,7 @@ return function(opts)
             "-DUSE_SYSTEM_RAPIDJSON=OFF",
             "-DCMAKE_FIND_FRAMEWORK=LAST",
             "-Wno-dev",
-            ("-DCMAKE_INSTALL_PREFIX=%s"):format(ctx.cwd:get()),
+            ("-DCMAKE_INSTALL_PREFIX=%s"):format(install_prefix),
             Optional.of_nilable(opts.llvm_dir)
                 :map(function(llvm_dir)
                     return {
