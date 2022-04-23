@@ -82,7 +82,7 @@ function M.gunzip_release_file(opts)
         release_file_source.download_url,
         ("%s.gz"):format(assert(opts.out_file, "out_file must be specified"))
     )
-    std.gunzip(opts.out_file)
+    std.gunzip(opts.out_file .. ".gz")
     return release_file_source
 end
 
