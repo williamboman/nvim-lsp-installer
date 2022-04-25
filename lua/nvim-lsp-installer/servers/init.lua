@@ -136,6 +136,7 @@ local CORE_SERVERS = Data.set_of {
     "vala_ls",
     "verible",
     "vimls",
+    "vls",
     "volar",
     "vuels",
     "yamlls",
