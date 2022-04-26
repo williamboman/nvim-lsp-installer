@@ -14,6 +14,12 @@ local M = {}
 
 M.settings = settings.set
 
+---@param config table
+function M.setup(config)
+    settings.set(config)
+    require("nvim-lsp-installer.middleware").register_lspconfig_hook()
+end
+
 M.info_window = {
     ---Opens the status window.
     open = function()
