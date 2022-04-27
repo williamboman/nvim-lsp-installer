@@ -17,8 +17,8 @@
 ## About
 
 Neovim plugin that allows you to manage LSP servers (servers are installed inside `:echo stdpath("data")` by default).
-It registers a hook with [`lspconfig`](https://github.com/neovim/nvim-lspconfig) that enhances the `PATH` environment,
-allowing neovim's LSP client to locate the installed server executable<sup>1</sup>.
+It works in tandem with [`lspconfig`](https://github.com/neovim/nvim-lspconfig)<sup>1</sup> by registering a hook that
+enhances the `PATH` environment variable, allowing neovim's LSP client to locate the installed server executable.<sup>2</sup>
 
 On top of just providing commands for installing & uninstalling LSP servers, it:
 
@@ -29,7 +29,9 @@ On top of just providing commands for installing & uninstalling LSP servers, it:
 -   hosts [a suite of system tests](https://github.com/williamboman/nvim-lspconfig-test) for all supported servers
 -   has full support for Windows <img src="https://user-images.githubusercontent.com/6705160/131256603-cacf7f66-dfa9-4515-8ae4-0e42d08cfc6a.png" height="20">
 
-<sup>1 - some servers don't provide an executable, in which case the full command to spawn the server is provided instead</sup>
+<sup>1 - while lspconfig is the main target, this plugin may also be used for other use cases</sup>
+<br>
+<sup>2 - some servers don't provide an executable, in which case the full command to spawn the server is provided instead</sup>
 
 ## Screenshots
 
