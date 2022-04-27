@@ -17,6 +17,7 @@ M.settings = settings.set
 ---@param config table
 function M.setup(config)
     settings.set(config)
+    settings.uses_new_setup = true
     require("nvim-lsp-installer.middleware").register_lspconfig_hook()
 end
 
