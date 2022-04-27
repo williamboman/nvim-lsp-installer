@@ -54,6 +54,19 @@ to call the `setup()` function _before_ you set up any servers: >
     require("nvim-lsp-installer").setup {}
 <
 
+Next, in your initialization files |init.lua|, setup the servers you want to use.
+Refer to |lspconfig| for more information! For example: >
+
+    local lspconfig = require("lspconfig")
+
+    local function on_attach(client, bufnr)
+        -- set up buffer keymaps, etc.
+    end
+
+    lspconfig.sumneko_lua.setup { on_attach = on_attach }
+    lspconfig.tsserver.setup { on_attach = on_attach }
+<
+
 To view the UI for nvim-lsp-installer, run: >
 
     :LspInstallInfo
@@ -81,8 +94,7 @@ buffer, simply just run: >
     :LspInstall
 <
 
-Please refer to each server's own release page to find which versions are
-available.
+Please refer to each server's own release page to find which versions are available.
 
 ==============================================================================
 COMMANDS                                        *nvim-lsp-installer-commands*
@@ -354,6 +366,9 @@ class: Server
             - get_default_options()
                     Returns a deep copy of the default options provided to
                     lspconfig in the setup({opts}) method.
+                    Note: These only include the options provided by
+                    nvim-lsp-installer, and not the default options provided
+                    by lspconfig.
 
             - on_ready({handler})
                     Registers the provided {handler} to be called when the
