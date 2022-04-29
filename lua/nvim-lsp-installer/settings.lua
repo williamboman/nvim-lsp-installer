@@ -8,6 +8,8 @@ local DEFAULT_SETTINGS = {
     ensure_installed = {},
     -- Whether servers that are set up (via lspconfig) should be automatically installed if they're not already installed.
     automatic_installation = false,
+    -- To use along automatic_installation list of servers to ignore if automatically installating servers.
+    avoid_installation = {},
     ui = {
         icons = {
             -- The list icon to use for installed servers.
@@ -61,6 +63,18 @@ M.current = M._DEFAULT_SETTINGS
 ---@param opts LspInstallerSettings
 function M.set(opts)
     M.current = vim.tbl_deep_extend("force", M.current, opts)
+    M.setup_avoid()
+end
+
+-- Transforms avoid server list into a table for better access in middleware
+function M.setup_avoid()
+    if #M.current.avoid_installation > 0 then
+        local avoid_tbl = {}
+        for _, value in ipairs(M.current.avoid_installation) do
+            avoid_tbl[value] = true
+        end
+        M.current.avoid_installation = avoid_tbl
+    end
 end
 
 -- Whether the new .setup() function has been called.

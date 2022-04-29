@@ -28,7 +28,7 @@ function M.register_lspconfig_hook()
             if server:is_installed() then
                 merge_in_place(config, server._default_options)
             end
-            if settings.current.automatic_installation and not server:is_installed() then
+            if settings.current.automatic_installation and not settings.current.avoid_installation[config.name] and not server:is_installed() then
                 server:install()
             end
         end
