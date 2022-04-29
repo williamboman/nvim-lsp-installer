@@ -8,6 +8,8 @@ local DEFAULT_SETTINGS = {
     ensure_installed = {},
     -- Whether servers that are set up (via lspconfig) should be automatically installed if they're not already installed.
     automatic_installation = false,
+    -- Whether to ignore automatic installation if the server command is found in the system path
+    ignore_in_path = false,
     ui = {
         icons = {
             -- The list icon to use for installed servers.

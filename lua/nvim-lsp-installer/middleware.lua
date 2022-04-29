@@ -1,3 +1,4 @@
+local lspconfig = require "lspconfig"
 local util = require "lspconfig.util"
 local servers = require "nvim-lsp-installer.servers"
 local settings = require "nvim-lsp-installer.settings"
@@ -28,7 +29,11 @@ function M.register_lspconfig_hook()
             if server:is_installed() then
                 merge_in_place(config, server._default_options)
             end
-            if settings.current.automatic_installation and not server:is_installed() then
+            if
+                settings.current.automatic_installation
+                and not server:is_installed()
+                and (not settings.current.ignore_in_path or vim.fn.executable(lspconfig[server.name].cmd[1]))
+            then
                 server:install()
             end
         end
