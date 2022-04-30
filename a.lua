@@ -19,6 +19,14 @@ lsp_installer.on_server_ready(function (server)
     on_attach = on_attach
   }
 
+  if server.name == "rust_analyzer" then
+    require("rust-tools").setup {
+      server = vim.tbl_deep_extend("force", server:get_default_options(), opts),
+    }
+    server:attach_buffers()
+    return
+  end
+
   if server.name == "tsserver" then
     local tsutils = require "nvim-lsp-ts-utils"
     opts.init_options = { hostInfo = "neovim" }
