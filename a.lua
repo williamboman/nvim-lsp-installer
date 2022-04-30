@@ -1,6 +1,4 @@
-local lsp_installer = require("nvim-lsp-installer")
-
-lsp_installer.settings {
+require("nvim-lsp-installer").setup {
   ui = {
     icons = {
       server_installed = "",
@@ -9,40 +7,37 @@ lsp_installer.settings {
     },
   },
 }
+local lspconfig = require("lspconfig")
 
 local function on_attach(client, bufnr)
   -- set up buffer keymaps, etc.
 end
 
-lsp_installer.on_server_ready(function (server)
-  local opts = {
-    on_attach = on_attach
-  }
+local rust_tools = require("rust-tools")
+rust_tools.setup {
+    server = { on_attach = on_attach }
+}
 
-  if server.name == "rust_analyzer" then
-    require("rust-tools").setup {
-      server = vim.tbl_deep_extend("force", server:get_default_options(), opts),
-    }
-    server:attach_buffers()
-    return
+local tsutils = require "nvim-lsp-ts-utils"
+lspconfig.tsserver.setup {
+  init_options = { hostInfo = "neovim" },
+  on_attach = function (client, bufnr)
+    tsutils.setup {}
+    tsutils.setup_client(client)
   end
+}
 
-  if server.name == "tsserver" then
-    local tsutils = require "nvim-lsp-ts-utils"
-    opts.init_options = { hostInfo = "neovim" }
-    opts.on_attach = function (client, bufnr)
-      tsutils.setup {}
-      tsutils.setup_client(client)
-    end
-  elseif server.name == "sumneko_lua" then
-    opts.settings = {
-      Lua = {
-        diagnostics = {
-          globals = { "vim" }
-        }
+lspconfig.sumneko_lua.setup {
+  on_attach = on_attach,
+  settings = {
+    Lua = {
+      diagnostics = {
+        globals = { "vim" }
       }
     }
-  end
+  }
+}
 
-  server:setup(opts)
-end)
+lspconfig.graphql.setup { on_attach = on_attach }
+lspconfig.jsonls.setup { on_attach = on_attach }
+lspconfig.cssls.setup { on_attach = on_attach }
