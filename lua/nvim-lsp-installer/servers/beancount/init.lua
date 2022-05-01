@@ -16,15 +16,9 @@ return function(name, root_dir)
         homepage = "https://github.com/polarmutex/beancount-language-server",
         async = true,
         ---@param ctx InstallContext
-        installer = function(ctx)
-            cargo.install("beancount-language-server").with_receipt()
-            pip3.install { "beancount" }
-            ctx.receipt:with_secondary_source(ctx.receipt.pip3 "beancount")
-        end,
+        installer = cargo.crate("beancount-language-server"),
         default_options = {
-            cmd_env = {
-                PATH = process.extend_path { path.concat { root_dir, "bin" }, pip3.venv_path(root_dir) },
-            },
+            cmd_env = cargo.env(root_dir)
         },
     }
 end
