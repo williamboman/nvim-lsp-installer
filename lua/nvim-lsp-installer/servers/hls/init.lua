@@ -30,12 +30,9 @@ return function(name, root_dir)
             end)
 
             local asset_file = coalesce(
-                when(platform.is_mac and platform.arch == "arm64", "haskell-language-server-%s-aarch64-darwin.tar.xz"),
-                when(platform.is_mac and platform.arch == "x64", "haskell-language-server-%s-x86_64-darwin.tar.xz"),
-                when(
-                    platform.is_win and platform.arch == "x64",
-                    "haskell-language-server-%s-x86_64-unknown-mingw32.zip"
-                )
+                when(platform.is.mac_arm64, "haskell-language-server-%s-aarch64-darwin.tar.xz"),
+                when(platform.is.mac_x64, "haskell-language-server-%s-x86_64-darwin.tar.xz"),
+                when(platform.is.win_x64, "haskell-language-server-%s-x86_64-unknown-mingw32.zip")
             )
 
             if not asset_file and platform.is_linux then
