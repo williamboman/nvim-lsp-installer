@@ -19,6 +19,7 @@ return function(name, root_dir)
                 repo = "haskell/haskell-language-server",
                 asset_file = function(version)
                     local target = coalesce(
+                        when(version >= "1.7", "haskell-language-server-%s-src.tar.gz"),
                         when(platform.is_mac, "haskell-language-server-macOS-%s.tar.gz"),
                         when(platform.is_linux, "haskell-language-server-Linux-%s.tar.gz"),
                         when(platform.is_win, "haskell-language-server-Windows-%s.tar.gz")
