@@ -111,6 +111,7 @@ local CORE_SERVERS = Data.set_of {
     "remark_ls",
     "rescriptls",
     "rnix",
+    "robotframework_ls",
     "rome",
     "rust_analyzer",
     "salt_ls",
