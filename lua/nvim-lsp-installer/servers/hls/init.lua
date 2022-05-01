@@ -6,7 +6,7 @@ local std = require "nvim-lsp-installer.core.managers.std"
 local github_client = require "nvim-lsp-installer.core.managers.github.client"
 local path = require "nvim-lsp-installer.path"
 
-local coalesce, when = Data.coalesce, Data.when
+local coalesce = Data.coalesce
 
 return function(name, root_dir)
     return server.Server:new {
@@ -30,9 +30,9 @@ return function(name, root_dir)
             end)
 
             local asset_file = coalesce(
-                when(platform.is.mac_arm64, "haskell-language-server-%s-aarch64-darwin.tar.xz"),
-                when(platform.is.mac_x64, "haskell-language-server-%s-x86_64-darwin.tar.xz"),
-                when(platform.is.win_x64, "haskell-language-server-%s-x86_64-unknown-mingw32.zip")
+                platform.is.mac_arm64 and "haskell-language-server-%s-aarch64-darwin.tar.xz",
+                platform.is.mac_x64 and "haskell-language-server-%s-x86_64-darwin.tar.xz",
+                platform.is.win_x64 and "haskell-language-server-%s-x86_64-unknown-mingw32.zip"
             )
 
             if not asset_file and platform.is_linux then
