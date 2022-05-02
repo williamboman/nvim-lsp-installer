@@ -382,7 +382,7 @@ class: Server
                     nvim-lsp-installer, and not the default options provided
                     by lspconfig.
 
-            - on_ready({handler}) *DEPRECATED*
+            - on_ready({handler}) *DEPRECATED - setup servers directly via lspconfig instead*
                     Registers the provided {handler} to be called when the
                     server is ready to be setup.
 
