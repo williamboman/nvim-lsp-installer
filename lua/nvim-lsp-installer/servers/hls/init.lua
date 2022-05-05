@@ -29,8 +29,8 @@ return function(name, root_dir)
                     :get_or_throw()
             end)
 
-            ctx:promote_cwd()
             std.ensure_executable("ghcup", { help_url = "https://www.haskell.org/ghcup/" })
+            ctx:promote_cwd()
             ctx.spawn.ghcup { "install", "hls", release, "-i", ctx.cwd:get() }
 
             ctx.receipt:with_primary_source(ctx.receipt.github_release(repo, release))
