@@ -181,7 +181,7 @@ require("nvim-lsp-installer").setup({
 | Language                            | Server name                |
 | ----------------------------------- | -------------------------- |
 | AWK                                 | `awk_ls`                   |
-| Astro                               | `astro_ls`                 |
+| Astro                               | `astro`                    |
 | Angular                             | `angularls`                |
 | Ansible                             | `ansiblels`                |
 | Arduino [(docs!!!)][arduino]        | `arduino_language_server`  |
