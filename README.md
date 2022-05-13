@@ -5,32 +5,33 @@
 -   [About](#about)
 -   [Screenshots](#screenshots)
 -   [Installation](#installation)
-    -   [Packer](#packer)
-    -   [vim-plug](#vim-plug)
 -   [Usage](#usage)
-    -   [Commands](#commands)
     -   [Setup](#setup)
+    -   [Commands](#commands)
     -   [Configuration](#configuration)
 -   [Available LSPs](#available-lsps)
 -   [Custom servers](#custom-servers)
 -   [Logo](#logo)
--   [Roadmap](#roadmap)
 -   [Default configuration](#default-configuration)
 
 ## About
 
-Neovim plugin that allows you to seamlessly install LSP servers locally (inside `:echo stdpath("data")`).
+Neovim plugin that allows you to manage LSP servers (servers are installed inside `:echo stdpath("data")` by default).
+It works in tandem with [`lspconfig`](https://github.com/neovim/nvim-lspconfig)<sup>1</sup> by registering a hook that
+enhances the `PATH` environment variable, allowing neovim's LSP client to locate the installed server executable.<sup>2</sup>
 
 On top of just providing commands for installing & uninstalling LSP servers, it:
 
 -   provides a graphical UI
--   is optimized for blazing fast startup times
--   provides the ability to check for new server versions
+-   provides the ability to check for, and upgrade to, new server versions through a single interface
 -   supports installing custom versions of LSP servers (for example `:LspInstall rust_analyzer@nightly`)
 -   relaxes the minimum requirements by attempting multiple different utilities (for example, only one of `wget`, `curl`, or `Invoke-WebRequest` is required for HTTP requests)
--   allows you to install and setup servers without having to restart neovim
 -   hosts [a suite of system tests](https://github.com/williamboman/nvim-lspconfig-test) for all supported servers
 -   has full support for Windows <img src="https://user-images.githubusercontent.com/6705160/131256603-cacf7f66-dfa9-4515-8ae4-0e42d08cfc6a.png" height="20">
+
+<sup>1 - while lspconfig is the main target, this plugin may also be used for other use cases</sup>
+<br>
+<sup>2 - some servers don't provide an executable, in which case the full command to spawn the server is provided instead</sup>
 
 ## Screenshots
 
@@ -41,7 +42,7 @@ On top of just providing commands for installing & uninstalling LSP servers, it:
 
 ## Installation
 
-Requires neovim `>= 0.6.0` and [nvim-lspconfig](https://github.com/neovim/nvim-lspconfig). The _full requirements_ to
+Requires neovim `>= 0.7.0` and [nvim-lspconfig](https://github.com/neovim/nvim-lspconfig). The _full requirements_ to
 install _all_ servers are:
 
 -   For Unix systems: git(1), curl(1) or wget(1), unzip(1), tar(1), gzip(1)
@@ -57,6 +58,8 @@ install _all_ servers are:
 -   Julia
 -   valac (and meson & ninja)
 -   rebar3
+-   cargo
+-   ghcup
 
 [7zip]: https://www.7-zip.org/
 [archiver]: https://github.com/mholt/archiver
@@ -68,19 +71,79 @@ install _all_ servers are:
 
 ```lua
 use {
-    'neovim/nvim-lspconfig',
-    'williamboman/nvim-lsp-installer',
+    "williamboman/nvim-lsp-installer",
+    "neovim/nvim-lspconfig",
 }
 ```
 
 ### vim-plug
 
 ```vim
-Plug 'neovim/nvim-lspconfig'
-Plug 'williamboman/nvim-lsp-installer'
+Plug "williamboman/nvim-lsp-installer"
+Plug "neovim/nvim-lspconfig"
 ```
 
 ## Usage
+
+### Setup
+
+In order for nvim-lsp-installer to register the necessary hooks at the right moment, **make sure you call the `.setup()`
+function before you set up any servers with `lspconfig`**!
+
+```lua
+require("nvim-lsp-installer").setup {}
+```
+
+<details>
+<summary>
+Important if you use packer.nvim! (click to expand)
+</summary>
+
+<br />
+
+> Do not separate the nvim-lsp-installer setup from lspconfig, for example via the `config` hook.
+> Make sure to colocate the nvim-lsp-installer setup with the lspconfig setup. This is because load order of plugins is
+> not guaranteed, leading to nvim-lsp-installer's `config` function potentially executing after lspconfig's.
+>
+> ❌ Do not do this:
+
+```lua
+use {
+    {
+        "williamboman/nvim-lsp-installer",
+        config = function()
+            require("nvim-lsp-installer").setup {}
+        end
+    },
+    {
+        "neovim/nvim-lspconfig",
+        config = function()
+            local lspconfig = require("lspconfig")
+            lspconfig.sumneko_lua.setup {}
+        end
+    },
+}
+```
+
+> ✅ Instead, do this:
+
+```lua
+use {
+    "williamboman/nvim-lsp-installer",
+    {
+        "neovim/nvim-lspconfig",
+        config = function()
+            require("nvim-lsp-installer").setup {}
+            local lspconfig = require("lspconfig")
+            lspconfig.sumneko_lua.setup {}
+        end
+    }
+}
+```
+
+</details>
+
+Refer to the [Configuration](#configuration) section for information about which settings are available.
 
 ### Commands
 
@@ -91,54 +154,17 @@ Plug 'williamboman/nvim-lsp-installer'
 -   `:LspInstallLog` - opens the log file in a new tab window
 -   `:LspPrintInstalled` - prints all installed language servers
 
-### Setup
-
-The recommended way of setting up your installed servers is to do it through nvim-lsp-installer.
-By doing so, nvim-lsp-installer will make sure to inject any necessary properties before calling lspconfig's setup
-function for you. You may find a minimal example below. To see how you can override the default settings for a server,
-refer to the [Wiki][overriding-default-settings].
-
-Make sure you don't also set up your servers directly via lspconfig (e.g. `require("lspconfig").clangd.setup {}`), as
-this will cause servers to be set up twice!
-
-[overriding-default-settings]: https://github.com/williamboman/nvim-lsp-installer/wiki/Advanced-Configuration#overriding-the-default-lsp-server-options
-
-```lua
-local lsp_installer = require("nvim-lsp-installer")
-
--- Register a handler that will be called for each installed server when it's ready (i.e. when installation is finished
--- or if the server is already installed).
-lsp_installer.on_server_ready(function(server)
-    local opts = {}
-
-    -- (optional) Customize the options passed to the server
-    -- if server.name == "tsserver" then
-    --     opts.root_dir = function() ... end
-    -- end
-
-    -- This setup() function will take the provided server configuration and decorate it with the necessary properties
-    -- before passing it onwards to lspconfig.
-    -- Refer to https://github.com/neovim/nvim-lspconfig/blob/master/doc/server_configurations.md
-    server:setup(opts)
-end)
-```
-
-For more advanced use cases you may also interact with more APIs nvim-lsp-installer has to offer, refer to `:help nvim-lsp-installer` for more docs.
-
 ### Configuration
 
-You can configure certain behavior of nvim-lsp-installer by calling the `.settings()` function.
-
-_Make sure to provide your settings before any other interactions with nvim-lsp-installer!_
+You may optionally configure certain behavior of nvim-lsp-installer when calling the `.setup()` function.
 
 Refer to the [default configuration](#default-configuration) for all available settings.
 
 Example:
 
 ```lua
-local lsp_installer = require("nvim-lsp-installer")
-
-lsp_installer.settings({
+require("nvim-lsp-installer").setup({
+    automatic_installation = true, -- automatically detect which servers to install (based on which servers are set up via lspconfig)
     ui = {
         icons = {
             server_installed = "✓",
@@ -158,7 +184,7 @@ lsp_installer.settings({
 | Ansible                             | `ansiblels`                |
 | Arduino [(docs!!!)][arduino]        | `arduino_language_server`  |
 | Assembly (GAS/NASM, GO)             | `asm_lsp`                  |
-| AsyncAPI                            | `spectral`                 |
+| Astro                               | `astro`                    |
 | Bash                                | `bashls`                   |
 | Beancount                           | `beancount`                |
 | Bicep                               | `bicep`                    |
@@ -171,6 +197,7 @@ lsp_installer.settings({
 | CMake                               | `cmake`                    |
 | CSS                                 | `cssls`                    |
 | CSS                                 | `cssmodules_ls`            |
+| Clarity                             | `clarity_lsp`              |
 | Clojure                             | `clojure_lsp`              |
 | CodeQL                              | `codeqlls`                 |
 | Crystal                             | `crystalline`              |
@@ -202,6 +229,7 @@ lsp_installer.settings({
 | HTML                                | `html`                     |
 | Haskell                             | `hls`                      |
 | Haxe                                | `haxe_language_server`     |
+| Hoon                                | `hoon_ls`                  |
 | JSON                                | `jsonls`                   |
 | Java                                | `jdtls`                    |
 | JavaScript                          | `quick_lint_js`            |
@@ -213,34 +241,36 @@ lsp_installer.settings({
 | LaTeX                               | `texlab`                   |
 | Lelwel                              | `lelwel_ls`                |
 | Lua                                 | `sumneko_lua`              |
+| Markdown                            | `prosemd_lsp`              |
 | Markdown                            | `remark_ls`                |
-| Markdown                            | `zeta_note`                |
 | Markdown                            | `zk`                       |
+| Metamath Zero                       | `mm0_ls`                   |
 | Nickel                              | `nickel_ls`                |
 | Nim                                 | `nimls`                    |
 | OCaml                               | `ocamlls`                  |
 | OCaml                               | `ocamllsp`                 |
 | Objective C                         | `ccls`                     |
 | OneScript, 1C:Enterprise            | `bsl_ls`                   |
-| OpenAPI                             | `spectral`                 |
 | OpenCL                              | `opencl_ls`                |
-| Perl                                | `perlnavigator`            |
 | PHP                                 | `intelephense`             |
 | PHP                                 | `phpactor`                 |
 | PHP                                 | `psalm`                    |
+| Perl                                | `perlnavigator`            |
 | Powershell                          | `powershell_es`            |
 | Prisma                              | `prismals`                 |
 | Puppet                              | `puppet`                   |
 | PureScript                          | `purescriptls`             |
 | Python                              | `jedi_language_server`     |
 | Python                              | `pyright`                  |
+| Python                              | `sourcery`                 |
 | Python [(docs)][pylsp]              | `pylsp`                    |
 | R                                   | `r_language_server`        |
 | ReScript                            | `rescriptls`               |
 | Reason                              | `reason_ls`                |
+| Robot Framework                     | `robotframework_ls`        |
 | Rome                                | `rome`                     |
 | Ruby                                | `solargraph`               |
-| Rust [(wiki)][rust_analyzer]        | `rust_analyzer`            |
+| Rust                                | `rust_analyzer`            |
 | SQL                                 | `sqlls`                    |
 | SQL                                 | `sqls`                     |
 | Salt                                | `salt_ls`                  |
@@ -260,7 +290,7 @@ lsp_installer.settings({
 | Tailwind CSS                        | `tailwindcss`              |
 | Terraform                           | `terraformls`              |
 | Terraform [(docs)][tflint]          | `tflint`                   |
-| TypeScript [(docs)][tsserver]       | `tsserver`                 |
+| TypeScript                          | `tsserver`                 |
 | Vala                                | `vala_ls`                  |
 | VimL                                | `vimls`                    |
 | Vue                                 | `volar`                    |
@@ -272,9 +302,7 @@ lsp_installer.settings({
 [arduino]: ./lua/nvim-lsp-installer/servers/arduino_language_server/README.md
 [eslint]: ./lua/nvim-lsp-installer/servers/eslint/README.md
 [tflint]: ./lua/nvim-lsp-installer/servers/tflint/README.md
-[tsserver]: ./lua/nvim-lsp-installer/servers/tsserver/README.md
 [pylsp]: ./lua/nvim-lsp-installer/servers/pylsp/README.md
-[rust_analyzer]: https://github.com/williamboman/nvim-lsp-installer/wiki/Rust
 
 ## Custom servers
 
@@ -285,15 +313,25 @@ You can create your own installers by using the same APIs nvim-lsp-installer its
 
 Illustrations in the logo are derived from [@Kaligule](https://schauderbasis.de/)'s "Robots" collection.
 
-## Roadmap
-
--   Command (and corresponding Lua API) to update outdated servers (e.g., `:LspUpdateAll`)
-
 ## Default configuration
 
 ```lua
 local DEFAULT_SETTINGS = {
+    -- A list of servers to automatically install if they're not already installed. Example: { "rust_analyzer", "sumneko_lua" }
+    -- This setting has no relation with the `automatic_installation` setting.
+    ensure_installed = {},
+
+    -- Whether servers that are set up (via lspconfig) should be automatically installed if they're not already installed.
+    -- This setting has no relation with the `ensure_installed` setting.
+    -- Can either be:
+    --   - false: Servers are not automatically installed.
+    --   - true: All servers set up via lspconfig are automatically installed.
+    --   - { exclude: string[] }: All servers set up via lspconfig, except the ones provided in the list, are automatically installed.
+    --       Example: automatic_installation = { exclude = { "rust_analyzer", "solargraph" } }
+    automatic_installation = false,
+
     ui = {
+
         icons = {
             -- The list icon to use for installed servers.
             server_installed = "◍",
@@ -305,12 +343,16 @@ local DEFAULT_SETTINGS = {
         keymaps = {
             -- Keymap to expand a server in the UI
             toggle_server_expand = "<CR>",
-            -- Keymap to install a server
+            -- Keymap to install the server under the current cursor position
             install_server = "i",
-            -- Keymap to reinstall/update a server
+            -- Keymap to reinstall/update the server under the current cursor position
             update_server = "u",
+            -- Keymap to check for new version for the server under the current cursor position
+            check_server_version = "c",
             -- Keymap to update all installed servers
             update_all_servers = "U",
+            -- Keymap to check which installed servers are outdated
+            check_outdated_servers = "C",
             -- Keymap to uninstall a server
             uninstall_server = "X",
         },

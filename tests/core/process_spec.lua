@@ -1,6 +1,5 @@
 local spy = require "luassert.spy"
-local process = require "nvim-lsp-installer.process"
-local async = require "plenary.async"
+local process = require "nvim-lsp-installer.core.process"
 
 describe("process.attempt", function()
     it("should attempt job variants until first successful one", function()

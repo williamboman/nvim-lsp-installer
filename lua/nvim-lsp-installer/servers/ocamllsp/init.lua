@@ -1,5 +1,5 @@
 local server = require "nvim-lsp-installer.server"
-local opam = require "nvim-lsp-installer.installers.opam"
+local opam = require "nvim-lsp-installer.core.managers.opam"
 
 return function(name, root_dir)
     return server.Server:new {

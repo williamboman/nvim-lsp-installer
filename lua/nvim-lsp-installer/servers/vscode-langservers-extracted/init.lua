@@ -1,5 +1,5 @@
 local server = require "nvim-lsp-installer.server"
-local npm = require "nvim-lsp-installer.installers.npm"
+local npm = require "nvim-lsp-installer.core.managers.npm"
 
 ---@param languages string[]
 return function(languages)

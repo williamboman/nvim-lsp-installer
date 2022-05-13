@@ -1,5 +1,6 @@
 local Result = require "nvim-lsp-installer.core.result"
 local match = require "luassert.match"
+local spy = require "luassert.spy"
 
 describe("result", function()
     it("should create success", function()
@@ -84,5 +85,59 @@ describe("result", function()
         assert.is_false(mapped:is_success())
         assert.is_true(mapped:is_failure())
         assert.is_true(match.has_match "This is an error$"(mapped:err_or_nil()))
+    end)
+
+    it("should recover errors", function()
+        local result = Result.failure("call an ambulance"):recover(function(err)
+            return err .. ". but not for me!"
+        end)
+        assert.is_true(result:is_success())
+        assert.equals("call an ambulance. but not for me!", result:get_or_nil())
+    end)
+
+    it("should catch errors in recover", function()
+        local result = Result.failure("call an ambulance"):recover_catching(function(err)
+            error("Oh no... " .. err, 2)
+        end)
+        assert.is_true(result:is_failure())
+        assert.equals("Oh no... call an ambulance", result:err_or_nil())
+    end)
+
+    it("should return results in run_catching", function()
+        local result = Result.run_catching(function()
+            return "Hello world!"
+        end)
+        assert.is_true(result:is_success())
+        assert.equals("Hello world!", result:get_or_nil())
+    end)
+
+    it("should return failures in run_catching", function()
+        local result = Result.run_catching(function()
+            error("Oh noes", 2)
+        end)
+        assert.is_true(result:is_failure())
+        assert.equals("Oh noes", result:err_or_nil())
+    end)
+
+    it("should run on_failure if failure", function()
+        local on_success = spy.new()
+        local on_failure = spy.new()
+        local result = Result.failure("Oh noes"):on_failure(on_failure):on_success(on_success)
+        assert.is_true(result:is_failure())
+        assert.equals("Oh noes", result:err_or_nil())
+        assert.spy(on_failure).was_called(1)
+        assert.spy(on_success).was_called(0)
+        assert.spy(on_failure).was_called_with "Oh noes"
+    end)
+
+    it("should run on_success if success", function()
+        local on_success = spy.new()
+        local on_failure = spy.new()
+        local result = Result.success("Oh noes"):on_failure(on_failure):on_success(on_success)
+        assert.is_true(result:is_success())
+        assert.equals("Oh noes", result:get_or_nil())
+        assert.spy(on_failure).was_called(0)
+        assert.spy(on_success).was_called(1)
+        assert.spy(on_success).was_called_with "Oh noes"
     end)
 end)

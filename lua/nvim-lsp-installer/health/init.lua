@@ -1,12 +1,13 @@
 local health = require "health"
-local process = require "nvim-lsp-installer.process"
-local gem = require "nvim-lsp-installer.installers.gem"
-local composer = require "nvim-lsp-installer.installers.composer"
-local npm = require "nvim-lsp-installer.installers.npm"
-local platform = require "nvim-lsp-installer.platform"
-local Data = require "nvim-lsp-installer.data"
+local process = require "nvim-lsp-installer.core.process"
+local platform = require "nvim-lsp-installer.core.platform"
+local functional = require "nvim-lsp-installer.core.functional"
 
-local when = Data.when
+local when = functional.when
+
+local gem_cmd = platform.is_win and "gem.cmd" or "gem"
+local composer_cmd = platform.is_win and "composer.bat" or "composer"
+local npm_cmd = platform.is_win and "npm.cmd" or "npm"
 
 local M = {}
 
@@ -41,8 +42,8 @@ end
 function HealthCheck:get_health_report_level()
     return ({
         ["success"] = "report_ok",
-        ["version-mismatch"] = "report_warn",
         ["parse-error"] = "report_warn",
+        ["version-mismatch"] = "report_error",
         ["not-available"] = self.relaxed and "report_warn" or "report_error",
     })[self.result]
 end
@@ -124,10 +125,10 @@ end
 
 function M.check()
     health.report_start "nvim-lsp-installer report"
-    if vim.fn.has "nvim-0.6.0" == 1 then
-        health.report_ok "neovim version >= 0.6.0"
+    if vim.fn.has "nvim-0.7.0" == 1 then
+        health.report_ok "neovim version >= 0.7.0"
     else
-        health.report_error "neovim version < 0.6.0"
+        health.report_error "neovim version < 0.7.0"
     end
 
     local completed = 0
@@ -140,7 +141,7 @@ function M.check()
         end
     ))
 
-    local checks = Data.list_not_nil(
+    local checks = functional.list_not_nil(
         check {
             cmd = "go",
             args = { "version" },
@@ -155,12 +156,13 @@ function M.check()
                 end
             end,
         },
+        check { cmd = "cargo", args = { "--version" }, name = "cargo", relaxed = true },
         check { cmd = "ruby", args = { "--version" }, name = "Ruby", relaxed = true },
-        check { cmd = gem.gem_cmd, args = { "--version" }, name = "RubyGem", relaxed = true },
-        check { cmd = composer.composer_cmd, args = { "--version" }, name = "Composer", relaxed = true },
+        check { cmd = gem_cmd, args = { "--version" }, name = "RubyGem", relaxed = true },
+        check { cmd = composer_cmd, args = { "--version" }, name = "Composer", relaxed = true },
         check { cmd = "php", args = { "--version" }, name = "PHP", relaxed = true },
         check {
-            cmd = npm.npm_command,
+            cmd = npm_cmd,
             args = { "--version" },
             name = "npm",
             version_check = function(version)

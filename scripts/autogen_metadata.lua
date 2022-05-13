@@ -1,14 +1,11 @@
 local uv = vim.loop
 local a = require "nvim-lsp-installer.core.async"
-local Path = require "nvim-lsp-installer.path"
+local Path = require "nvim-lsp-installer.core.path"
 local fetch = require "nvim-lsp-installer.core.fetch"
-local Data = require "nvim-lsp-installer.data"
-
-local coalesce = Data.coalesce
-
-package.loaded["nvim-lsp-installer.servers"] = nil
-package.loaded["nvim-lsp-installer.fs"] = nil
+local functional = require "nvim-lsp-installer.core.functional"
 local servers = require "nvim-lsp-installer.servers"
+
+local coalesce = functional.coalesce
 
 local generated_dir = Path.concat { vim.fn.getcwd(), "lua", "nvim-lsp-installer", "_generated" }
 local schemas_dir = Path.concat { generated_dir, "schemas" }
@@ -74,6 +71,7 @@ local function get_supported_filetypes(server)
     return filetypes
 end
 
+---@async
 local function create_filetype_map()
     local filetype_map = {}
 
@@ -91,6 +89,7 @@ local function create_filetype_map()
     write_file(Path.concat { generated_dir, "filetype_map.lua" }, "return " .. vim.inspect(filetype_map), "w")
 end
 
+---@async
 local function create_autocomplete_map()
     ---@type table<string, Server>
     local language_map = {}
@@ -133,6 +132,7 @@ local function create_autocomplete_map()
     )
 end
 
+---@async
 local function create_server_metadata()
     local metadata = {}
 
@@ -149,19 +149,19 @@ local function create_server_metadata()
     write_file(Path.concat { generated_dir, "metadata.lua" }, "return " .. vim.inspect(metadata), "w")
 end
 
+---@async
 local function create_setting_schema_files()
     local available_servers = servers.get_available_servers()
-    local gist_err, gist_data =
-        a.promisify(fetch) "https://gist.githubusercontent.com/williamboman/a01c3ce1884d4b57cc93422e7eae7702/raw/lsp-packages.json"
-    assert(not gist_err, "Failed to fetch gist.")
+    local gist_data = fetch(
+        "https://gist.githubusercontent.com/williamboman/a01c3ce1884d4b57cc93422e7eae7702/raw/lsp-packages.json"
+    ):get_or_throw()
     local package_json_mappings = vim.json.decode(gist_data)
 
     for _, server in pairs(available_servers) do
         local package_json_url = package_json_mappings[server.name]
         if package_json_url then
             print(("Fetching %q..."):format(package_json_url))
-            local err, response = a.promisify(fetch)(package_json_url)
-            assert(not err, "Failed to fetch package.json for " .. server.name)
+            local response = fetch(package_json_url):get_or_throw()
             local schema = vim.json.decode(response)
             if schema.contributes and schema.contributes.configuration then
                 schema = schema.contributes.configuration

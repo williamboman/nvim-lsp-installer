@@ -1,5 +1,5 @@
 local server = require "nvim-lsp-installer.server"
-local cargo = require "nvim-lsp-installer.installers.cargo"
+local cargo = require "nvim-lsp-installer.core.managers.cargo"
 
 return function(name, root_dir)
     return server.Server:new {

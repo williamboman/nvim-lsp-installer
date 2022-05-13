@@ -18,6 +18,7 @@ local M = {}
 ---| '"jdtls"'
 ---| '"git"'
 ---| '"github_tag"'
+---| '"github_release"'
 ---| '"github_release_file"'
 
 ---@alias InstallReceiptSource {type: InstallReceiptSourceType}
@@ -125,6 +126,16 @@ InstallReceiptBuilder.opam = package_source "opam"
 
 InstallReceiptBuilder.unmanaged = { type = "unmanaged" }
 
+---@param repo string
+---@param release string
+function InstallReceiptBuilder.github_release(repo, release)
+    return {
+        type = "github_release",
+        repo = repo,
+        release = release,
+    }
+end
+
 ---@param dependency string
 function InstallReceiptBuilder.system(dependency)
     return { type = "system", dependency = dependency }
@@ -133,27 +144,6 @@ end
 ---@param remote_url string
 function InstallReceiptBuilder.git_remote(remote_url)
     return { type = "git", remote = remote_url }
-end
-
----@param ctx ServerInstallContext
----@param opts FetchLatestGithubReleaseOpts|nil
-function InstallReceiptBuilder.github_release_file(ctx, opts)
-    opts = opts or {}
-    return {
-        type = "github_release_file",
-        repo = ctx.github_repo,
-        file = ctx.github_release_file,
-        release = ctx.requested_server_version,
-        tag_name_pattern = opts.tag_name_pattern,
-    }
-end
-
-function InstallReceiptBuilder.github_tag(ctx)
-    return {
-        type = "github_tag",
-        repo = ctx.github_repo,
-        tag = ctx.requested_server_version,
-    }
 end
 
 ---@class InstallReceipt

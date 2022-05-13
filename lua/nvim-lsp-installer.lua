@@ -1,18 +1,49 @@
-local fs = require "nvim-lsp-installer.fs"
+local fs = require "nvim-lsp-installer.core.fs"
 local notify = require "nvim-lsp-installer.notify"
 local dispatcher = require "nvim-lsp-installer.dispatcher"
-local process = require "nvim-lsp-installer.process"
-local status_win = require "nvim-lsp-installer.ui.status-win"
+local process = require "nvim-lsp-installer.core.process"
+local status_win = require "nvim-lsp-installer.ui"
 local servers = require "nvim-lsp-installer.servers"
 local settings = require "nvim-lsp-installer.settings"
 local log = require "nvim-lsp-installer.log"
-local platform = require "nvim-lsp-installer.platform"
+local platform = require "nvim-lsp-installer.core.platform"
 local language_autocomplete_map = require "nvim-lsp-installer._generated.language_autocomplete_map"
 local filetype_server_map = require "nvim-lsp-installer._generated.filetype_map"
 
 local M = {}
 
 M.settings = settings.set
+
+---@param server_identifiers string[]
+local function ensure_installed(server_identifiers)
+    local candidates = {}
+    for _, server_identifier in ipairs(server_identifiers) do
+        local server_name, version = servers.parse_server_identifier(server_identifier)
+        local ok, server = servers.get_server(server_name)
+        if ok and not server:is_installed() then
+            table.insert(candidates, server_name)
+            server:install(version)
+        end
+    end
+    if #candidates > 0 then
+        notify("Installing LSP servers: " .. table.concat(candidates, ", "))
+    end
+end
+
+---@param config table
+function M.setup(config)
+    if config then
+        settings.set(config)
+    end
+    settings.uses_new_setup = true
+    require("nvim-lsp-installer.middleware").register_lspconfig_hook()
+
+    if vim.tbl_islist(settings.current.ensure_installed) then
+        vim.schedule(function()
+            ensure_installed(settings.current.ensure_installed)
+        end)
+    end
+end
 
 M.info_window = {
     ---Opens the status window.
@@ -24,15 +55,6 @@ M.info_window = {
         status_win().close()
     end,
 }
-
----Deprecated. Use info_window.open().
-function M.display()
-    notify(
-        "The lsp_installer.display() function has been deprecated. Use lsp_installer.info_window.open() instead.",
-        vim.log.levels.WARN
-    )
-    status_win().open()
-end
 
 function M.get_install_completion()
     local result = {}
@@ -167,7 +189,6 @@ function M.install_by_filetype(filetype)
 end
 
 --- Queues a server to be installed. Will also open the status window.
---- Use the .on_server_ready(cb) function to register a handler to be executed when a server is ready to be set up.
 ---@param server_identifier string @The server to install. This can also include a requested version, for example "rust_analyzer@nightly".
 function M.install(server_identifier)
     local server_name, version = servers.parse_server_identifier(server_identifier)
@@ -226,8 +247,8 @@ function M.uninstall_all(no_confirm)
     end
 
     log.info "Uninstalling all servers."
-    if fs.dir_exists(settings.current.install_root_dir) then
-        local ok, err = pcall(fs.rmrf, settings.current.install_root_dir)
+    if fs.sync.dir_exists(settings.current.install_root_dir) then
+        local ok, err = pcall(fs.sync.rmrf, settings.current.install_root_dir)
         if not ok then
             log.error(err)
             raise_error "Failed to uninstall all servers."
@@ -238,8 +259,13 @@ function M.uninstall_all(no_confirm)
     status_win().open()
 end
 
+---@deprecated Setup servers directly via lspconfig instead. See https://github.com/williamboman/nvim-lsp-installer/discussions/636
 ---@param cb fun(server: Server) @Callback to be executed whenever a server is ready to be set up.
 function M.on_server_ready(cb)
+    assert(
+        not settings.uses_new_setup,
+        "Please set up servers directly via lspconfig instead of using .on_server_ready() (this method is now deprecated)! Refer to :h nvim-lsp-installer-quickstart for more information."
+    )
     dispatcher.register_server_ready_callback(cb)
     vim.schedule(function()
         local installed_servers = servers.get_installed_servers()

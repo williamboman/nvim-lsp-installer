@@ -1,6 +1,7 @@
 name: Run autogen script
 
 on:
+    workflow_dispatch:
     schedule:
         - cron: "15 13 * * *"
 
@@ -14,7 +15,7 @@ jobs:
             - uses: rhysd/action-setup-vim@v1
               with:
                   neovim: true
-                  version: v0.6.0
+                  version: v0.7.0
 
             - name: Clone dependencies
               run: |

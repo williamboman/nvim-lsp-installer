@@ -1,6 +1,6 @@
 local server = require "nvim-lsp-installer.server"
-local path = require "nvim-lsp-installer.path"
-local npm = require "nvim-lsp-installer.installers.npm"
+local path = require "nvim-lsp-installer.core.path"
+local npm = require "nvim-lsp-installer.core.managers.npm"
 
 return function(name, root_dir)
     return server.Server:new {
