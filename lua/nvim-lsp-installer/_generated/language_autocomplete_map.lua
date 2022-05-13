@@ -39,6 +39,7 @@ return {
   toml = { "taplo" },
   typescript = { "eslint", "rome", "tsserver" },
   verilog = { "verible" },
+  vlang = { "vls" },
   vue = { "volar", "vuels" },
   xml = { "lemminx" },
   zig = { "zls" }
