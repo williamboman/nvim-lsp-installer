@@ -3,6 +3,7 @@
 return {
   OpenFOAM = { "foam_ls" },
   R = { "r_language_server" },
+  V = { "vls" },
   ["assembly-gas"] = { "asm_lsp" },
   ["assembly-go"] = { "asm_lsp" },
   ["assembly-nasm"] = { "asm_lsp" },

@@ -13,7 +13,7 @@ return function(name, root_dir)
         name = name,
         root_dir = root_dir,
         homepage = "https://github.com/vlang/vls",
-        languages = { "vlang" },
+        languages = { "vlang", "V" },
         ---@async
         installer = function()
             local repo = "vlang/vls"
