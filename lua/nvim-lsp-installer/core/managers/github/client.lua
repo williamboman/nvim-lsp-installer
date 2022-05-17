@@ -1,9 +1,7 @@
-local functional = require "nvim-lsp-installer.core.functional"
+local _ = require "nvim-lsp-installer.core.functional"
 local log = require "nvim-lsp-installer.log"
 local fetch = require "nvim-lsp-installer.core.fetch"
 local spawn = require "nvim-lsp-installer.core.spawn"
-
-local list_find_first = functional.list_find_first
 
 local M = {}
 
@@ -45,29 +43,36 @@ function M.fetch_release(repo, tag_name)
     end)
 end
 
----@alias FetchLatestGithubReleaseOpts {tag_name_pattern:string}
+---@param opts {include_prerelease: boolean, tag_name_pattern: string}
+function M.release_predicate(opts)
+    local is_not_draft = _.prop_eq("draft", false)
+    local is_not_prerelease = _.prop_eq("prerelease", false)
+    local tag_name_matches = _.prop_satisfies(_.matches(opts.tag_name_pattern), "tag_name")
+
+    return _.all_pass {
+        _.if_else(_.always(opts.include_prerelease), _.T, is_not_prerelease),
+        _.if_else(_.always(opts.tag_name_pattern), tag_name_matches, _.T),
+        is_not_draft,
+    }
+end
+
+---@alias FetchLatestGithubReleaseOpts {tag_name_pattern:string|nil, include_prerelease: boolean}
 
 ---@async
 ---@param repo string @The GitHub repo ("username/repo").
 ---@param opts FetchLatestGithubReleaseOpts|nil
 ---@return Result @of GitHubRelease
 function M.fetch_latest_release(repo, opts)
-    opts = opts or {}
+    opts = opts or {
+        tag_name_pattern = nil,
+        include_prerelease = false,
+    }
     return M.fetch_releases(repo):map_catching(
         ---@param releases GitHubRelease[]
         function(releases)
+            local is_stable_release = M.release_predicate(opts)
             ---@type GitHubRelease|nil
-            local latest_release = list_find_first(
-                ---@param release GitHubRelease
-                function(release)
-                    local is_stable_release = not release.prerelease and not release.draft
-                    if opts.tag_name_pattern then
-                        return is_stable_release and release.tag_name:match(opts.tag_name_pattern)
-                    end
-                    return is_stable_release
-                end,
-                releases
-            )
+            local latest_release = _.find_first(is_stable_release, releases)
 
             if not latest_release then
                 log.fmt_info("Failed to find latest release. repo=%s, opts=%s", repo, opts)
@@ -100,6 +105,15 @@ function M.fetch_latest_tag(repo)
         end
         return tags[1]
     end)
+end
+
+---@alias GitHubRateLimit {limit: integer, remaining: integer, reset: integer, used: integer}
+---@alias GitHubRateLimitResponse {resources: { core: GitHubRateLimit }}
+
+---@async
+--@return Result @of GitHubRateLimitResponse
+function M.fetch_rate_limit()
+    return api_call "rate_limit"
 end
 
 return M

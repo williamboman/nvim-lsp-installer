@@ -1,14 +1,15 @@
-local functional = require "nvim-lsp-installer.core.functional"
+local _ = require "nvim-lsp-installer.core.functional"
 local M = {}
 
 ---@alias NodeType
 ---| '"NODE"'
 ---| '"CASCADING_STYLE"'
 ---| '"VIRTUAL_TEXT"'
+---| '"DIAGNOSTICS"'
 ---| '"HL_TEXT"'
 ---| '"KEYBIND_HANDLER"'
 
----@alias INode Node | HlTextNode | CascadingStyleNode | VirtualTextNode | KeybindHandlerNode
+---@alias INode Node | HlTextNode | CascadingStyleNode | VirtualTextNode | KeybindHandlerNode | DiagnosticsNode
 
 ---@param children INode[]
 function M.Node(children)
@@ -34,11 +35,13 @@ function M.HlTextNode(lines_with_span_tuples)
     return node
 end
 
+local create_unhighlighted_lines = _.map(function(line)
+    return { { line, "" } }
+end)
+
 ---@param lines string[]
 function M.Text(lines)
-    return M.HlTextNode(functional.list_map(function(line)
-        return { { line, "" } }
-    end, lines))
+    return M.HlTextNode(create_unhighlighted_lines(lines))
 end
 
 ---@alias CascadingStyle
@@ -63,6 +66,16 @@ function M.VirtualTextNode(virt_text)
     local node = {
         type = "VIRTUAL_TEXT",
         virt_text = virt_text,
+    }
+    return node
+end
+
+---@param diagnostic {message: string, severity: integer, source: string|nil}
+function M.DiagnosticsNode(diagnostic)
+    ---@class DiagnosticsNode
+    local node = {
+        type = "DIAGNOSTICS",
+        diagnostic = diagnostic,
     }
     return node
 end
