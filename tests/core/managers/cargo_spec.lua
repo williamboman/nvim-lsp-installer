@@ -154,7 +154,7 @@ zoxide v0.5.0:
                 return Result.success {
                     stdout = [[flux-lsp v0.8.8 (https://github.com/influxdata/flux-lsp#4e452f07):
     flux-lsp
-]]                   ,
+]],
                 }
             end)
 
@@ -191,7 +191,7 @@ zoxide v0.5.0:
                 return Result.success {
                     stdout = [[lelwel v0.4.0:
     lelwel-ls
-]]                   ,
+]],
                 }
             end)
 
@@ -218,7 +218,7 @@ zoxide v0.5.0:
                 current_version = "0.4.0",
                 latest_version = match.matches "%d.%d.%d",
                 name = "lelwel",
-            } (result:get_or_nil()))
+            }(result:get_or_nil()))
 
             spawn.cargo = nil
         end)

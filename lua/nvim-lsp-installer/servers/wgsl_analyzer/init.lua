@@ -10,7 +10,7 @@ return function(name, root_dir)
         languages = { "wgsl" },
         homepage = homepage,
         installer = cargo.crate("wgsl_analyzer", {
-            git = homepage
+            git = homepage,
         }),
         default_options = {
             cmd_env = cargo.env(root_dir),
