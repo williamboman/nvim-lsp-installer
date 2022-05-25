@@ -54,6 +54,23 @@ describe("cargo manager", function()
     )
 
     it(
+        "should call cargo install with git source and a specific crate",
+        async_test(function()
+            installer.run_installer(ctx, cargo.crate("crate-name", { git = "https://my-crate.git" }))
+            assert.spy(ctx.spawn.cargo).was_called(1)
+            assert.spy(ctx.spawn.cargo).was_called_with {
+                "install",
+                "--root",
+                ".",
+                "--locked",
+                vim.NIL,
+                vim.NIL, -- --features
+                { "--git", "https://my-crate.git", "crate-name" },
+            }
+        end)
+    )
+
+    it(
         "should respect options",
         async_test(function()
             ctx.requested_version = Optional.of "42.13.37"
@@ -137,7 +154,7 @@ zoxide v0.5.0:
                 return Result.success {
                     stdout = [[flux-lsp v0.8.8 (https://github.com/influxdata/flux-lsp#4e452f07):
     flux-lsp
-]],
+]]                   ,
                 }
             end)
 
@@ -174,7 +191,7 @@ zoxide v0.5.0:
                 return Result.success {
                     stdout = [[lelwel v0.4.0:
     lelwel-ls
-]],
+]]                   ,
                 }
             end)
 
@@ -201,7 +218,7 @@ zoxide v0.5.0:
                 current_version = "0.4.0",
                 latest_version = match.matches "%d.%d.%d",
                 name = "lelwel",
-            }(result:get_or_nil()))
+            } (result:get_or_nil()))
 
             spawn.cargo = nil
         end)
