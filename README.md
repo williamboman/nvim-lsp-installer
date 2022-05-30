@@ -236,7 +236,7 @@ require("nvim-lsp-installer").setup({
 | JavaScript                          | `quick_lint_js`            |
 | JavaScript                          | `tsserver`                 |
 | Jsonnet                             | `jsonnet_ls`               |
-| Julia                               | `julials`                  |
+| Julia [(docs)][julials]             | `julials`                  |
 | Kotlin                              | `kotlin_language_server`   |
 | LaTeX                               | `ltex`                     |
 | LaTeX                               | `texlab`                   |
@@ -304,6 +304,7 @@ require("nvim-lsp-installer").setup({
 
 [arduino]: ./lua/nvim-lsp-installer/servers/arduino_language_server/README.md
 [eslint]: ./lua/nvim-lsp-installer/servers/eslint/README.md
+[julials]: ./lua/nvim-lsp-installer/servers/julials/README.md
 [omnisharp]: ./lua/nvim-lsp-installer/servers/omnisharp/README.md
 [pylsp]: ./lua/nvim-lsp-installer/servers/pylsp/README.md
 [tflint]: ./lua/nvim-lsp-installer/servers/tflint/README.md
