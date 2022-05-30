@@ -12,15 +12,9 @@ using LanguageServer, SymbolServer, Pkg
 
 OLD_DEPOT_PATH = ARGS[1]
 SYMBOLSTORE_PATH = ARGS[2]
+ENV_PATH = ARGS[3]
 
 maybe_dirname = x -> x !== nothing ? dirname(x) : nothing
-
-ENV_PATH = something(
-    get(ARGS, 3, nothing),                               # 1. user specified (or inferred if Project.toml & Manifest.toml is in workspace folder)
-    maybe_dirname(Pkg.Types.Context().env.project_file), # 2. VSCode's default
-    maybe_dirname(Base.current_project(pwd())),          # 3. parent project of pwd() (languageserver's default #1)
-    maybe_dirname(Base.load_path_expand("@v#.#"))        # 4. default "global" env (languageserver's default #2)
-)
 
 runserver(
     stdin,
@@ -73,6 +67,19 @@ runserver(
                         env_path = new_root_dir
                     elseif file_exists { "JuliaProject.toml" } and file_exists { "JuliaManifest.toml" } then
                         env_path = new_root_dir
+                    end
+                end
+
+                if not env_path then
+                    local ok, env = pcall(vim.fn.system, {
+                        "julia",
+                        "--startup-file=no",
+                        "--history-file=no",
+                        "-e",
+                        "using Pkg; print(dirname(Pkg.Types.Context().env.project_file))",
+                    })
+                    if ok then
+                        env_path = env
                     end
                 end
 
