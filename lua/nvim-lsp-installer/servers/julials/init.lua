@@ -14,8 +14,6 @@ OLD_DEPOT_PATH = ARGS[1]
 SYMBOLSTORE_PATH = ARGS[2]
 ENV_PATH = ARGS[3]
 
-maybe_dirname = x -> x !== nothing ? dirname(x) : nothing
-
 runserver(
     stdin,
     stdout,
