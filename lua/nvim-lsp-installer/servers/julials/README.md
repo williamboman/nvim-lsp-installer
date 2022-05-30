@@ -5,7 +5,5 @@
 The Julia Environment will be identified in the following order:
 
 1) user configuration (`lspconfig.julials.setup { julia_env_path = "/my/env" }`)
-2) existence of `Project.toml` & `Manifest.toml` (or `JuliaProject.toml` & `JuliaManifest.toml`) in the current project working directory
-3) inferred from `Pkg.Types.Context().env.project_file`
-4) inferred from `Base.current_project(pwd())`
-5) inferred from `Base.load_path_expand("@v#.#)`
+2) if the `Project.toml` & `Manifest.toml` (or `JuliaProject.toml` & `JuliaManifest.toml`) files exists in the current project working directory, the current project working directory is used as the environment
+3) the result of `Pkg.Types.Context().env.project_file`
