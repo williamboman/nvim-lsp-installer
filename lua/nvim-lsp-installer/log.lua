@@ -31,7 +31,10 @@ local config = {
 }
 
 local log = {
-    outfile = path.concat { vim.fn.stdpath "cache", ("%s.log"):format(config.name) },
+    outfile = path.concat {
+        vim.fn.stdpath "cache",
+        ("%s.log"):format(config.name),
+    },
 }
 
 local unpack = unpack or table.unpack

@@ -10,15 +10,15 @@
     -   [Commands](#commands)
     -   [Configuration](#configuration)
 -   [Available LSPs](#available-lsps)
--   [Custom servers](#custom-servers)
 -   [Logo](#logo)
 -   [Default configuration](#default-configuration)
 
 ## About
 
-Neovim plugin that allows you to manage LSP servers (servers are installed inside `:echo stdpath("data")` by default).
+Neovim plugin that allow you to manage LSP servers (servers are installed inside `:echo stdpath("data")` by default).
 It works in tandem with [`lspconfig`](https://github.com/neovim/nvim-lspconfig)<sup>1</sup> by registering a hook that
-enhances the `PATH` environment variable, allowing neovim's LSP client to locate the installed server executable.<sup>2</sup>
+enhances the `PATH` environment variable, allowing neovim's LSP client to locate the server executable installed by
+nvim-lsp-installer.<sup>2</sup>
 
 On top of just providing commands for installing & uninstalling LSP servers, it:
 
@@ -60,6 +60,7 @@ install _all_ servers are:
 -   rebar3
 -   cargo
 -   ghcup
+-   luarocks
 
 [7zip]: https://www.7-zip.org/
 [archiver]: https://github.com/mholt/archiver
@@ -235,7 +236,7 @@ require("nvim-lsp-installer").setup({
 | JavaScript                          | `quick_lint_js`            |
 | JavaScript                          | `tsserver`                 |
 | Jsonnet                             | `jsonnet_ls`               |
-| Julia                               | `julials`                  |
+| Julia [(docs)][julials]             | `julials`                  |
 | Kotlin                              | `kotlin_language_server`   |
 | LaTeX                               | `ltex`                     |
 | LaTeX                               | `texlab`                   |
@@ -288,6 +289,7 @@ require("nvim-lsp-installer").setup({
 | SystemVerilog                       | `verible`                  |
 | TOML                                | `taplo`                    |
 | Tailwind CSS                        | `tailwindcss`              |
+| Teal                                | `teal_ls`                  |
 | Terraform                           | `terraformls`              |
 | Terraform [(docs)][tflint]          | `tflint`                   |
 | TypeScript                          | `tsserver`                 |
@@ -302,14 +304,10 @@ require("nvim-lsp-installer").setup({
 
 [arduino]: ./lua/nvim-lsp-installer/servers/arduino_language_server/README.md
 [eslint]: ./lua/nvim-lsp-installer/servers/eslint/README.md
+[julials]: ./lua/nvim-lsp-installer/servers/julials/README.md
 [omnisharp]: ./lua/nvim-lsp-installer/servers/omnisharp/README.md
 [pylsp]: ./lua/nvim-lsp-installer/servers/pylsp/README.md
 [tflint]: ./lua/nvim-lsp-installer/servers/tflint/README.md
-
-## Custom servers
-
-You can create your own installers by using the same APIs nvim-lsp-installer itself uses. Refer to
-[CUSTOM_SERVERS.md](./CUSTOM_SERVERS.md) for more information.
 
 ## Logo
 

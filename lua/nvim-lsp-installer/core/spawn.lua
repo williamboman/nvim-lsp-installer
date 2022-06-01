@@ -12,6 +12,8 @@ local spawn = {
         gem = platform.is_win and "gem.cmd" or "gem",
         composer = platform.is_win and "composer.bat" or "composer",
         gradlew = platform.is_win and "gradlew.bat" or "gradlew",
+        -- for hererocks installations
+        luarocks = (platform.is_win and vim.fn.executable "luarocks.bat" == 1) and "luarocks.bat" or "luarocks",
     },
 }
 
@@ -85,7 +87,7 @@ setmetatable(spawn, {
 
             local cmd = self._aliases[normalized_cmd] or normalized_cmd
 
-            if args.check_executable ~= false and not is_executable(cmd) then
+            if (env and env.PATH) == nil and args.check_executable ~= false and not is_executable(cmd) then
                 return Failure({
                     stderr = ("%s is not executable"):format(cmd),
                 }, cmd)

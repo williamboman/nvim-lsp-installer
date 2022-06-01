@@ -11,8 +11,9 @@ local coalesce, when = functional.coalesce, functional.when
 return function(name, root_dir)
     ---@async
     local function download_solang()
-        local source = github.release_file {
+        local source = github.download_release_file({
             repo = "hyperledger-labs/solang",
+            out_file = platform.is_win and "solang.exe" or "solang",
             asset_file = coalesce(
                 when(platform.is_mac and platform.arch == "x64", "solang-mac-intel"),
                 when(platform.is_mac and platform.arch == "arm64", "solang-mac-arm"),
@@ -20,14 +21,13 @@ return function(name, root_dir)
                 when(platform.is_linux and platform.arch == "x64", "solang-linux-x86-64"),
                 when(platform.is_win, "solang.exe")
             ),
-        }
-        source.with_receipt()
-        std.download_file(source.download_url, platform.is_win and "solang.exe" or "solang")
+        }).with_receipt()
         std.chmod("+x", { "solang" })
         return source
     end
 
     ---@async
+    ---Solang needs a build of llvm with some extra patches.
     local function download_llvm()
         local source = github.release_file {
             repo = "hyperledger-labs/solang",
