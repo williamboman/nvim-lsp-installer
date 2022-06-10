@@ -30,8 +30,6 @@ jobs:
               with:
                   add-paths: lua/nvim-lsp-installer/_generated
                   commit-message: run autogen_metadata.lua
-                  committer: William Boman (automated) <william@redwill.se>
-                  author: William Boman (automated) <william@redwill.se>
                   branch: chore/autogen_metadata
                   branch-suffix: short-commit-hash
                   delete-branch: true
