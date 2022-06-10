@@ -41,7 +41,7 @@ function HealthCheck:get_health_report_level()
     return ({
         ["success"] = "report_ok",
         ["parse-error"] = "report_warn",
-        ["version-mismatch"] = "report_error",
+        ["version-mismatch"] = self.relaxed and "report_warn" or "report_error",
         ["not-available"] = self.relaxed and "report_warn" or "report_error",
     })[self.result]
 end
@@ -151,7 +151,18 @@ function M.check()
                 end
             end,
         },
-        check { cmd = "cargo", args = { "--version" }, name = "cargo", relaxed = true },
+        check {
+            cmd = "cargo",
+            args = { "--version" },
+            name = "cargo",
+            relaxed = true,
+            version_check = function(version)
+                local _, _, major, minor = version:find "(%d+)%.(%d+)%.(%d+)"
+                if (tonumber(major) <= 1) and (tonumber(minor) < 60) then
+                    return "Some cargo installations require Rust >= 1.60.0."
+                end
+            end,
+        },
         check {
             cmd = "luarocks",
             args = { "--version" },
