@@ -32,3 +32,16 @@ jobs:
                   if git commit -m "run autogen_metadata.lua" -- lua/nvim-lsp-installer/_generated; then
                     git push
                   fi
+
+            - name: Create Pull Request
+              uses: peter-evans/create-pull-request@v4
+              with:
+                  add-paths: lua/nvim-lsp-installer/_generated
+                  commit-message: run autogen_metadata.lua
+                  committer: William Boman (automated) <william@redwill.se>
+                  author: William Boman (automated) <william@redwill.se>
+                  branch: chore/autogen_metadata
+                  branch-suffix: short-commit-hash
+                  delete-branch: true
+                  labels: automerge
+                  title: run autogen_metadata.lua
