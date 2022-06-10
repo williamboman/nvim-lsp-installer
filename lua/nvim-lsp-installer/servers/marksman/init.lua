@@ -20,7 +20,7 @@ return function(name, root_dir)
                 asset_file = coalesce(
                     when(platform.is.mac, "marksman-macos"),
                     when(platform.is.linux_x64, "marksman-linux"),
-                    when(platform.is_win_x64, "marksman.exe")
+                    when(platform.is.win_x64, "marksman.exe")
                 ),
             }).with_receipt()
             std.chmod("+x", { "marksman" })
