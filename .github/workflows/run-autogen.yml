@@ -25,14 +25,6 @@ jobs:
             - name: Run autogen_metadata.sh script
               run: ./scripts/autogen_metadata.sh
 
-            - name: Commit and push changes
-              run: |
-                  git config --local user.email "william@redwill.se"
-                  git config --local user.name "William Boman (automated)"
-                  if git commit -m "run autogen_metadata.lua" -- lua/nvim-lsp-installer/_generated; then
-                    git push
-                  fi
-
             - name: Create Pull Request
               uses: peter-evans/create-pull-request@v4
               with:
