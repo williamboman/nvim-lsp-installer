@@ -28,9 +28,8 @@ jobs:
               uses: peter-evans/create-pull-request@v4
               with:
                   token: ${{ secrets.PAT }}
-                  author: William Botman <william+bot@redwill.se>
-                  committer: William Botman <william+bot@redwill.se>
-                  signoff: William Boman <william@redwill.se>
+                  author: "William Botman <william+bot@redwill.se>"
+                  committer: "William Botman <william+bot@redwill.se>"
                   add-paths: lua/nvim-lsp-installer/_generated
                   commit-message: run autogen_metadata.lua
                   branch: chore/autogen_metadata
