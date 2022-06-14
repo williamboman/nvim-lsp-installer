@@ -101,10 +101,14 @@ Plug "neovim/nvim-lspconfig"
 
 ## Usage
 
+nvim-lsp-installer will only make sure that Neovim can find your installed servers, it does not set up any servers for
+you automatically. You will have to set up your servers yourself (for example via
+[lspconfig](https://github.com/neovim/nvim-lspconfig)).
+
 ### Setup
 
-In order for nvim-lsp-installer to register the necessary hooks at the right moment, **make sure you call the `.setup()`
-function before you set up any servers with `lspconfig`**!
+In order for nvim-lsp-installer to register the necessary hooks at the right moment, **make sure you call the
+`require("nvim-lsp-installer").setup()` function before you set up any servers**!
 
 ```lua
 require("nvim-lsp-installer").setup {}
