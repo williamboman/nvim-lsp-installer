@@ -68,8 +68,7 @@ to call the `setup()` function _before_ you set up any servers:
     require("nvim-lsp-installer").setup {}
 
 
-Next, in your initialization files |init.lua|, setup the servers you want to use.
-Refer to |lspconfig| for more information! For example:
+Next, in your initialization files |init.lua|, setup the servers you want to use. In this example, |lspconfig| is used to set up servers.
 
     require("nvim-lsp-installer").setup {}
     local lspconfig = require("lspconfig")
@@ -344,24 +343,6 @@ uninstall({server_name})
         Parameters: ~
             {server_name} (string) The server to uninstall.
 
-                                       *nvim-lsp-installer.on_server_ready()*
-on_server_ready({cb})
-        DEPRECATED - setup servers directly via lspconfig instead
-
-        Registers a callback to be executed each time a server is ready to be
-        initiated.
-
-        When called, all currently installed servers will be considered ready
-        to be initiated and will each individually be invoked on {cb}.
-
-        Parameters: ~
-            {cb} (function) Function to be invoked when a server is ready to
-            be initiated.
-
-        Return: ~
-            Returns a function which when called will de-register the {cb}
-            from any future dispatches.
-
                                       *nvim-lsp-installer.info_window.open()*
 info_window.open()
     Opens the `:LspInstallInfo` UI window.
@@ -419,35 +400,6 @@ class: Server
         servers.
 
         Methods: ~
-            - setup({opts})
-                    DEPRECATED - setup servers directly via lspconfig instead
-
-                    Sets up the language server and attaches all open buffers.
-
-                    See:
-                        - setup_lsp({opts})
-                        - attach_buffers()
-
-                    Parameters: ~
-                        {opts} (table) The lspconfig server configuration.
-                        See https://github.com/neovim/nvim-lspconfig/blob/master/doc/server_configurations.md
-
-            - setup_lsp({opts})
-                    DEPRECATED - setup servers directly via lspconfig instead
-
-                    Sets up the language server via lspconfig.
-                    This function has the same signature as the setup function
-                    in nvim-lspconfig.
-
-                    Parameters: ~
-                        {opts} (table) The lspconfig server configuration.
-                        See https://github.com/neovim/nvim-lspconfig/blob/master/doc/server_configurations.md
-
-            - attach_buffers()
-                    DEPRECATED - setup servers directly via lspconfig instead
-
-                    Attaches this server to all current open buffers with a
-                    'filetype' that matches the server's configured filetypes.
 
             - get_default_options()
                     Returns a deep copy of the default options provided to
@@ -457,8 +409,6 @@ class: Server
                     by lspconfig.
 
             - on_ready({handler})
-                    DEPRECATED - setup servers directly via lspconfig instead
-
                     Registers the provided {handler} to be called when the
                     server is ready to be setup.
 
