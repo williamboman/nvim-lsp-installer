@@ -231,7 +231,7 @@ require("nvim-lsp-installer").setup({
 | Haxe                                | `haxe_language_server`     |
 | Hoon                                | `hoon_ls`                  |
 | JSON                                | `jsonls`                   |
-| Java                                | `jdtls`                    |
+| Java [(docs)][jdtls]                 | `jdtls`                    |
 | JavaScript                          | `quick_lint_js`            |
 | JavaScript                          | `tsserver`                 |
 | Jsonnet                             | `jsonnet_ls`               |
@@ -306,6 +306,7 @@ require("nvim-lsp-installer").setup({
 
 [arduino]: ./lua/nvim-lsp-installer/servers/arduino_language_server/README.md
 [eslint]: ./lua/nvim-lsp-installer/servers/eslint/README.md
+[jdtls]: ./lua/nvim-lsp-installer/servers/jdtls/README.md
 [julials]: ./lua/nvim-lsp-installer/servers/julials/README.md
 [omnisharp]: ./lua/nvim-lsp-installer/servers/omnisharp/README.md
 [pylsp]: ./lua/nvim-lsp-installer/servers/pylsp/README.md
