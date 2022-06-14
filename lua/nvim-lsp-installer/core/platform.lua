@@ -141,6 +141,7 @@ M.get_libc = _.lazy(function()
     end
 end)
 
+---@type table<string, boolean>
 M.is = setmetatable({}, {
     __index = function(_, key)
         local platform, arch = unpack(vim.split(key, "_", { plain = true }))
