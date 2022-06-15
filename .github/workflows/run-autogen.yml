@@ -38,15 +38,6 @@ jobs:
                   labels: automerge
                   title: run autogen_metadata.lua
 
-            - name: Enable Pull Request Automerge
-              if: steps.cpr.outputs.pull-request-operation == 'created'
-              uses: williamboman/enable-pull-request-automerge@2de7a2decc4396344162b7ded3b170d9205394a0
-              with:
-                  token: ${{ secrets.PAT }}
-                  pull-request-number: ${{ steps.cpr.outputs.pull-request-number }}
-                  merge-method: squash
-
-
             - name: Auto approve
               if: steps.cpr.outputs.pull-request-operation == 'created'
               uses: juliangruber/approve-pull-request-action@v1
