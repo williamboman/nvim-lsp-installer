@@ -40,7 +40,7 @@ jobs:
 
             - name: Enable Pull Request Automerge
               if: steps.cpr.outputs.pull-request-operation == 'created'
-              uses: williamboman/enable-pull-request-automerge@5c6540bf9fc62fbed82b53fceb64b63af64ea8b7
+              uses: williamboman/enable-pull-request-automerge@da74a4c5fb6394da897066f20e924cd060fea4e1
               with:
                   token: ${{ secrets.PAT }}
                   pull-request-number: ${{ steps.cpr.outputs.pull-request-number }}
