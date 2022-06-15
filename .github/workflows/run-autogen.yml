@@ -37,10 +37,3 @@ jobs:
                   delete-branch: true
                   labels: automerge
                   title: run autogen_metadata.lua
-
-            - name: Auto approve
-              if: steps.cpr.outputs.pull-request-operation == 'created'
-              uses: juliangruber/approve-pull-request-action@v1
-              with:
-                github-token: ${{ secrets.PAT }}
-                number: ${{ steps.cpr.outputs.pull-request-number }}
