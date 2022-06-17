@@ -29,6 +29,7 @@ return function(name, root_dir)
             "java.base/java.lang=ALL-UNNAMED",
             "--add-opens",
             "java.base/sun.nio.fs=ALL-UNNAMED", -- https://github.com/redhat-developer/vscode-java/issues/2264
+            use_lombok_agent and ("-javaagent:" .. lombok) or "", -- javaagent needs to come before -jar flag
             "-jar",
             jar,
             "-configuration",
@@ -43,10 +44,6 @@ return function(name, root_dir)
             "-data",
             path.concat { workspace_root, workspace_dir },
         }
-
-        if use_lombok_agent then
-            vim.list_extend(cmd, { "-javaagent:" .. lombok })
-        end
 
         if platform.is.win then
             -- https://github.com/redhat-developer/vscode-java/pull/847
