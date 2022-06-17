@@ -5,14 +5,17 @@ local _ = require "nvim-lsp-installer.core.functional"
 local installer = require "nvim-lsp-installer.core.installer"
 local eclipse = require "nvim-lsp-installer.core.clients.eclipse"
 local std = require "nvim-lsp-installer.core.managers.std"
+local settings = require "nvim-lsp-installer.settings"
 
 return function(name, root_dir)
     ---@param workspace_root string
     ---@param workspace_path string|nil @The path to the server instance's current workspace. Can be nil when running in single file mode.
     ---@param vmargs string[]
     ---@param use_lombok_agent boolean
-    local function get_cmd(workspace_root, workspace_path, vmargs, use_lombok_agent)
-        local executable = vim.env.JAVA_HOME and path.concat { vim.env.JAVA_HOME, "bin", "java" } or "java"
+    ---@param java_home string @The path to the java_home that should be used for starting jdtls.
+    local function get_cmd(workspace_root, workspace_path, vmargs, use_lombok_agent, java_home)
+        java_home = java_home or vim.env.JAVA_HOME
+        local executable = java_home and path.concat { java_home, "bin", "java" } or "java"
         local jar = vim.fn.expand(path.concat { root_dir, "plugins", "org.eclipse.equinox.launcher_*.jar" })
         local lombok = vim.fn.expand(path.concat { root_dir, "lombok.jar" })
         local workspace_dir = vim.fn.fnamemodify(workspace_path or vim.fn.getcwd(), ":p:h:t")
@@ -105,7 +108,8 @@ return function(name, root_dir)
                 vim.env.WORKSPACE and vim.env.WORKSPACE or path.concat { vim.env.HOME, "workspace" },
                 vim.loop.cwd(),
                 DEFAULT_VMARGS,
-                false
+                false,
+                settings.java_home
             ),
             on_new_config = function(config, workspace_path)
                 -- We redefine the cmd in on_new_config because `cmd` will be invalid if the user has not installed
@@ -115,7 +119,8 @@ return function(name, root_dir)
                     vim.env.WORKSPACE and vim.env.WORKSPACE or path.concat { vim.env.HOME, "workspace" },
                     workspace_path,
                     config.vmargs or DEFAULT_VMARGS,
-                    config.use_lombok_agent or false
+                    config.use_lombok_agent or false,
+                    config.java_home
                 )
             end,
         },
