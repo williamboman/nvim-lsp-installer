@@ -235,7 +235,7 @@ require("nvim-lsp-installer").setup({
 | Haxe                                | `haxe_language_server`     |
 | Hoon                                | `hoon_ls`                  |
 | JSON                                | `jsonls`                   |
-| Java [(docs)][jdtls]                 | `jdtls`                    |
+| Java [(docs)][jdtls]                | `jdtls`                    |
 | JavaScript                          | `quick_lint_js`            |
 | JavaScript                          | `tsserver`                 |
 | Jsonnet                             | `jsonnet_ls`               |
@@ -252,6 +252,7 @@ require("nvim-lsp-installer").setup({
 | Metamath Zero                       | `mm0_ls`                   |
 | Nickel                              | `nickel_ls`                |
 | Nim                                 | `nimls`                    |
+| Nix                                 | `rnix`                     |
 | OCaml                               | `ocamlls`                  |
 | OCaml                               | `ocamllsp`                 |
 | Objective C                         | `ccls`                     |
