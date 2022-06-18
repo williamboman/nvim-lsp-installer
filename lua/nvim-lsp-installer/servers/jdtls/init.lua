@@ -17,11 +17,12 @@ return function(name, root_dir)
         local lombok = vim.fn.expand(path.concat { root_dir, "lombok.jar" })
         local workspace_dir = vim.fn.fnamemodify(workspace_path or vim.fn.getcwd(), ":p:h:t")
 
-        local cmd = {
+        local cmd = _.list_not_nil(
             platform.is_win and ("%s.exe"):format(executable) or executable,
             "-Declipse.application=org.eclipse.jdt.ls.core.id1",
             "-Dosgi.bundles.defaultStartLevel=4",
             "-Declipse.product=org.eclipse.jdt.ls.core.product",
+            _.when(platform.is.win, "-DwatchParentProcess=false"), -- https://github.com/redhat-developer/vscode-java/pull/847
             "--add-modules=ALL-SYSTEM",
             "--add-opens",
             "java.base/java.util=ALL-UNNAMED",
@@ -29,7 +30,7 @@ return function(name, root_dir)
             "java.base/java.lang=ALL-UNNAMED",
             "--add-opens",
             "java.base/sun.nio.fs=ALL-UNNAMED", -- https://github.com/redhat-developer/vscode-java/issues/2264
-            use_lombok_agent and ("-javaagent:" .. lombok) or "", -- javaagent needs to come before -jar flag
+            _.when(use_lombok_agent, "-javaagent:" .. lombok), -- javaagent needs to come before -jar flag
             "-jar",
             jar,
             "-configuration",
@@ -42,15 +43,8 @@ return function(name, root_dir)
                 ),
             },
             "-data",
-            path.concat { workspace_root, workspace_dir },
-        }
-
-        if platform.is.win then
-            -- https://github.com/redhat-developer/vscode-java/pull/847
-            vim.list_extend(cmd, {
-                "-DwatchParentProcess=false",
-            })
-        end
+            path.concat { workspace_root, workspace_dir }
+        )
 
         return vim.list_extend(cmd, vmargs)
     end
