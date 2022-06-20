@@ -19,7 +19,8 @@ return function(name, root_dir)
                     github.untargz_release_file({
                         repo = repo,
                         asset_file = coalesce(
-                            when(platform.is_mac, "texlab-x86_64-macos.tar.gz"),
+                            when(platform.is_mac and platform.arch == "arm64", "texlab-aarch64-macos.tar.gz"),
+                            when(platform.is_mac and platform.arch == "x64", "texlab-x86_64-macos.tar.gz"),
                             when(platform.is_linux and platform.arch == "x64", "texlab-x86_64-linux.tar.gz")
                         ),
                     }).with_receipt()
