@@ -5,8 +5,6 @@ local github_client = require "nvim-lsp-installer.core.managers.github.client"
 local _ = require "nvim-lsp-installer.core.functional"
 local spawn = require "nvim-lsp-installer.core.spawn"
 
-local when = _.when
-
 local M = {}
 
 ---@alias HealthCheckResult
@@ -136,7 +134,7 @@ function M.check()
         end
     ))
 
-    local checks = _.list_not_nil(
+    local checks = {
         check {
             cmd = "go",
             args = { "version" },
@@ -205,28 +203,10 @@ function M.check()
                 end
             end,
         },
-        when(
-            platform.is_win,
-            check { cmd = "python", use_stderr = true, args = { "--version" }, name = "python", relaxed = true }
-        ),
-        when(
-            platform.is_win,
-            check { cmd = "python", args = { "-m", "pip", "--version" }, name = "pip", relaxed = true }
-        ),
         check { cmd = "python3", args = { "--version" }, name = "python3", relaxed = true },
         check { cmd = "python3", args = { "-m", "pip", "--version" }, name = "pip3", relaxed = true },
         check { cmd = "javac", args = { "-version" }, name = "javac", relaxed = true },
         check { cmd = "java", args = { "-version" }, name = "java", use_stderr = true, relaxed = true },
-        when(
-            vim.env.JAVA_HOME,
-            check {
-                cmd = ("%s/bin/java"):format(vim.env.JAVA_HOME),
-                args = { "-version" },
-                name = "JAVA_HOME",
-                use_stderr = true,
-                relaxed = true,
-            }
-        ),
         check { cmd = "julia", args = { "--version" }, name = "julia", relaxed = true },
         check { cmd = "wget", args = { "--version" }, name = "wget" },
         -- wget is used interchangeably with curl, but with higher priority, so we mark curl as relaxed
@@ -238,15 +218,45 @@ function M.check()
             use_stderr = platform.is_mac, -- Apple gzip prints version string to stderr
         },
         check { cmd = "tar", args = { "--version" }, name = "tar" },
-        when(
-            vim.g.python3_host_prog,
-            check { cmd = vim.g.python3_host_prog, args = { "--version" }, name = "python3_host_prog", relaxed = true }
-        ),
-        when(platform.is_unix, check { cmd = "bash", args = { "--version" }, name = "bash" }),
-        when(platform.is_unix, check { cmd = "sh", name = "sh" })
         -- when(platform.is_win, check { cmd = "powershell.exe", args = { "-Version" }, name = "PowerShell" }), -- TODO fix me
         -- when(platform.is_win, check { cmd = "cmd.exe", args = { "-Version" }, name = "cmd" }) -- TODO fix me
-    )
+    }
+
+    if platform.is.unix then
+        table.insert(checks, check { cmd = "bash", args = { "--version" }, name = "bash" })
+        table.insert(checks, check { cmd = "sh", name = "sh" })
+    end
+
+    if platform.is.win then
+        table.insert(
+            checks,
+            check { cmd = "python", use_stderr = true, args = { "--version" }, name = "python", relaxed = true }
+        )
+        table.insert(
+            checks,
+            check { cmd = "python", args = { "-m", "pip", "--version" }, name = "pip", relaxed = true }
+        )
+    end
+
+    if vim.g.python3_host_prog then
+        table.insert(
+            checks,
+            check { cmd = vim.g.python3_host_prog, args = { "--version" }, name = "python3_host_prog", relaxed = true }
+        )
+    end
+
+    if vim.env.JAVA_HOME then
+        table.insert(
+            checks,
+            check {
+                cmd = ("%s/bin/java"):format(vim.env.JAVA_HOME),
+                args = { "-version" },
+                name = "JAVA_HOME",
+                use_stderr = true,
+                relaxed = true,
+            }
+        )
+    end
 
     a.run_blocking(function()
         for _, c in ipairs(checks) do
