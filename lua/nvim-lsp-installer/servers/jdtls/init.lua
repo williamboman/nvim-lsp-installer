@@ -102,12 +102,17 @@ return function(name, root_dir)
                 -- We redefine the cmd in on_new_config because `cmd` will be invalid if the user has not installed
                 -- jdtls when starting the session (due to vim.fn.expand returning an empty string, because it can't
                 -- locate the file).
-                config.cmd = get_cmd(
+		-- it seems that vim.fn.expand could return original patterns when expanding fails, tested in linux and mac.
+		-- only replace config.cmd when org.eclipse.equinox.launcher_*.jar expanding fails.
+		cmd = unpack(config.cmd)
+		if string.find(cmd, "-jar  -") or string.find(cmd, "*.jar") then
+		  config.cmd = get_cmd(
                     vim.env.WORKSPACE and vim.env.WORKSPACE or path.concat { vim.env.HOME, "workspace" },
                     workspace_path,
                     config.vmargs or DEFAULT_VMARGS,
                     config.use_lombok_agent or false
-                )
+                 )
+	        end
             end,
         },
     }

@@ -16,10 +16,10 @@ local function merge_in_place(t1, t2)
         if type(v) == "table" then
             if type(t1[k]) == "table" and not vim.tbl_islist(t1[k]) then
                 merge_in_place(t1[k], v)
-            else
+            elseif not t1[k] then
                 t1[k] = v
             end
-        else
+        elseif not t1[k] then
             t1[k] = v
         end
     end
