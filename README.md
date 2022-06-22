@@ -114,38 +114,6 @@ In order for nvim-lsp-installer to register the necessary hooks at the right mom
 require("nvim-lsp-installer").setup {}
 ```
 
-<details>
-<summary>
-ℹ️ Important if you use packer.nvim! (click to expand)
-</summary>
-
-<br />
-
-> You need to make sure that the setup for nvim-lsp-installer executes _before_ your setup for lspconfig.
-> There are different ways of achieving this, for example by using the `after` directive:
-
-```lua
-use {
-    {
-        "williamboman/nvim-lsp-installer",
-        config = function ()
-            require("nvim-lsp-installer").setup {}
-        end
-    },
-    {
-        "neovim/nvim-lspconfig",
-        after = "nvim-lsp-installer",
-        config = function()
-            local lspconfig = require("lspconfig")
-            lspconfig.sumneko_lua.setup {}
-            --- ...
-        end
-    }
-}
-```
-
-</details>
-
 Refer to the [Configuration](#configuration) section for information about which settings are available.
 
 ### Commands
