@@ -169,7 +169,7 @@ describe("integration test", function()
                     ["R_EFFECT"] = function() end,
                 },
                 highlight_groups = {
-                    "hi def MyHighlight gui=bold",
+                    MyHighlight = { bold = true },
                 },
             }
 
