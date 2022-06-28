@@ -387,9 +387,8 @@ function M.new_view_only_win(name)
         })
 
         if highlight_groups then
-            for i = 1, #highlight_groups do
-                -- TODO use vim.api.nvim_set_hl()
-                vim.cmd(highlight_groups[i])
+            for hl_name, args in pairs(highlight_groups) do
+                vim.api.nvim_set_hl(0, hl_name, args)
             end
         end
 

@@ -163,26 +163,30 @@ describe("integration test", function()
 
             local mutate_state = window.init { text = "Initial state" }
 
+            local clear_namespace = spy.on(vim.api, "nvim_buf_clear_namespace")
+            local buf_set_option = spy.on(vim.api, "nvim_buf_set_option")
+            local win_set_option = spy.on(vim.api, "nvim_win_set_option")
+            local set_lines = spy.on(vim.api, "nvim_buf_set_lines")
+            local set_extmark = spy.on(vim.api, "nvim_buf_set_extmark")
+            local set_hl = spy.on(vim.api, "nvim_set_hl")
+            local add_highlight = spy.on(vim.api, "nvim_buf_add_highlight")
+            local set_keymap = spy.on(vim.keymap, "set")
+
             window.open {
                 effects = {
                     ["EFFECT"] = function() end,
                     ["R_EFFECT"] = function() end,
                 },
                 highlight_groups = {
-                    "hi def MyHighlight gui=bold",
+                    MyHighlight = { bold = true },
                 },
             }
 
-            local clear_namespace = spy.on(vim.api, "nvim_buf_clear_namespace")
-            local buf_set_option = spy.on(vim.api, "nvim_buf_set_option")
-            local win_set_option = spy.on(vim.api, "nvim_win_set_option")
-            local set_lines = spy.on(vim.api, "nvim_buf_set_lines")
-            local set_extmark = spy.on(vim.api, "nvim_buf_set_extmark")
-            local add_highlight = spy.on(vim.api, "nvim_buf_add_highlight")
-            local set_keymap = spy.on(vim.keymap, "set")
-
             -- Initial window and buffer creation + initial render
             a.scheduler()
+
+            assert.spy(set_hl).was_called(1)
+            assert.spy(set_hl).was_called_with(match.is_number(), "MyHighlight", match.same { bold = true })
 
             assert.spy(win_set_option).was_called(8)
             assert.spy(win_set_option).was_called_with(match.is_number(), "number", false)
