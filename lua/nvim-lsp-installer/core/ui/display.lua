@@ -388,7 +388,7 @@ function M.new_view_only_win(name)
 
         if highlight_groups then
             for hl_name, args in pairs(highlight_groups) do
-                vim.api.nvim_set_hl(namespace, hl_name, args)
+                vim.api.nvim_set_hl(0, hl_name, args)
             end
         end
 
