@@ -32,6 +32,22 @@ return function(name, root_dir)
             ctx.receipt:with_primary_source(ctx.receipt.github_release(repo, release))
         end,
         default_options = {
+            lspinfo = function(cfg)
+                local extra = {}
+                local function on_stdout(_, data, _)
+                    local version = data[1]
+                    table.insert(extra, "version:   " .. version)
+                end
+
+                local opts = {
+                    cwd = cfg.cwd,
+                    stdout_buffered = true,
+                    on_stdout = on_stdout,
+                }
+                local chanid = vim.fn.jobstart({ path.concat { root_dir, "bin", cfg.cmd[1] }, "--version" }, opts)
+                vim.fn.jobwait { chanid }
+                return extra
+            end,
             cmd_env = {
                 PATH = process.extend_path {
                     platform.is_win and root_dir or path.concat { root_dir, "bin" },
