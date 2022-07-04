@@ -3,7 +3,9 @@ local a = require "nvim-lsp-installer.core.async"
 local platform = require "nvim-lsp-installer.core.platform"
 local github_client = require "nvim-lsp-installer.core.managers.github.client"
 local _ = require "nvim-lsp-installer.core.functional"
+local servers = require "nvim-lsp-installer.servers"
 local spawn = require "nvim-lsp-installer.core.spawn"
+local middleware = require "nvim-lsp-installer.middleware"
 
 local M = {}
 
@@ -293,6 +295,24 @@ function M.check()
                 end
                 health.report_warn "Failed to check GitHub API rate limit status."
             end)
+
+        local configs_ok, configs = pcall(require, "lspconfig.configs")
+        if configs_ok then
+            local is_unenhanced = _.compose(
+                _.filter(servers.is_server_installed),
+                _.filter(function(server_name)
+                    return middleware.enhanced_configs[server_name] ~= true
+                end)
+            )
+            local installed_unenhanced_servers = is_unenhanced(vim.tbl_keys(configs))
+            if _.length(installed_unenhanced_servers) > 0 then
+                health.report_warn(
+                    (
+                        "The following servers have not been enhanced by nvim-lsp-installer: \n- %s\n*Make sure you set up nvim-lsp-installer before you set up these servers.*"
+                    ):format(table.concat(installed_unenhanced_servers, "\n- "))
+                )
+            end
+        end
     end)
 end
 

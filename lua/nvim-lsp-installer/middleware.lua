@@ -41,6 +41,8 @@ end
 
 local registered_server_hooks = {}
 
+M.enhanced_configs = {}
+
 ---@param server_name string
 ---@param fn fun(config: table)
 function M.register_server_hook(server_name, fn)
@@ -56,6 +58,7 @@ function M.register_lspconfig_hook()
         if ok then
             if server:is_installed() then
                 merge_in_place(config, server._default_options)
+                M.enhanced_configs[config.name] = true
             elseif should_auto_install(server.name) then
                 notify("(automatic installation) Installing LSP server: " .. server.name)
                 server:install()
