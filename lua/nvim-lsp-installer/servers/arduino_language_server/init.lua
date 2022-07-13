@@ -30,14 +30,8 @@ return function(name, root_dir)
                             platform.is_linux and platform.arch == "arm64",
                             "arduino-language-server_%s_Linux_ARM64.tar.gz"
                         ),
-                        when(
-                            platform.is_win and platform.arch == "x64",
-                            "arduino-language-server_0.6.0_Windows_64bit.zip"
-                        ),
-                        when(
-                            platform.is_win and platform.arch == "x86",
-                            "arduino-language-server_0.6.0_Windows_32bit.zip"
-                        )
+                        when(platform.is_win and platform.arch == "x64", "arduino-language-server_%s_Windows_64bit.zip"),
+                        when(platform.is_win and platform.arch == "x86", "arduino-language-server_%s_Windows_32bit.zip")
                     )
 
                     return target and target:format(release)
