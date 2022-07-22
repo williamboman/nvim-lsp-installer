@@ -95,8 +95,8 @@ use {
 ### vim-plug
 
 ```vim
-Plug "williamboman/nvim-lsp-installer"
-Plug "neovim/nvim-lspconfig"
+Plug 'williamboman/nvim-lsp-installer'
+Plug 'neovim/nvim-lspconfig'
 ```
 
 ## Usage
