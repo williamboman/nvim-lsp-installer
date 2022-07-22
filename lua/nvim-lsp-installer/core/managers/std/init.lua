@@ -150,14 +150,14 @@ end
 ---@async
 ---@param file string
 function M.gunzip(file)
+    local function gunzip()
+        local ctx = installer.context()
+        ctx.spawn.gzip { "-d", file }
+    end
+    
     platform.when {
-        unix = function()
-            local ctx = installer.context()
-            ctx.spawn.gzip { "-d", file }
-        end,
-        win = function()
-            win_extract(file)
-        end,
+        unix = gunzip,
+        win = gunzip
     }
 end
 
