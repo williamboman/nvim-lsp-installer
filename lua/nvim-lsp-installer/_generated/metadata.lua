@@ -98,7 +98,7 @@ return {
     filetypes = { "handlebars", "typescript", "javascript" }
   },
   emmet_ls = {
-    filetypes = { "html", "css" }
+    filetypes = { "html", "typescriptreact", "javascriptreact", "css", "sass", "scss", "less" }
   },
   erlangls = {
     filetypes = { "erlang" }
@@ -326,7 +326,7 @@ return {
     filetypes = { "terraform" }
   },
   texlab = {
-    filetypes = { "tex", "bib" }
+    filetypes = { "tex", "plaintex", "bib" }
   },
   tflint = {
     filetypes = { "terraform" }
