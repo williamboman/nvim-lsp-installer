@@ -2,6 +2,7 @@
   <img src="https://user-images.githubusercontent.com/6705160/118490159-f064bb00-b71d-11eb-883e-4affbd020074.png" alt="nvim-lsp-installer" width="50%" />
 </p>
 
+-   [ℹ️ Project status](#ℹ%EF%B8%8F-project-status)
 -   [About](#about)
 -   [Screenshots](#screenshots)
 -   [Requirements](#requirements)
@@ -15,6 +16,28 @@
 -   [Available LSPs](#available-lsps)
 -   [Logo](#logo)
 -   [Default configuration](#default-configuration)
+
+## ℹ️ Project status
+
+> This is an excerpt from the [announcement here](https://github.com/williamboman/nvim-lsp-installer/discussions/876).
+
+_`nvim-lsp-installer` will no longer be actively maintained, meaning I won't be doing things like porting new mason.nvim
+packages to nvim-lsp-installer, monitoring lspconfig for changes that require updates, or put much effort into user
+support or bug issues (the recommendation for the latter will be to migrate to mason.nvim)._
+
+[`mason.nvim`](https://github.com/williamboman/mason.nvim) is the next generation version of `nvim-lsp-installer`. It
+builds on top of the very same foundation as `nvim-lsp-installer`, but with a majority of internals refactored to
+improve extensibility and testability.
+
+More importantly, the scope of `mason.nvim` has also been widened to target more than just LSP servers. `mason.nvim`
+supports DAP servers, linters, formatters, and more. As of writing, `mason.nvim` provides 150+ packages for 100+
+languages. It can be thought of as a general-purpose package manager, native to Neovim, that runs everywhere Neovim runs
+(Windows, macOS, Linux, etc.).
+
+Another big change with `mason.nvim` is that executables are now linked to a single, shared, location, allowing seamless
+access from Neovim builtins (shell, terminal, etc.) as well as other 3rd party plugins.
+
+There have also been other improvements such as broader test coverage, more documentation, and a revamped UI!
 
 ## About
 
