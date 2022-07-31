@@ -125,7 +125,7 @@ return {
     filetypes = { "go", "gomod" }
   },
   gopls = {
-    filetypes = { "go", "gomod", "gotmpl" }
+    filetypes = { "go", "gomod", "gowork", "gotmpl" }
   },
   grammarly = {
     filetypes = { "markdown" }
