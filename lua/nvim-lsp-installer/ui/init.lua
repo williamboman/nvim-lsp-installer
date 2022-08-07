@@ -187,8 +187,15 @@ local function Header(props)
                 { "?", props.is_showing_help and "LspInstallerOrange" or "LspInstallerHighlighted" },
                 { props.is_showing_help and " for server list" or " for help", "LspInstallerMuted" },
             },
+        },
+        Ui.Table {
             {
-                { "https://github.com/williamboman/nvim-lsp-installer", "Comment" },
+                { "        Project status", "" },
+                { "https://github.com/williamboman/nvim-lsp-installer/issues/879", "LspInstallerHighlighted" },
+            },
+            {
+                { "Introducing mason.nvim", "Bold" },
+                { "https://github.com/williamboman/nvim-lsp-installer/discussions/876", "LspInstallerHighlighted" },
             },
         },
     })
