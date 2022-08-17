@@ -95,6 +95,7 @@ local CORE_SERVERS = _.set_of {
     "mm0_ls",
     "nickel_ls",
     "nimls",
+    "nxls",
     "ocamlls",
     "ocamllsp",
     "omnisharp",

@@ -244,6 +244,7 @@ require("nvim-lsp-installer").setup({
 | Nickel                              | `nickel_ls`                |
 | Nim                                 | `nimls`                    |
 | Nix                                 | `rnix`                     |
+| Nx                                  | `nxls`                     |
 | OCaml                               | `ocamlls`                  |
 | OCaml                               | `ocamllsp`                 |
 | Objective C                         | `ccls`                     |
