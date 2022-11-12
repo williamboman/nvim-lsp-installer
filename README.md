@@ -1,7 +1,3 @@
-<p align="center">
-  <img src="https://user-images.githubusercontent.com/6705160/118490159-f064bb00-b71d-11eb-883e-4affbd020074.png" alt="nvim-lsp-installer" width="50%" />
-</p>
-
 ## ℹ️ Project status
 
 > This is an excerpt from the [announcement here](https://github.com/williamboman/nvim-lsp-installer/discussions/876).
@@ -9,8 +5,8 @@
 _`nvim-lsp-installer` is no longer maintained._
 
 [`mason.nvim`](https://github.com/williamboman/mason.nvim) is the next generation version of `nvim-lsp-installer`. It
-builds on top of the very same foundation as `nvim-lsp-installer` (which means it's very easy to migrate), but with
-a majority of internals refactored to improve extensibility and testability.
+builds on top of the very same foundation as `nvim-lsp-installer` (which means it's easy to migrate), but with a
+majority of internals refactored to improve extensibility and testability.
 
 More importantly, the scope of `mason.nvim` has also been widened to target more than just LSP servers. `mason.nvim`
 supports DAP servers, linters, formatters, and more. As of writing, `mason.nvim` provides 150+ packages for 100+
@@ -20,7 +16,12 @@ languages. It can be thought of as a general-purpose package manager, native to 
 Another big change with `mason.nvim` is that executables are now linked to a single, shared, location, allowing seamless
 access from Neovim builtins (shell, terminal, etc.) as well as other 3rd party plugins.
 
-There have also been other improvements such as broader test coverage, more documentation, and a revamped UI!
+There have also been other improvements such as broader test coverage, more documentation, and a revamped UI - check it
+out!
+
+<p align="center">
+  <img src="https://user-images.githubusercontent.com/6705160/118490159-f064bb00-b71d-11eb-883e-4affbd020074.png" alt="nvim-lsp-installer" width="50%" />
+</p>
 
 -   [About](#about)
 -   [Screenshots](#screenshots)
